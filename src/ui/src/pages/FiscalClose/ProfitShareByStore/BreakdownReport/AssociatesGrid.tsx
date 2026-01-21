@@ -36,6 +36,24 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({
   const profitYear = useDecemberFlowProfitYear();
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
 
+  // Extract param builder to reduce duplication
+  const buildParams = useCallback(
+    (pageNum: number, pageSz: number, sortPrms: SortParams) => ({
+      profitYear: queryParams?.profitYear || profitYear,
+      storeNumber: store || undefined,
+      storeManagement: false,
+      badgeNumber: queryParams?.badgeNumber && queryParams.badgeNumber > 0 ? queryParams.badgeNumber : undefined,
+      employeeName: queryParams?.employeeName?.trim() || undefined,
+      pagination: {
+        skip: pageNum * pageSz,
+        take: pageSz,
+        sortBy: sortPrms.sortBy,
+        isSortDescending: sortPrms.isSortDescending
+      }
+    }),
+    [queryParams?.profitYear, profitYear, store, queryParams?.badgeNumber, queryParams?.employeeName]
+  );
+
   const {
     pageNumber,
     pageSize,
@@ -52,64 +70,18 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({
     onPaginationChange: useCallback(
       async (pageNum: number, pageSz: number, sortPrms: SortParams) => {
         if (hasToken) {
-          const params = {
-            profitYear: queryParams?.profitYear || profitYear,
-            storeNumber: store || undefined,
-            storeManagement: false,
-            badgeNumber: queryParams?.badgeNumber && queryParams.badgeNumber > 0 ? queryParams.badgeNumber : undefined,
-            employeeName: queryParams?.employeeName && queryParams.employeeName.trim() !== "" ? queryParams.employeeName : undefined,
-            pagination: {
-              skip: pageNum * pageSz,
-              take: pageSz,
-              sortBy: sortPrms.sortBy,
-              isSortDescending: sortPrms.isSortDescending
-            }
-          };
-          await fetchBreakdownByStore(params);
+          await fetchBreakdownByStore(buildParams(pageNum, pageSz, sortPrms));
         }
       },
-      [
-        hasToken,
-        queryParams?.profitYear,
-        profitYear,
-        store,
-        queryParams?.badgeNumber,
-        queryParams?.employeeName,
-        fetchBreakdownByStore
-      ]
+      [hasToken, fetchBreakdownByStore, buildParams]
     )
   });
 
   const fetchData = useCallback(() => {
-    const params = {
-      profitYear: queryParams?.profitYear || profitYear,
-      storeNumber: store || undefined,
-      storeManagement: false,
-      badgeNumber: queryParams?.badgeNumber && queryParams.badgeNumber > 0 ? queryParams.badgeNumber : undefined,
-      employeeName: queryParams?.employeeName && queryParams.employeeName.trim() !== "" ? queryParams.employeeName : undefined,
-      pagination: {
-        skip: pageNumber * pageSize,
-        take: pageSize,
-        sortBy: sortParams.sortBy,
-        isSortDescending: sortParams.isSortDescending
-      }
-    };
     if (hasToken) {
-      fetchBreakdownByStore(params);
+      fetchBreakdownByStore(buildParams(pageNumber, pageSize, sortParams));
     }
-  }, [
-    fetchBreakdownByStore,
-    hasToken,
-    pageNumber,
-    pageSize,
-    profitYear,
-    queryParams?.profitYear,
-    queryParams?.badgeNumber,
-    queryParams?.employeeName,
-    sortParams.isSortDescending,
-    sortParams.sortBy,
-    store
-  ]);
+  }, [fetchBreakdownByStore, hasToken, pageNumber, pageSize, sortParams, buildParams]);
 
   useEffect(() => {
     fetchData();
@@ -117,25 +89,10 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({
 
   // Refetch when trigger changes - directly call the API with current params
   useEffect(() => {
-    if (refetchTrigger !== undefined && refetchTrigger > 0) {
-      if (hasToken) {
-        const params = {
-          profitYear: queryParams?.profitYear || profitYear,
-          storeNumber: store || undefined,
-          storeManagement: false,
-          badgeNumber: queryParams?.badgeNumber && queryParams.badgeNumber > 0 ? queryParams.badgeNumber : undefined,
-          employeeName: queryParams?.employeeName && queryParams.employeeName.trim() !== "" ? queryParams.employeeName : undefined,
-          pagination: {
-            skip: pageNumber * pageSize,
-            take: pageSize,
-            sortBy: sortParams.sortBy,
-            isSortDescending: sortParams.isSortDescending
-          }
-        };
-        fetchBreakdownByStore(params);
-      }
+    if (refetchTrigger !== undefined && refetchTrigger > 0 && hasToken) {
+      fetchBreakdownByStore(buildParams(pageNumber, pageSize, sortParams));
     }
-  }, [refetchTrigger, hasToken, queryParams, profitYear, store, pageNumber, pageSize, sortParams, fetchBreakdownByStore]);
+  }, [refetchTrigger, hasToken, pageNumber, pageSize, sortParams, fetchBreakdownByStore, buildParams]);
 
   useEffect(() => {
     if (pageNumberReset) {

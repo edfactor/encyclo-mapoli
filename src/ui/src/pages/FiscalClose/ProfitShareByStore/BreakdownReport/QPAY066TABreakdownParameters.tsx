@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Autocomplete, FormLabel, Grid, TextField } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -46,17 +46,21 @@ interface QPAY066TABreakdownParametersProps {
   onReset?: () => void;
   isLoading?: boolean;
   onSearch?: () => void;
+  /** Initial store value to populate the form (used when remounting after grid collapse) */
+  initialStore?: number | null;
 }
 
 const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> = ({
   onStoreChange,
   onReset,
   isLoading = false,
-  onSearch
+  onSearch,
+  initialStore = null
 }) => {
   const dispatch = useDispatch();
   const profitYear = useDecemberFlowProfitYear();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [storeInputValue, setStoreInputValue] = useState("");
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   
   // Fetch stores from API
@@ -65,7 +69,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
   });
 
   // Combine blank entry, "All Stores", and API-fetched stores
-  const stores: OptionItem[] = [
+  const stores: OptionItem[] = useMemo(() => [
     { id: 0, label: "" },
     { id: -1, label: "All Stores" },
     { id: 700, label: "700 - Retired - Drawing Pension" },
@@ -75,7 +79,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
     { id: 802, label: "802 - Terminated w/ Balance but No Vesting" },
     { id: 900, label: "900 - Monthly Payroll" },
     ...(apiStores || [])
-  ];
+  ], [apiStores]);
 
   useEffect(() => {
     if (!isLoading) {
@@ -92,7 +96,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
   } = useForm<BreakdownSearchParams>({
     resolver: yupResolver(schema) as Resolver<BreakdownSearchParams>,
     defaultValues: {
-      store: null,
+      store: initialStore,
       employeeStatus: "",
       badgeId: undefined,
       employeeName: "",
@@ -111,14 +115,28 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
     name: "store"
   });
 
+  // Sync storeInputValue with the selected store value
+  useEffect(() => {
+    if (store === null || store === undefined || store === 0) {
+      setStoreInputValue("");
+    } else {
+      const selectedStore = stores.find(s => s.id === store);
+      if (selectedStore) {
+        setStoreInputValue(selectedStore.label);
+      }
+    }
+  }, [store, stores]);
+
+  // Check if the current store input is valid (matches an option or is empty)
+  // Use startsWith to allow partial matching during typing
+  const isStoreInputValid = storeInputValue === "" || 
+    stores.some(s => s.label.toLowerCase().startsWith(storeInputValue.toLowerCase()));
+
   useEffect(() => {
     if (employeeStatus && employeeStatus !== "") {
       setValue("employeeStatus", employeeStatus);
-      //if (onStoreChange) {
-      //  onStoreChange(data.store);
-      // }
     }
-  }, [employeeStatus, setValue, onStoreChange]);
+  }, [employeeStatus, setValue]);
 
   const validateAndSubmit = handleSubmit((data) => {
     if (!isSubmitting) {
@@ -164,6 +182,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
   });
 
   const handleReset = () => {
+    setStoreInputValue("");
     reset({
       store: null,
       employeeStatus: "",
@@ -258,6 +277,17 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                 }}
                 value={field.value === null || field.value === undefined || field.value === 0 ? null : 
                   stores.find(s => s.id === field.value) || null}
+                inputValue={storeInputValue}
+                onInputChange={(_e, newInputValue, reason) => {
+                  setStoreInputValue(newInputValue);
+                  // When clearing via the clear button or reset, also clear the field value
+                  if (reason === "clear") {
+                    field.onChange(null);
+                    if (onStoreChange) {
+                      onStoreChange(null);
+                    }
+                  }
+                }}
                 onChange={(_e, newValue) => {
                   // Handle clear/null/blank selection
                   if (newValue === null || newValue === undefined || (typeof newValue === 'object' && newValue.id === 0)) {
@@ -394,7 +424,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                 validateAndSubmit();
               }}
               isFetching={isLoading || isSubmitting}
-              disabled={!prerequisitesComplete || isLoading || isSubmitting}
+              disabled={!prerequisitesComplete || isLoading || isSubmitting || !isStoreInputValid}
             />
           )}
         </DuplicateSsnGuard>

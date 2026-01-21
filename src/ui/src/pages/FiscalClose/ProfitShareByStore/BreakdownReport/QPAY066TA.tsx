@@ -47,8 +47,6 @@ const QPAY066TA = () => {
     return <StatusDropdownActionNode />;
   };
 
-
-
   return (
     <PageErrorBoundary pageName="QPAY066TA Breakdown Report">
       <Page
@@ -71,6 +69,7 @@ const QPAY066TA = () => {
                   onReset={handleReset}
                   isLoading={isLoading}
                   onSearch={() => setRefetchTrigger(prev => prev + 1)}
+                  initialStore={store}
                 />
               </DSMAccordion>
             </Grid>
