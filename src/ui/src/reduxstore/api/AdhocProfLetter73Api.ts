@@ -16,6 +16,7 @@ export interface AdhocProfLetter73Request {
 export interface AdhocProfLetter73FormLetterRequest {
   profitYear: number;
   badgeNumbers: string[];
+  isXerox?: boolean;
 }
 
 export interface AdhocProfLetter73Data {
@@ -64,7 +65,8 @@ export const AdhocProfLetter73Api = createApi({
         method: "GET",
         params: {
           profitYear: params.profitYear,
-          badgeNumbers: params.badgeNumbers
+          badgeNumbers: params.badgeNumbers,
+          isXerox: params.isXerox
         },
         responseHandler: (response) => response.blob()
       })

@@ -1,13 +1,17 @@
 using System.Text;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.PrintFormatting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
@@ -21,19 +25,25 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
     private readonly TotalService _totalService;
     private readonly ICalendarService _calendarService;
     private readonly TimeProvider _timeProvider;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
+    private readonly DjdeDirectiveOptions _djdeDirectiveOptions;
 
     public EmployeesWithProfitsOver73Service(
         IProfitSharingDataContextFactory dataContextFactory,
         IDemographicReaderService demographicReaderService,
         TotalService totalService,
         ICalendarService calendarService,
-        TimeProvider timeProvider)
+        TimeProvider timeProvider,
+        IProfitSharingAuditService profitSharingAuditService,
+        IOptions<DjdeDirectiveOptions> djdeDirectiveOptions)
     {
         _dataContextFactory = dataContextFactory;
         _demographicReaderService = demographicReaderService;
         _totalService = totalService;
         _calendarService = calendarService;
         _timeProvider = timeProvider;
+        _profitSharingAuditService = profitSharingAuditService;
+        _djdeDirectiveOptions = djdeDirectiveOptions.Value;
     }
 
     public Task<ReportResponseBase<EmployeesWithProfitsOver73DetailDto>> GetEmployeesWithProfitsOver73Async(
@@ -51,7 +61,7 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
             var demographicQuery = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
 
             // Calculate age threshold - employees must be over 73 years old
-            var today = DateOnly.FromDateTime(_timeProvider.GetLocalNow().DateTime);
+            DateOnly today = DateOnly.FromDateTime(_timeProvider.GetLocalNow().DateTime);
             var ageThresholdDate = today.AddYears(-73);
 
             // Start with base query for employees over 73
@@ -63,32 +73,50 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
                 query = query.Where(d => request.BadgeNumbers.Contains(d.BadgeNumber));
             }
 
-            // Query for employees over 73 with all required fields
-            var employeesOver73 = await query
-                .Select(d => new
+            // Get total balances for these employees (SQL join to avoid large IN lists)
+            var totalBalanceQuery = _totalService.GetTotalBalanceSet(ctx, request.ProfitYear)
+                .TagWith($"GetTotalBalances-Over73-{request.ProfitYear}")
+                .Where(tb => tb.TotalAmount > 0);
+
+            // Query for employees over 73 with positive balances and all required fields
+            var employeesOver73 = await (
+                    from d in query
+                    join tb in totalBalanceQuery on d.Ssn equals tb.Ssn
+                    select new
+                    {
+                        d.Ssn,
+                        d.BadgeNumber,
+                        FullName = d.ContactInfo.FullName,
+                        Address = d.Address.Street,
+                        City = d.Address.City,
+                        State = d.Address.State,
+                        Zip = d.Address.PostalCode,
+                        d.DateOfBirth,
+                        d.TerminationDate,
+                        d.EmploymentStatusId,
+                        EmploymentStatusName = d.EmploymentStatus != null ? d.EmploymentStatus.Name : string.Empty,
+                        TotalAmount = tb.TotalAmount.HasValue ? tb.TotalAmount.Value : 0m
+                    })
+                .TagWith($"GetEmployeesOver73WithBalances-{request.ProfitYear}")
+                .ToListAsync(cancellationToken);
+
+            if (employeesOver73.Count == 0)
+            {
+                return new ReportResponseBase<EmployeesWithProfitsOver73DetailDto>
                 {
-                    d.Ssn,
-                    d.BadgeNumber,
-                    FullName = d.ContactInfo.FullName,
-                    Address = d.Address.Street,
-                    City = d.Address.City,
-                    State = d.Address.State,
-                    Zip = d.Address.PostalCode,
-                    d.DateOfBirth,
-                    d.TerminationDate,
-                    d.EmploymentStatusId,
-                    EmploymentStatusName = d.EmploymentStatus != null ? d.EmploymentStatus.Name : string.Empty
-                })
-                .ToListAsync(cancellationToken);
+                    ReportName = "PROF-LETTER73: Employees with Profits Over Age 73",
+                    ReportDate = DateTimeOffset.UtcNow,
+                    StartDate = fiscalStartDate,
+                    EndDate = fiscalEndDate,
+                    Response = new PaginatedResponseDto<EmployeesWithProfitsOver73DetailDto>(request)
+                    {
+                        Results = [],
+                        Total = 0
+                    }
+                };
+            }
 
-            var employeeSsns = employeesOver73.Select(e => e.Ssn).ToHashSet();
-
-            // Get total balances for these employees
-            var totalBalances = await _totalService.GetTotalBalanceSet(ctx, request.ProfitYear)
-                .Where(tb => employeeSsns.Contains(tb.Ssn))
-                .Where(tb => tb.TotalAmount > 0) // Only include employees with positive balances
-                .ToListAsync(cancellationToken);
-            var totalBalanceBySsn = totalBalances.ToLookup(tb => tb.Ssn);
+            HashSet<int> employeeSsns = employeesOver73.Select(e => e.Ssn).ToHashSet();
 
             // Load all RMD factors from database (ages 73-99)
             var rmdFactors = await ctx.RmdsFactorsByAge
@@ -96,7 +124,7 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
                 .ToDictionaryAsync(r => (int)r.Age, r => r.Factor, cancellationToken);
 
             // Get payment profit codes (codes that represent distributions/payments)
-            var paymentProfitCodes = ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
+            byte[] paymentProfitCodes = ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
 
             // Calculate payments within fiscal year for these employees
             // Payment records are in PROFIT_DETAIL where:
@@ -119,25 +147,24 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
 
             // Build detail records with pagination support
             var detailRecords = employeesOver73
-                .Where(e => totalBalanceBySsn[e.Ssn].Any())
                 .Select(employee =>
                 {
-                    var balance = totalBalanceBySsn[employee.Ssn].FirstOrDefault();
-                    var age = today.Year - employee.DateOfBirth.Year;
+                    decimal balance = employee.TotalAmount;
+                    int age = today.Year - employee.DateOfBirth.Year;
 
                     // Get RMD factor for this age (default to 0 if age not found)
-                    var factor = rmdFactors.TryGetValue(age, out var f) ? f : 0m;
+                    decimal factor = rmdFactors.GetValueOrDefault(age, 0m);
 
                     // Calculate RMD: Balance ÷ Factor (protect against divide by zero)
                     // IMPORTANT: Parentheses around (balance?.TotalAmount ?? 0) ensure correct order of operations
-                    var rmd = factor > 0 ? Math.Round((balance?.TotalAmount ?? 0) / factor, 2, MidpointRounding.AwayFromZero) : 0m;
+                    decimal rmd = factor > 0 ? Math.Round(balance / factor, 2, MidpointRounding.AwayFromZero) : 0m;
 
                     // Get payments made in the fiscal year
-                    var paymentsInYear = paymentsBySsn[employee.Ssn].FirstOrDefault()?.TotalPayments ?? 0m;
+                    decimal paymentsInYear = paymentsBySsn[employee.Ssn].FirstOrDefault()?.TotalPayments ?? 0m;
 
                     // Calculate suggested RMD check amount based on de minimis threshold
-                    var currentBalance = balance?.TotalAmount ?? 0;
-                    var suggestRmdCheckAmount = currentBalance <= request.DeMinimusValue
+                    decimal currentBalance = balance;
+                    decimal suggestRmdCheckAmount = currentBalance <= request.DeMinimusValue
                         ? currentBalance  // De minimis: liquidate entire account
                         : Math.Max(0, rmd - paymentsInYear);  // Above threshold: RMD minus payments already received
 
@@ -182,13 +209,21 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
         CancellationToken cancellationToken = default)
     {
         var result = await GetEmployeesWithProfitsOver73Async(request, cancellationToken);
+        string letterContent = GenerateFormLettersForOver73Employees(result, request.IsXerox);
+        int recordCount = result.Response.Results.Count();
 
-        // Generate form letters
-        return GenerateFormLettersForOver73Employees(result);
+        await _profitSharingAuditService.LogSensitiveDataAccessAsync(
+            operationName: "Prof Letter 73 Print",
+            tableName: "ProfLetter73",
+            primaryKey: $"ProfitYear:{request.ProfitYear}",
+            details: $"Records:{recordCount}, BadgeCount:{request.BadgeNumbers?.Count ?? 0}, IsXerox:{request.IsXerox}",
+            cancellationToken: cancellationToken);
+
+        return letterContent;
     }
 
 
-    private string GenerateFormLettersForOver73Employees(ReportResponseBase<EmployeesWithProfitsOver73DetailDto> report)
+    private string GenerateFormLettersForOver73Employees(ReportResponseBase<EmployeesWithProfitsOver73DetailDto> report, bool isXerox)
     {
 
         if (!report.Response.Results.Any())
@@ -196,14 +231,14 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
             return "No employees over 73 with positive balances found.";
         }
 
-        var letter = new StringBuilder();
-        var space7 = new string(' ', 7);
+        StringBuilder letter = new StringBuilder();
+        string space7 = new string(' ', 7);
 
         foreach (EmployeesWithProfitsOver73DetailDto emp in report.Response.Results)
         {
             #region Beginning of letter
             letter.AppendLine();
-            letter.AppendLine("DJDE JDE=QPS073,JDL=PAYROL,END,;");
+            PrintFormatHelper.AppendXeroxLine(letter, _djdeDirectiveOptions.ProfitsOver73Header, isXerox);
             var now = _timeProvider.GetLocalNow().DateTime;
             letter.AppendLine($"{now.Month.ToString("MMMM")} {now.Year}");
             #endregion

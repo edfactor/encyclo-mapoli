@@ -487,6 +487,7 @@ insert_navigation_item(PRINT_PS_JOBS, YEAR_END_MENU, 'Print PS Jobs', '', 'print
     assign_navigation_role(PRINT_PS_JOBS, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(PRINT_PS_JOBS, FINANCE_MANAGER);
     assign_navigation_role(PRINT_PS_JOBS, DISTRIBUTIONS_CLERK);
+    assign_navigation_role(PRINT_PS_JOBS, IT_DEVOPS);
 
 -- Distribution Inquiry
     assign_navigation_role(DISTRIBUTIONS_MENU, SYSTEM_ADMINISTRATOR);

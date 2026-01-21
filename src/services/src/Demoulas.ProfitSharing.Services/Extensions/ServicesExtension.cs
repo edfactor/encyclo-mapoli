@@ -61,6 +61,9 @@ public static class ServicesExtension
             return maskingOptions;
         });
 
+        _ = builder.Services.AddOptions<DjdeDirectiveOptions>()
+            .Bind(builder.Configuration.GetSection(DjdeDirectiveOptions.SectionName));
+
         _ = builder.Services.AddScoped<IPayClassificationService, PayClassificationService>();
         _ = builder.Services.AddScoped<ICertificateService, CertificateService>();
         _ = builder.Services.AddScoped<ICheckRunWorkflowService, CheckRunWorkflowService>();

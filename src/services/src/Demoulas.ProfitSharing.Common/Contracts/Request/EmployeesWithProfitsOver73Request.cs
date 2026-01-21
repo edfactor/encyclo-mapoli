@@ -21,6 +21,8 @@ public record EmployeesWithProfitsOver73Request : ProfitYearRequest
     /// </summary>
     public decimal DeMinimusValue { get; init; } = 5000m;
 
+    public bool IsXerox { get; init; }
+
     public static new EmployeesWithProfitsOver73Request RequestExample()
     {
         return new EmployeesWithProfitsOver73Request
@@ -29,7 +31,8 @@ public record EmployeesWithProfitsOver73Request : ProfitYearRequest
             Skip = 0,
             Take = 100,
             BadgeNumbers = null, // Optional: Can include [12345, 67890] for specific employees
-            DeMinimusValue = 5000m
+            DeMinimusValue = 5000m,
+            IsXerox = false
         };
     }
 }

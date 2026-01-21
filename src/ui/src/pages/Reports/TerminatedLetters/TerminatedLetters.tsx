@@ -24,7 +24,9 @@ const TerminatedLettersContent = () => {
     isPrintDialogOpen,
     setIsPrintDialogOpen,
     printContent,
-    printTerminatedLetters
+    printTerminatedLetters,
+    isXerox,
+    setIsXerox
   } = useTerminatedLetters();
 
   return (
@@ -60,6 +62,8 @@ const TerminatedLettersContent = () => {
             setIsPrintDialogOpen={setIsPrintDialogOpen}
             printContent={printContent}
             printTerminatedLetters={printTerminatedLetters}
+            isXerox={isXerox}
+            setIsXerox={setIsXerox}
           />
         )}
       </Grid>
