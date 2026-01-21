@@ -474,13 +474,23 @@ public sealed class BreakdownReportService : IBreakdownService
             // Combine employees and beneficiaries in memory
             var combined = terminatedEmployees.Concat(beneficiaries).ToList();
 
-            // Apply sorting and pagination in memory
-            var ordered = combined
-                .OrderBy(e => e.StoreNumber)
-                .ThenBy(e => e.FullName)
-                .ToList();
+            // Apply sorting and pagination in memory (matching GetPaginatedResults logic)
+            IEnumerable<ActiveMemberDto> ordered;
+            if (ReferenceData.CertificateSort.Equals(request.SortBy, StringComparison.InvariantCultureIgnoreCase))
+            {
+                ordered = combined
+                    .OrderBy(e => e.StoreNumber)
+                    .ThenBy(e => e.CertificateSort)
+                    .ThenBy(e => e.FullName);
+            }
+            else
+            {
+                ordered = combined
+                    .OrderBy(e => e.StoreNumber)
+                    .ThenBy(e => e.FullName);
+            }
 
-            var total = ordered.Count;
+            var total = combined.Count;
             var results = ordered
                 .Skip(request.Skip ?? 0)
                 .Take(request.Take ?? 25)
@@ -840,6 +850,14 @@ public sealed class BreakdownReportService : IBreakdownService
         {
             var pattern = $"%{request.EmployeeName.ToUpperInvariant()}%";
             query = query.Where(x => EF.Functions.Like(x.FullName.ToUpper(), pattern));
+        }
+
+        // Apply store management filter
+        if (request.StoreManagement.HasValue)
+        {
+            query = request.StoreManagement.Value
+                ? ApplyStoreManagementFilter(query)
+                : ApplyNonStoreManagementFilter(query);
         }
 
         return query
