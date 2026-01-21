@@ -346,7 +346,7 @@ public sealed class SmartApiClientFactory : ISmartApiClientFactory
         HttpClient httpClient = _httpClientFactory.CreateClient("SmartApi");
         TestToken.CreateAndAssignTokenForClient(httpClient, _jwtOptions, "Finance-Manager");
 
-        HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/yearend/final")
+        HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/year-end/final")
         {
             Content = new StringContent("{ \"ProfitYear\" : " + _profitYear + "}", Encoding.UTF8, "application/json")
         };
@@ -459,7 +459,7 @@ public sealed class SmartApiClientFactory : ISmartApiClientFactory
         HttpClient httpClient = _httpClientFactory.CreateClient("SmartApi");
         TestToken.CreateAndAssignTokenForClient(httpClient, _jwtOptions, "Finance-Manager");
 
-        HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/yearend/enrollments")
+        HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/year-end/enrollments")
         {
             Content = new StringContent("{ \"profitYear\": " + TestConstants.OpenProfitYear + "}", Encoding.UTF8, "application/json")
         };
@@ -490,7 +490,7 @@ public sealed class SmartApiClientFactory : ISmartApiClientFactory
 
     private static async Task<Outcome> A27_Prof_Share_by_Store(ApiClient apiClient, string aname, string name)
     {
-        /* We dont capture this yet var r = */
+        /* We dont capture the report output yet */
         await apiClient.ReportsYearEndBreakdownEndpointAsync(false, 1, null, null, 2025, "", null, null, null, null, null);
         return Ok(aname, name, $"Something?");
     }

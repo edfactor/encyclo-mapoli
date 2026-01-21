@@ -127,7 +127,13 @@ public class TestEnrollmentComparison : BaseSqlActivity
         string query = $"""
                         SELECT
                             d.badge_number,
-                            pp.enrollment_id
+                            CASE
+                            WHEN VESTING_SCHEDULE_ID = 1 AND HAS_FORFEITED = 0 THEN 1
+                            WHEN VESTING_SCHEDULE_ID = 2 AND HAS_FORFEITED = 0 THEN 2
+                            WHEN VESTING_SCHEDULE_ID = 1 AND HAS_FORFEITED = 1 THEN 3
+                            WHEN VESTING_SCHEDULE_ID = 2 AND HAS_FORFEITED = 1 THEN 4
+                            ELSE 0
+                        END AS enrollment_id
                         FROM pay_profit pp
                         JOIN demographic d ON pp.demographic_id = d.id
                         WHERE pp.profit_year = {ProfitYear}

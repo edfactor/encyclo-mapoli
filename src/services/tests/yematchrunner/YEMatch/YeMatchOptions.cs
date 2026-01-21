@@ -5,7 +5,6 @@
 /// </summary>
 public class YeMatchOptions
 {
-    
     public const string SectionName = "YeMatch";
 
     /// <summary>
@@ -104,12 +103,12 @@ public class YearEndDatesOptions
     ///     Profit sharing year
     /// </summary>
     public short ProfitYear { get; set; } = 2025;
-    
+
     /// <summary>
     ///     Profit sharing year
     /// </summary>
     public int ProfitYearCalendarYearEnd { get; set; } = 20251231;
-    
+
     /// <summary>
     ///     First Saturday date (YYMMDD format)
     /// </summary>
@@ -200,7 +199,7 @@ public class JwtOptions
     public string Audience { get; set; } = "https://localhost:7141";
 
     /// <summary>
-    ///     Token expiration time in seconds. Defaults to 3600 (1 hour).
+    ///     Token expiration time in seconds. Defaults to 36000 (10 hours).
     /// </summary>
-    public int ExpirationSeconds { get; set; } = 3600;
+    public int ExpirationSeconds { get; set; } = 36000;
 }

@@ -49,7 +49,7 @@ public class AutoMatchRun : Runnable
             R22_ProfitShareEdit, // PAY447 - creates a data file
             IntPay447Test,
             UpdateNavigation, // Update the navigation table
-            R23_ProfitMasterUpdate, // updates ready with contributions 
+            R23_ProfitMasterUpdate, // updates ready with contributions
             IntProfitMasterUpdateTest, // Runs Contributions on Smart
 
             // Ensure that YE update went to plan
@@ -60,7 +60,7 @@ public class AutoMatchRun : Runnable
             R24B_ProfPayMasterUpdatePartTwo, // Updates the YEARS, and enrollment on READY, NOP on SMART
             S24_ProfPayMasterUpdate, // <--- Writes out update enrollments to the OPEN PROFIT YEAR
             IntPay450, // Does the FrozenService produce the same report as READY?
-            TestEnrollmentComparison // Does READY's enrollments match SMART 2025 ?  
+            TestEnrollmentComparison // Does READY's enrollments match SMART 2025 ?
         ));
     }
 }
