@@ -1,9 +1,9 @@
-using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.Common.Data.Services.Entities.Entities;
 using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Lookups;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Lookup;
@@ -15,51 +15,54 @@ namespace Demoulas.ProfitSharing.Services.Lookup;
 public sealed class StoreLookupService : IStoreLookupService
 {
     private readonly IStoreService _commonStoreService;
-    private readonly IDemoulasCommonWarehouseContext _warehouseContext;
+    private readonly IProfitSharingDataContextFactory _profitSharingDataContext;
 
     public StoreLookupService(
         IStoreService commonStoreService,
-        IDemoulasCommonWarehouseContext warehouseContext)
+        IProfitSharingDataContextFactory profitSharingDataContext)
     {
         _commonStoreService = commonStoreService;
-        _warehouseContext = warehouseContext;
+        _profitSharingDataContext = profitSharingDataContext;
     }
 
-    public async Task<List<StoreListResponse>> GetStoresAsync(
-        StoreListRequest request, 
+    public Task<List<StoreListResponse>> GetStoresAsync(
+        StoreListRequest request,
         CancellationToken cancellationToken)
     {
-        // Build base query based on status filter
-        IQueryable<StoreInformation> query = request.Status switch
+        return _profitSharingDataContext.UseWarehouseContext(async ctx =>
         {
-            StoreStatusFilter.Unopened => await BuildUnopenedStoresQuery(cancellationToken),
-            StoreStatusFilter.Active => _commonStoreService.GetActiveStoresQuery(_warehouseContext),
-            _ => _commonStoreService.GetAllStoresQuery(_warehouseContext)
-        };
+            // Build base query based on status filter
+            IQueryable<StoreInformation> query = request.Status switch
+            {
+                StoreStatusFilter.Unopened => await BuildUnopenedStoresQuery(cancellationToken),
+                StoreStatusFilter.Active => _commonStoreService.GetActiveStoresQuery(ctx),
+                _ => _commonStoreService.GetAllStoresQuery(ctx)
+            };
 
-        // Apply retail filter if requested
-        if (request.StoreType == StoreTypeFilter.Retail)
-        {
-            query = query.Where(s => s.StoreId < 899);
-        }
+            // Apply retail filter if requested
+            if (request.StoreType == StoreTypeFilter.Retail)
+            {
+                query = query.Where(s => s.StoreId < 899);
+            }
 
-        // Execute query and get stores
-        var stores = await query
-            .OrderBy(s => s.StoreId)
-            .ToListAsync(cancellationToken);
+            // Execute query and get stores
+            var stores = await query
+                .OrderBy(s => s.StoreId)
+                .ToListAsync(cancellationToken);
 
-        // Map to response DTOs
-        return stores.Select(store => MapToStoreListResponse(store))
-            .ToList();
+            // Map to response DTOs
+            return stores.Select(store => MapToStoreListResponse(store))
+                .ToList();
+        });
     }
 
     public async Task<StoreListResponse?> GetStoreByIdAsync(
-        int storeId, 
+        int storeId,
         CancellationToken cancellationToken)
     {
         // Get max batch date
         var maxBatchDate = await _commonStoreService.GetMaxBatchDateAsync(
-            _warehouseContext, 
+            _warehouseContext,
             cancellationToken: cancellationToken) ?? DateTime.UtcNow;
 
         // Get single store
