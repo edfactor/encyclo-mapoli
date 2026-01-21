@@ -1,6 +1,6 @@
 using System.Data.Common;
+using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Services.Distributions;
-using Demoulas.ProfitSharing.Services.Services.YearEnd;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -35,7 +35,7 @@ public class YearEndServiceTests : PristineBaseTest
         Dictionary<int, YearEndChange> smartRowsBySsn = await DbFactory.UseWritableContext(async ctx =>
         {
             PayProfitUpdateService ppus = new(DbFactory, _loggerFactory, TotalService, CalendarService, VestingScheduleService);
-            YearEndService yearEndService = new(DbFactory, CalendarService, ppus, TotalService, DemographicReaderService);
+            YearEndServiceOld yearEndService = new(DbFactory, CalendarService, ppus, TotalService, DemographicReaderService);
             OracleConnection c = (ctx.Database.GetDbConnection() as OracleConnection)!;
             await c.OpenAsync(ct);
 

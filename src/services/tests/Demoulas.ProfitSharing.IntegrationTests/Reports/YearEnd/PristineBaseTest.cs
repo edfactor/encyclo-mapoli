@@ -5,6 +5,7 @@ using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Time;
+using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.ProfitSharing.Services.Services.Adjustments;
@@ -38,7 +39,7 @@ public abstract class PristineBaseTest
     protected readonly MemoryDistributedCache DistributedCache;
     protected readonly IVestingScheduleService VestingScheduleService;
     protected readonly IPayProfitUpdateService PayProfitUpdateService;
-    protected readonly YearEndService YearEndService;
+    protected readonly IYearEndService YearEndService;
     protected readonly IForfeitureAdjustmentService ForfeitureAdjustmentService;
     protected readonly TimeProvider TimeProvider = TimeProvider.System;
 
@@ -58,7 +59,7 @@ public abstract class PristineBaseTest
         TestOutputHelper = testOutputHelper;
         VestingScheduleService = new VestingScheduleService(DbFactory, DistributedCache);
         PayProfitUpdateService = new PayProfitUpdateService(DbFactory, NullLoggerFactory.Instance, TotalService, CalendarService, VestingScheduleService);
-        YearEndService = new YearEndService(DbFactory, CalendarService, PayProfitUpdateService, TotalService, DemographicReaderService);
+        YearEndService = new YearEndServiceOld(DbFactory, CalendarService, PayProfitUpdateService, TotalService, DemographicReaderService);
         var mockAppUser = new Mock<IAppUser>();
         var mockAuditService = new Mock<IProfitSharingAuditService>();
         ForfeitureAdjustmentService = new ForfeitureAdjustmentService(DbFactory, TotalService, DemographicReaderService, TimeProvider, mockAppUser.Object, mockAuditService.Object);

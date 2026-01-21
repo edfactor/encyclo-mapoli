@@ -1,5 +1,6 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.PAY443;
@@ -34,7 +35,7 @@ internal sealed class ProfitShareUpdateReport
     public DateTime TodaysDateTime { get; set; }
     public List<string> ReportLines { get; set; } = [];
 
-    public async Task ProfitSharingUpdatePaginated(ProfitShareUpdateRequest profitShareUpdateRequest, IDemographicReaderService demographicReaderService, YearEndService  yearEndService)
+    public async Task ProfitSharingUpdatePaginated(ProfitShareUpdateRequest profitShareUpdateRequest, IDemographicReaderService demographicReaderService, IYearEndService  yearEndService)
     {
         TotalService totalService = new(_dbFactory, _calendarService, new EmbeddedSqlService(), demographicReaderService);
         ProfitShareUpdateService psu = new(_dbFactory, totalService, _calendarService, demographicReaderService, TimeProvider.System);
