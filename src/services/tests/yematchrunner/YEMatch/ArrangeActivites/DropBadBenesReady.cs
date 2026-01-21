@@ -11,7 +11,7 @@ public class DropBadBenesReady : BaseSqlActivity
 
     public override async Task<Outcome> Execute()
     {
-        // Probably shoudl start refering to the scrambles by date names.
+        // Probably should start referring to the scrambles by date names.
         if (IsNewNewScramble && !IsNewNewScramble)
         {
             int expectedBenes = 5;
