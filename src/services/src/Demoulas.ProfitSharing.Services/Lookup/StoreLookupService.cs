@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Data.Contexts.Interfaces;
+using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.Common.Data.Services.Entities.Entities;
 using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Lookups;
@@ -15,14 +15,14 @@ namespace Demoulas.ProfitSharing.Services.Lookup;
 public sealed class StoreLookupService : IStoreLookupService
 {
     private readonly IStoreService _commonStoreService;
-    private readonly IStoreDbContext _storeContext;
+    private readonly IDemoulasCommonWarehouseContext _warehouseContext;
 
     public StoreLookupService(
         IStoreService commonStoreService,
-        IStoreDbContext storeContext)
+        IDemoulasCommonWarehouseContext warehouseContext)
     {
         _commonStoreService = commonStoreService;
-        _storeContext = storeContext;
+        _warehouseContext = warehouseContext;
     }
 
     public async Task<List<StoreListResponse>> GetStoresAsync(
@@ -33,8 +33,8 @@ public sealed class StoreLookupService : IStoreLookupService
         IQueryable<StoreInformation> query = request.Status switch
         {
             StoreStatusFilter.Unopened => await BuildUnopenedStoresQuery(cancellationToken),
-            StoreStatusFilter.Active => _commonStoreService.GetActiveStoresQuery(_storeContext),
-            _ => _commonStoreService.GetAllStoresQuery(_storeContext)
+            StoreStatusFilter.Active => _commonStoreService.GetActiveStoresQuery(_warehouseContext),
+            _ => _commonStoreService.GetAllStoresQuery(_warehouseContext)
         };
 
         // Apply retail filter if requested
@@ -59,12 +59,12 @@ public sealed class StoreLookupService : IStoreLookupService
     {
         // Get max batch date
         var maxBatchDate = await _commonStoreService.GetMaxBatchDateAsync(
-            _storeContext, 
+            _warehouseContext, 
             cancellationToken: cancellationToken) ?? DateTime.UtcNow;
 
         // Get single store
         var store = await _commonStoreService
-            .GetStoreLocationQuery(_storeContext, (short)storeId)
+            .GetStoreLocationQuery(_warehouseContext, (short)storeId)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (store == null)
@@ -74,7 +74,7 @@ public sealed class StoreLookupService : IStoreLookupService
 
         // Get departments for this store
         var departments = await _commonStoreService
-            .GetStoreDepartmentsQuery(_storeContext, new[] { (short)storeId })
+            .GetStoreDepartmentsQuery(_warehouseContext, new[] { (short)storeId })
             .Select(d => d.DepartmentId.ToString())
             .ToListAsync(cancellationToken);
 
@@ -91,13 +91,13 @@ public sealed class StoreLookupService : IStoreLookupService
     {
         // Get list of unopened store IDs
         var unopenedStoreIds = await _commonStoreService
-            .GetUnopenedStoresQuery(_storeContext)
+            .GetUnopenedStoresQuery(_warehouseContext)
             .ToListAsync(cancellationToken);
 
         // Return query for these stores (or empty if none)
         return unopenedStoreIds.Any()
-            ? _commonStoreService.GetStoreLocationsByNumbersQuery(_storeContext, unopenedStoreIds)
-            : _storeContext.Stores.Where(s => false); // Empty query
+            ? _commonStoreService.GetStoreLocationsByNumbersQuery(_warehouseContext, unopenedStoreIds)
+            : _warehouseContext.Stores.Where(s => false); // Empty query
     }
 
     private static StoreListResponse MapToStoreListResponse(

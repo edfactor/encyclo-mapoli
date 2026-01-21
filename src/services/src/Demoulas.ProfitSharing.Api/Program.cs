@@ -129,7 +129,6 @@ builder.AddDatabaseServices((services, factoryRequests) =>
 
     factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"));
     factoryRequests.Add(ContextFactoryRequest.Initialize<IDemoulasCommonWarehouseContext, DemoulasCommonWarehouseContext>("Warehouse"));
-    //// factoryRequests.Add(ContextFactoryRequest.Initialize<IStoreDbContext, StoreDbContext>("Warehouse"));
 });
 builder.AddProjectServices();
 
