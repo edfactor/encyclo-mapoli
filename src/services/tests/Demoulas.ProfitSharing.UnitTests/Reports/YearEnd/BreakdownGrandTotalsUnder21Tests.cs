@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -7,7 +7,7 @@ using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
-
+using Demoulas.ProfitSharing.Services.Services.Reports.Breakdown;
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
 /// <summary>
@@ -45,7 +45,7 @@ public sealed class BreakdownGrandTotalsUnder21Tests : ApiTestBase<Program>
 
         // Assert
         service.ShouldNotBeNull();
-        service.ShouldBeOfType<global::Demoulas.ProfitSharing.Services.Reports.Breakdown.BreakdownReportService>();
+        service.ShouldBeOfType<BreakdownReportService>();
     }
 
     #endregion
