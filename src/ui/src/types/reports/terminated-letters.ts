@@ -6,6 +6,7 @@ export interface TerminatedLettersRequest {
   endingDate?: string;
   excludeZeroBalance?: boolean;
   badgeNumbers?: number[];
+  isXerox?: boolean;
   pagination: SortedPaginationRequestDto;
 }
 

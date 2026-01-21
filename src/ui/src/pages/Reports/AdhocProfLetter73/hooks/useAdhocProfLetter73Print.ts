@@ -4,7 +4,8 @@ import { AdhocProfLetter73FilterParams } from "../AdhocProfLetter73SearchFilter"
 
 export const useAdhocProfLetter73Print = (
   filterParams: AdhocProfLetter73FilterParams | null,
-  selectedRows: Record<string, unknown>[]
+  selectedRows: Record<string, unknown>[],
+  isXerox: boolean
 ) => {
   const [triggerDownload] = useLazyDownloadAdhocProfLetter73FormLetterQuery();
 
@@ -66,7 +67,8 @@ export const useAdhocProfLetter73Print = (
     try {
       const result = await triggerDownload({
         profitYear: profitYear,
-        badgeNumbers: badgeNumbers
+        badgeNumbers: badgeNumbers,
+        isXerox: isXerox
       });
 
       if (result.error) {
@@ -86,9 +88,9 @@ export const useAdhocProfLetter73Print = (
     } finally {
       setIsDownloading(false);
     }
-  }, [filterParams, selectedRows, triggerDownload]);
+  }, [filterParams, selectedRows, triggerDownload, isXerox]);
 
-  const printFormLetter = useCallback((content: string) => {
+  const printFormLetter = useCallback((content: string, title: string) => {
     const escapeHtml = (text: string) => {
       const div = document.createElement("div");
       div.textContent = text;
@@ -99,7 +101,7 @@ export const useAdhocProfLetter73Print = (
       printWindow.document.write(`
         <html>
           <head>
-            <title>Prof Letter 73</title>
+            <title>${title}</title>
             <style>
               body {
                 font-family: monospace;

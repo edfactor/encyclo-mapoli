@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts;
@@ -7,8 +7,11 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
+using Demoulas.ProfitSharing.Services.PrintFormatting;
 using Demoulas.Util.Extensions;
+using Microsoft.Extensions.Options;
 
 namespace Demoulas.ProfitSharing.Services.Certificates;
 
@@ -18,17 +21,23 @@ public sealed class CertificateService : ICertificateService
     private readonly ICalendarService _calendarService;
     private readonly IAnnuityRatesService _annuityRatesService;
     private readonly IAnnuityRateValidator _annuityRateValidator;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
+    private readonly DjdeDirectiveOptions _djdeDirectiveOptions;
 
     public CertificateService(
         IBreakdownService breakdownService,
         ICalendarService calendarService,
         IAnnuityRatesService annuityRatesService,
-        IAnnuityRateValidator annuityRateValidator)
+        IAnnuityRateValidator annuityRateValidator,
+        IProfitSharingAuditService profitSharingAuditService,
+        IOptions<DjdeDirectiveOptions> djdeDirectiveOptions)
     {
         _breakdownService = breakdownService;
         _calendarService = calendarService;
         _annuityRatesService = annuityRatesService;
         _annuityRateValidator = annuityRateValidator;
+        _profitSharingAuditService = profitSharingAuditService;
+        _djdeDirectiveOptions = djdeDirectiveOptions.Value;
     }
 
     public async Task<Result<string>> GetCertificateFile(CerficatePrintRequest request, CancellationToken token)
@@ -42,6 +51,7 @@ public sealed class CertificateService : ICertificateService
         var annuityRates = annuityRatesResult.Value!;
 
         var members = await GetCertificateData(request, token);
+        var recordCount = members.Response.Results.Count();
 
         var sb = new StringBuilder();
         var spaces_2 = new string(' ', 2);
@@ -59,7 +69,7 @@ public sealed class CertificateService : ICertificateService
         var linefeeds_6 = new string('\n', 6);
 
         //Add xerox header
-        sb.Append("\fDJDE JDE=PROFNEW,JDL=DFLT5,END,;\r");
+        PrintFormatHelper.AppendXeroxHeader(sb, _djdeDirectiveOptions.CertificateHeader, request.IsXerox);
 
         foreach (var member in members.Response.Results)
         {
@@ -151,6 +161,13 @@ public sealed class CertificateService : ICertificateService
             WriteMemberInfo(sb, member, false);
 
         }
+
+        await _profitSharingAuditService.LogSensitiveDataAccessAsync(
+            operationName: "Certificate Print File Download",
+            tableName: "Certificates",
+            primaryKey: $"ProfitYear:{request.ProfitYear}",
+            details: $"Records:{recordCount}, BadgeCount:{request.BadgeNumbers?.Length ?? 0}, SsnCount:{request.Ssns?.Length ?? 0}, IsXerox:{request.IsXerox}",
+            cancellationToken: token);
 
         return Result<string>.Success(sb.ToString());
 

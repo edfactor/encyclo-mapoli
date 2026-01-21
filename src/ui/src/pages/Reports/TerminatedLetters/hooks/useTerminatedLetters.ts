@@ -4,8 +4,8 @@ import {
   useLazyGetTerminatedLettersReportQuery
 } from "reduxstore/api/AdhocApi";
 import { TerminatedLettersDetail, TerminatedLettersResponse } from "reduxstore/types";
-import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import { GRID_KEYS } from "../../../../constants";
+import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import { SortParams, useGridPagination } from "../../../../hooks/useGridPagination";
 import { useMissiveAlerts } from "../../../../hooks/useMissiveAlerts";
 import { ServiceErrorResponse } from "../../../../types/errors/errors";
@@ -167,6 +167,7 @@ export const useTerminatedLetters = () => {
   // Print dialog state
   const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
   const [printContent, setPrintContent] = useState<string>("");
+  const [isXerox, setIsXerox] = useState(false);
 
   // Use refs to prevent infinite loops in useGridPagination
   const searchParamsRef = useRef(state.search.searchParams);
@@ -300,6 +301,7 @@ export const useTerminatedLetters = () => {
         badgeNumbers: badgeNumbers,
         beginningDate: currentSearchParams.beginningDate,
         endingDate: currentSearchParams.endingDate,
+        isXerox: isXerox,
         pagination: {
           skip: 0,
           take: 999999,
@@ -323,15 +325,15 @@ export const useTerminatedLetters = () => {
         description: "Failed to generate print content"
       });
     }
-  }, [state.selectedRows, triggerDownload, addAlert]);
+  }, [state.selectedRows, triggerDownload, addAlert, isXerox]);
 
-  const printTerminatedLetters = useCallback((content: string) => {
+  const printTerminatedLetters = useCallback((content: string, title: string) => {
     const printWindow = window.open("", "_blank");
     if (printWindow) {
       printWindow.document.write(`
         <html>
           <head>
-            <title>Terminated Letters</title>
+            <title>${title}</title>
             <style>
               body {
                 font-family: monospace;
@@ -384,6 +386,8 @@ export const useTerminatedLetters = () => {
     setIsPrintDialogOpen,
     printContent,
     printTerminatedLetters,
+    isXerox,
+    setIsXerox,
 
     // Pagination
     gridPagination

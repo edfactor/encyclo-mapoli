@@ -6,6 +6,10 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
   Tooltip,
   Typography
 } from "@mui/material";
@@ -29,7 +33,9 @@ interface TerminatedLettersGridProps {
   isPrintDialogOpen: boolean;
   setIsPrintDialogOpen: (open: boolean) => void;
   printContent: string;
-  printTerminatedLetters: (content: string) => void;
+  printTerminatedLetters: (content: string, title: string) => void;
+  isXerox: boolean;
+  setIsXerox: (value: boolean) => void;
 }
 
 const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
@@ -43,7 +49,9 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
   isPrintDialogOpen,
   setIsPrintDialogOpen,
   printContent,
-  printTerminatedLetters
+  printTerminatedLetters,
+  isXerox,
+  setIsXerox
 }) => {
   const { sortParams, handleSortChange } = gridPagination;
 
@@ -59,6 +67,8 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
   const columnDefs = useMemo(() => GetTerminatedLettersColumns(), []);
 
   const isPrintDisabled = selectedRows.length === 0;
+  const printModeLabel = isXerox ? "Xerox" : "Default";
+  const dialogTitle = `Print Preview - Terminated Letters (${printModeLabel})`;
 
   const paginationProps = {
     pageNumber: gridPagination.pageNumber,
@@ -97,7 +107,7 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
   };
 
   return (
-    <div style={{ marginRight: "24px" }}>
+    <div className="mr-6">
       {reportData && reportData.response && (
         <DSMPaginatedGrid
           preferenceKey={GRID_KEYS.TERMINATED_LETTERS}
@@ -114,7 +124,7 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
           }}
           showPagination={reportData.response.results && reportData.response.results.length > 0}
           header={
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <div className="mb-4 flex items-center justify-between">
               <Typography
                 variant="h6"
                 component="h2"
@@ -122,7 +132,23 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
                 EMPLOYEES NEEDING INSTRUCTIONS TO WITHDRAW VESTED SAVINGS (
                 {formatNumberWithComma(reportData.response.total)} Records)
               </Typography>
-              {renderPrintButton()}
+              <div className="flex items-center">
+                <FormControl
+                  size="small"
+                  sx={{ minWidth: 140 }}>
+                  <InputLabel id="terminated-letters-printer-label">Printer</InputLabel>
+                  <Select
+                    labelId="terminated-letters-printer-label"
+                    value={isXerox ? "xerox" : "default"}
+                    label="Printer"
+                    onChange={(event) => setIsXerox(event.target.value === "xerox")}
+                    sx={{ height: "40px" }}>
+                    <MenuItem value="default">Default</MenuItem>
+                    <MenuItem value="xerox">Xerox</MenuItem>
+                  </Select>
+                </FormControl>
+                {renderPrintButton()}
+              </div>
             </div>
           }
         />
@@ -133,14 +159,14 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
         onClose={() => setIsPrintDialogOpen(false)}
         maxWidth="lg"
         fullWidth>
-        <DialogTitle>Print Preview - Terminated Letters</DialogTitle>
+        <DialogTitle>{dialogTitle}</DialogTitle>
         <DialogContent>
-          <pre style={{ whiteSpace: "pre-wrap", fontFamily: "monospace", fontSize: "12px" }}>{printContent}</pre>
+          <pre className="whitespace-pre-wrap font-mono text-xs">{printContent}</pre>
         </DialogContent>
         <DialogActions sx={{ paddingRight: "25px" }}>
           <Button onClick={() => setIsPrintDialogOpen(false)}>Close</Button>
           <Button
-            onClick={() => printTerminatedLetters(printContent)}
+            onClick={() => printTerminatedLetters(printContent, dialogTitle)}
             variant="contained">
             Print
           </Button>

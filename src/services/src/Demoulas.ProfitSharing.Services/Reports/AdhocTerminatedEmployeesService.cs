@@ -1,12 +1,15 @@
-﻿using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.PrintFormatting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
@@ -14,14 +17,20 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
 {
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
+    private readonly IProfitSharingAuditService _profitSharingAuditService;
+    private readonly DjdeDirectiveOptions _djdeDirectiveOptions;
 
     public AdhocTerminatedEmployeesService(
         IProfitSharingDataContextFactory profitSharingDataContextFactory,
-        IDemographicReaderService demographicReaderService
+        IDemographicReaderService demographicReaderService,
+        IProfitSharingAuditService profitSharingAuditService,
+        IOptions<DjdeDirectiveOptions> djdeDirectiveOptions
     )
     {
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
         _demographicReaderService = demographicReaderService;
+        _profitSharingAuditService = profitSharingAuditService;
+        _djdeDirectiveOptions = djdeDirectiveOptions.Value;
     }
 
     public async Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetTerminatedEmployees(StartAndEndDateRequest req, CancellationToken cancellationToken)
@@ -184,16 +193,26 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             IsSortDescending = startAndEndDateRequest.IsSortDescending
         };
         var report = await GetTerminatedEmployeesNeedingFormLetter(filterableRequest, cancellationToken);
-        return GenerateFormLetterFromReport(report);
+        return GenerateFormLetterFromReport(report, false);
     }
 
     public async Task<string> GetFormLetterForTerminatedEmployees(TerminatedLettersRequest terminatedLettersRequest, CancellationToken cancellationToken)
     {
         var report = await GetTerminatedEmployeesNeedingFormLetter(terminatedLettersRequest, cancellationToken);
-        return GenerateFormLetterFromReport(report);
+        var letterContent = GenerateFormLetterFromReport(report, terminatedLettersRequest.IsXerox);
+        var recordCount = report.Response.Results.Count();
+
+        await _profitSharingAuditService.LogSensitiveDataAccessAsync(
+            operationName: "Terminated Letters Print",
+            tableName: "TerminatedLetters",
+            primaryKey: $"ProfitYear:{terminatedLettersRequest.ProfitYear}",
+            details: $"Records:{recordCount}, BadgeCount:{terminatedLettersRequest.BadgeNumbers?.Count ?? 0}, IsXerox:{terminatedLettersRequest.IsXerox}",
+            cancellationToken: cancellationToken);
+
+        return letterContent;
     }
 
-    private static string GenerateFormLetterFromReport(ReportResponseBase<AdhocTerminatedEmployeeResponse> report)
+    private string GenerateFormLetterFromReport(ReportResponseBase<AdhocTerminatedEmployeeResponse> report, bool isXerox)
     {
         if (!report.Response.Results.Any())
         {
@@ -211,7 +230,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
         {
             #region Beginning of letter
             letter.AppendLine();
-            letter.AppendLine("DJDE JDE=QPS003,JDL=PAYROL,END,;");
+            PrintFormatHelper.AppendXeroxLine(letter, _djdeDirectiveOptions.TerminatedLettersHeader, isXerox);
             #endregion
 
             #region Return address
@@ -302,33 +321,18 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             #endregion
 
             #region Printer Control
-            letter.AppendLine();
-            letter.AppendLine();
-            letter.AppendLine("DJDE JDE=DISNO1,JDL=PAYROL,END,;");
-            letter.AppendLine();
-            letter.AppendLine();
-            letter.AppendLine();
-            letter.AppendLine("DJDE JDE=DISNO2,JDL=PAYROL,END,;");
-            letter.AppendLine();
-            letter.AppendLine();
-            letter.AppendLine();
-            letter.AppendLine("DJDE JDE=DISNO3,JDL=PAYROL,END,;");
-            letter.AppendLine();
-            letter.AppendLine();
-            letter.AppendLine();
-            letter.AppendLine("DJDE JDE=DISNO4,JDL=PAYROL,END,;");
-            letter.AppendLine();
-            letter.AppendLine();
-            letter.AppendLine();
-            letter.AppendLine("DJDE JDE=DISNO5,JDL=PAYROL,END,;");
-            letter.AppendLine();
-            letter.AppendLine();
-            letter.AppendLine();
-            letter.AppendLine("DJDE JDE=BENDS1,JDL=PAYROL,END,;");
-            letter.AppendLine();
-            letter.AppendLine();
-            letter.AppendLine();
-            letter.AppendLine("DJDE JDE=ACKNRC,JDL=PAYROL,END,;");
+            if (isXerox)
+            {
+                letter.AppendLine();
+                letter.AppendLine();
+                foreach (var directive in _djdeDirectiveOptions.TerminatedLettersPrinterControls)
+                {
+                    PrintFormatHelper.AppendXeroxLine(letter, directive, isXerox);
+                    letter.AppendLine();
+                    letter.AppendLine();
+                    letter.AppendLine();
+                }
+            }
             letter.Append("\f"); // Form feed to end the letter
             #endregion
         }

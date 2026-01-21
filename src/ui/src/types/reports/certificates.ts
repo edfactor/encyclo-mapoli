@@ -8,6 +8,7 @@ export interface CertificatePrintRequest extends ProfitYearRequest, SortedPagina
 export interface CertificateDownloadRequest extends ProfitYearRequest {
   ssns?: number[];
   badgeNumbers?: number[];
+  isXerox?: boolean;
 }
 
 export interface CertificateReprintResponse {

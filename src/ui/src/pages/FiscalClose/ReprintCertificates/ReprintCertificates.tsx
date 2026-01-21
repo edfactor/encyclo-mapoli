@@ -1,5 +1,18 @@
 import PageErrorBoundary from "@/components/PageErrorBoundary";
-import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Grid } from "@mui/material";
+import {
+  Alert,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select
+} from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useFakeTimeAwareYear } from "hooks/useFakeTimeAwareDate";
 import useNavigationYear from "hooks/useNavigationYear";
@@ -54,6 +67,10 @@ const ReprintCertificates: React.FC = () => {
   const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
   const [printContent, setPrintContent] = useState("");
   const [printDialogTitle, setPrintDialogTitle] = useState("Print Preview - Profit Certificates");
+  const [isXerox, setIsXerox] = useState(false);
+
+  const printModeLabel = isXerox ? "Xerox" : "Default";
+  const printDialogTitleWithMode = `${printDialogTitle} (${printModeLabel})`;
 
   const handleFilterChange = (params: ReprintCertificatesFilterParams) => {
     setFilterParams(params);
@@ -77,7 +94,8 @@ const ReprintCertificates: React.FC = () => {
     try {
       const result = await downloadCertificatesFile({
         profitYear: filterParams.profitYear,
-        badgeNumbers: selectedBadgeNumbers
+        badgeNumbers: selectedBadgeNumbers,
+        isXerox: isXerox
       });
 
       if ("data" in result && result.data) {
@@ -99,7 +117,8 @@ const ReprintCertificates: React.FC = () => {
     try {
       const result = await downloadCertificatesFile({
         profitYear: filterParams.profitYear,
-        badgeNumbers: selectedBadgeNumbers
+        badgeNumbers: selectedBadgeNumbers,
+        isXerox: isXerox
       });
 
       if ("data" in result && result.data) {
@@ -166,6 +185,20 @@ const ReprintCertificates: React.FC = () => {
     return (
       <div className="flex h-10 items-center gap-2">
         <StatusDropdownActionNode />
+        <FormControl
+          size="small"
+          sx={{ minWidth: 140 }}>
+          <InputLabel id="reprint-certificates-printer-label">Printer</InputLabel>
+          <Select
+            labelId="reprint-certificates-printer-label"
+            value={isXerox ? "xerox" : "default"}
+            label="Printer"
+            onChange={(event) => setIsXerox(event.target.value === "xerox")}
+            className="h-10">
+            <MenuItem value="default">Default</MenuItem>
+            <MenuItem value="xerox">Xerox</MenuItem>
+          </Select>
+        </FormControl>
         <Button
           onClick={handleTestPrint}
           variant="outlined"
@@ -239,7 +272,7 @@ const ReprintCertificates: React.FC = () => {
           onClose={() => setIsPrintDialogOpen(false)}
           maxWidth="md"
           fullWidth>
-          <DialogTitle>{printDialogTitle}</DialogTitle>
+          <DialogTitle>{printDialogTitleWithMode}</DialogTitle>
           <DialogContent>
             <pre className="whitespace-pre-wrap font-mono text-xs">{printContent}</pre>
           </DialogContent>
@@ -247,7 +280,7 @@ const ReprintCertificates: React.FC = () => {
             <Button onClick={() => setIsPrintDialogOpen(false)}>Close</Button>
             <Button
               variant="contained"
-              onClick={() => printCertificates(printContent, printDialogTitle)}>
+              onClick={() => printCertificates(printContent, printDialogTitleWithMode)}>
               Print
             </Button>
           </DialogActions>

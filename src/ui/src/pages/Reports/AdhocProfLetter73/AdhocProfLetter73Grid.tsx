@@ -10,8 +10,12 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
   Grid,
   IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
   Tooltip,
   Typography
 } from "@mui/material";
@@ -40,9 +44,12 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = (props) => {
   const [columnDefs, setColumnDefs] = useState<ColDef[]>([]);
   const [rowData, setRowData] = useState<Record<string, unknown>[]>([]);
   const [selectedRows, setSelectedRows] = useState<Record<string, unknown>[]>([]);
+  const [isXerox, setIsXerox] = useState(false);
 
   // Allow nullable filterParams; derive profitYear defensively
   const profitYear = filterParams?.profitYear?.getFullYear() || 0;
+  const printModeLabel = isXerox ? "Xerox" : "Default";
+  const dialogTitle = `Print Preview - Prof Letter 73 (${printModeLabel})`;
 
   // Keep last successful API response so we can display previous data while fetching
   const lastApiRef = useRef<AdhocProfLetter73Response | null>(null);
@@ -56,7 +63,7 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = (props) => {
     printFormLetter,
     error: printError,
     clearError
-  } = useAdhocProfLetter73Print(filterParams ?? null, selectedRows);
+  } = useAdhocProfLetter73Print(filterParams ?? null, selectedRows, isXerox);
 
   const [trigger, { data: apiData, isFetching, error, isError }] = useLazyGetAdhocProfLetter73Query();
 
@@ -278,16 +285,32 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = (props) => {
                 title={selectedRows.length === 0 ? "You must check at least one box" : "Print Prof Letter 73"}
                 placement="top">
                 <span>
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    size="medium"
-                    startIcon={isDownloading ? <CircularProgress size={20} /> : <Print />}
-                    onClick={handlePrint}
-                    disabled={isDownloading || selectedRows.length === 0}
-                    sx={{ marginLeft: 2, marginRight: "20px" }}>
-                    {isDownloading ? "Generating..." : "Print"}
-                  </Button>
+                  <div className="flex items-center">
+                    <FormControl
+                      size="small"
+                      sx={{ minWidth: 140 }}>
+                      <InputLabel id="adhoc-prof-letter73-printer-label">Printer</InputLabel>
+                      <Select
+                        labelId="adhoc-prof-letter73-printer-label"
+                        value={isXerox ? "xerox" : "default"}
+                        label="Printer"
+                        onChange={(event) => setIsXerox(event.target.value === "xerox")}
+                        sx={{ height: "40px" }}>
+                        <MenuItem value="default">Default</MenuItem>
+                        <MenuItem value="xerox">Xerox</MenuItem>
+                      </Select>
+                    </FormControl>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      size="medium"
+                      startIcon={isDownloading ? <CircularProgress size={20} /> : <Print />}
+                      onClick={handlePrint}
+                      disabled={isDownloading || selectedRows.length === 0}
+                      sx={{ marginLeft: 2, marginRight: "20px" }}>
+                      {isDownloading ? "Generating..." : "Print"}
+                    </Button>
+                  </div>
                 </span>
               </Tooltip>
               {onToggleExpand && (
@@ -371,14 +394,14 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = (props) => {
             onClose={() => setIsPrintDialogOpen(false)}
             maxWidth="lg"
             fullWidth>
-            <DialogTitle>Print Preview - Prof Letter 73</DialogTitle>
+            <DialogTitle>{dialogTitle}</DialogTitle>
             <DialogContent>
-              <pre style={{ whiteSpace: "pre-wrap", fontFamily: "monospace", fontSize: "12px" }}>{printContent}</pre>
+              <pre className="whitespace-pre-wrap font-mono text-xs">{printContent}</pre>
             </DialogContent>
             <DialogActions sx={{ paddingRight: "25px" }}>
               <Button onClick={() => setIsPrintDialogOpen(false)}>Close</Button>
               <Button
-                onClick={() => printFormLetter(printContent)}
+                onClick={() => printFormLetter(printContent, dialogTitle)}
                 variant="contained">
                 Print
               </Button>
