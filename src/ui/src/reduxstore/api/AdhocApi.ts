@@ -118,6 +118,7 @@ export const AdhocApi = createApi({
           endingDate: params.endingDate,
           excludeZeroBalance: params.excludeZeroBalance,
           badgeNumbers: params.badgeNumbers,
+          isXerox: params.isXerox,
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,

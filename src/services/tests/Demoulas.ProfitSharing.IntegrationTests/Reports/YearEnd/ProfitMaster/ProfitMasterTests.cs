@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Services.ProfitMaster;
-using Demoulas.ProfitSharing.Services.ProfitShareEdit;
+using Demoulas.ProfitSharing.Services.Services.Adjustments.ProfitShareEdit;
+using Demoulas.ProfitSharing.Services.Services.Distributions.ProfitMaster;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Oracle.ManagedDataAccess.Client;

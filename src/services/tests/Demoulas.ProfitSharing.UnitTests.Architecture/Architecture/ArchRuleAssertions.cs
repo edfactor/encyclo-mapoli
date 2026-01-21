@@ -1,4 +1,3 @@
-﻿using ArchUnitNET.Domain;
 using ArchUnitNET.Fluent;
 using Shouldly;
 

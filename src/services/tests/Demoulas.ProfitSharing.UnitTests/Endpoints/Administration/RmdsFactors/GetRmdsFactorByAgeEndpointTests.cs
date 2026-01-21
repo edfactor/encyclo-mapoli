@@ -1,12 +1,10 @@
 using System.ComponentModel;
 using System.Net;
-using Demoulas.ProfitSharing.Common.Contracts.Request.Administration;
+using System.Net.Http.Json;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Administration.RmdsFactors;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
-using FastEndpoints;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Administration.RmdsFactors;
@@ -27,14 +25,13 @@ public sealed class GetRmdFactorByAgeEndpointTests : ApiTestBase<Api.Program>
         const byte age = 73;
 
         // Act
-        var response = await ApiClient.GETAsync<GetRmdsFactorByAgeEndpoint, GetRmdsFactorByAgeRequest, RmdsFactorDto>(
-            new GetRmdsFactorByAgeRequest { Age = age });
+        var response = await GetByAgeAsync(age);
 
         // Assert
         response.Response.IsSuccessStatusCode.ShouldBeTrue();
         response.Result.ShouldNotBeNull();
-        response.Result.Age.ShouldBe(age);
-        response.Result.Factor.ShouldBe(26.5m); // IRS factor for age 73
+        response.Result!.Age.ShouldBe(age);
+        response.Result!.Factor.ShouldBe(26.5m); // IRS factor for age 73
     }
 
     [Fact(DisplayName = "GetRmdFactorByAge - Should return 404 for non-existent age")]
@@ -46,8 +43,7 @@ public sealed class GetRmdFactorByAgeEndpointTests : ApiTestBase<Api.Program>
         const byte age = 120; // Beyond seeded data
 
         // Act
-        var response = await ApiClient.GETAsync<GetRmdsFactorByAgeEndpoint, GetRmdsFactorByAgeRequest, RmdsFactorDto>(
-            new GetRmdsFactorByAgeRequest { Age = age });
+        var response = await GetByAgeAsync(age);
 
         // Assert
         response.Response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
@@ -62,13 +58,13 @@ public sealed class GetRmdFactorByAgeEndpointTests : ApiTestBase<Api.Program>
         const byte age = 80;
 
         // Act
-        var response = await ApiClient.GETAsync<GetRmdsFactorByAgeEndpoint, GetRmdsFactorByAgeRequest, RmdsFactorDto>(
-            new GetRmdsFactorByAgeRequest { Age = age });
+        var response = await GetByAgeAsync(age);
 
         // Assert
         response.Response.IsSuccessStatusCode.ShouldBeTrue();
-        response.Result.Age.ShouldBe(age);
-        response.Result.Factor.ShouldBe(20.2m); // IRS factor for age 80
+        response.Result.ShouldNotBeNull();
+        response.Result!.Age.ShouldBe(age);
+        response.Result!.Factor.ShouldBe(20.2m); // IRS factor for age 80
     }
 
     [Fact(DisplayName = "GetRmdFactorByAge - Should return correct factor for age 99")]
@@ -80,13 +76,13 @@ public sealed class GetRmdFactorByAgeEndpointTests : ApiTestBase<Api.Program>
         const byte age = 99;
 
         // Act
-        var response = await ApiClient.GETAsync<GetRmdsFactorByAgeEndpoint, GetRmdsFactorByAgeRequest, RmdsFactorDto>(
-            new GetRmdsFactorByAgeRequest { Age = age });
+        var response = await GetByAgeAsync(age);
 
         // Assert
         response.Response.IsSuccessStatusCode.ShouldBeTrue();
-        response.Result.Age.ShouldBe(age);
-        response.Result.Factor.ShouldBe(6.8m); // IRS factor for age 99
+        response.Result.ShouldNotBeNull();
+        response.Result!.Age.ShouldBe(age);
+        response.Result!.Factor.ShouldBe(6.8m); // IRS factor for age 99
     }
 
     [Fact(DisplayName = "GetRmdFactorByAge - Should be accessible to ADMINISTRATOR role")]
@@ -97,8 +93,7 @@ public sealed class GetRmdFactorByAgeEndpointTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
 
         // Act
-        var response = await ApiClient.GETAsync<GetRmdsFactorByAgeEndpoint, GetRmdsFactorByAgeRequest, RmdsFactorDto>(
-            new GetRmdsFactorByAgeRequest { Age = 73 });
+        var response = await GetByAgeAsync(73);
 
         // Assert
         response.Response.IsSuccessStatusCode.ShouldBeTrue();
@@ -113,16 +108,13 @@ public sealed class GetRmdFactorByAgeEndpointTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
 
         // Act - Minimum seeded age (73)
-        var minResponse = await ApiClient.GETAsync<GetRmdsFactorByAgeEndpoint, GetRmdsFactorByAgeRequest, RmdsFactorDto>(
-            new GetRmdsFactorByAgeRequest { Age = 73 });
+        var minResponse = await GetByAgeAsync(73);
 
         // Act - Maximum seeded age (99)
-        var maxResponse = await ApiClient.GETAsync<GetRmdsFactorByAgeEndpoint, GetRmdsFactorByAgeRequest, RmdsFactorDto>(
-            new GetRmdsFactorByAgeRequest { Age = 99 });
+        var maxResponse = await GetByAgeAsync(99);
 
         // Act - Below minimum (72)
-        var belowMinResponse = await ApiClient.GETAsync<GetRmdsFactorByAgeEndpoint, GetRmdsFactorByAgeRequest, RmdsFactorDto>(
-            new GetRmdsFactorByAgeRequest { Age = 72 });
+        var belowMinResponse = await GetByAgeAsync(72);
 
         // Assert
         minResponse.Response.IsSuccessStatusCode.ShouldBeTrue();
@@ -138,8 +130,7 @@ public sealed class GetRmdFactorByAgeEndpointTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
 
         // Act
-        var response = await ApiClient.GETAsync<GetRmdsFactorByAgeEndpoint, GetRmdsFactorByAgeRequest, RmdsFactorDto>(
-            new GetRmdsFactorByAgeRequest { Age = 73 });
+        var response = await GetByAgeAsync(73);
 
         // Assert
         response.Result.ShouldNotBeNull();
@@ -156,13 +147,26 @@ public sealed class GetRmdFactorByAgeEndpointTests : ApiTestBase<Api.Program>
         const byte age = 80;
 
         // Act
-        var response1 = await ApiClient.GETAsync<GetRmdsFactorByAgeEndpoint, GetRmdsFactorByAgeRequest, RmdsFactorDto>(
-            new GetRmdsFactorByAgeRequest { Age = age });
-        var response2 = await ApiClient.GETAsync<GetRmdsFactorByAgeEndpoint, GetRmdsFactorByAgeRequest, RmdsFactorDto>(
-            new GetRmdsFactorByAgeRequest { Age = age });
+        var response1 = await GetByAgeAsync(age);
+        var response2 = await GetByAgeAsync(age);
 
         // Assert
-        response1.Result.Age.ShouldBe(response2.Result.Age);
-        response1.Result.Factor.ShouldBe(response2.Result.Factor);
+        response1.Result.ShouldNotBeNull();
+        response2.Result.ShouldNotBeNull();
+        response1.Result!.Age.ShouldBe(response2.Result!.Age);
+        response1.Result!.Factor.ShouldBe(response2.Result!.Factor);
+    }
+
+    private async Task<(HttpResponseMessage Response, RmdsFactorDto? Result)> GetByAgeAsync(byte age)
+    {
+        var response = await ApiClient.GetAsync($"/api/administration/rmds-factors/{age}");
+        RmdsFactorDto? result = null;
+
+        if (response.IsSuccessStatusCode)
+        {
+            result = await response.Content.ReadFromJsonAsync<RmdsFactorDto>();
+        }
+
+        return (response, result);
     }
 }

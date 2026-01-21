@@ -1,6 +1,4 @@
-﻿using System;
 using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -94,7 +92,7 @@ public sealed class MaskSensitiveAttributeAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        var propertySymbol = context.SemanticModel.GetDeclaredSymbol(propertyDecl, context.CancellationToken) as IPropertySymbol;
+        var propertySymbol = context.SemanticModel.GetDeclaredSymbol(propertyDecl, context.CancellationToken);
         if (propertySymbol is null)
         {
             return;
@@ -117,7 +115,7 @@ public sealed class MaskSensitiveAttributeAnalyzer : DiagnosticAnalyzer
         }
 
         // Age and DateOfBirth are expected to be masked unless the whole DTO is already masked.
-        var typeSymbol = context.SemanticModel.GetDeclaredSymbol(containingType, context.CancellationToken) as INamedTypeSymbol;
+        var typeSymbol = context.SemanticModel.GetDeclaredSymbol(containingType, context.CancellationToken);
         var typeHasMaskSensitive = typeSymbol is not null && HasMaskSensitiveAttribute(typeSymbol);
 
         if (!hasMaskSensitive && !typeHasMaskSensitive)

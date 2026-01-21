@@ -16,6 +16,7 @@ export interface AdhocProfLetter73Request {
 export interface AdhocProfLetter73FormLetterRequest {
   profitYear: number;
   badgeNumbers: string[];
+  isXerox?: boolean;
 }
 
 export interface AdhocProfLetter73Data {
@@ -53,18 +54,19 @@ export const AdhocProfLetter73Api = createApi({
         }
 
         return {
-          url: `/adhoc/prof-letter73?${queryParams.toString()}`,
+          url: `/ad-hoc/prof-letter73?${queryParams.toString()}`,
           method: "GET"
         };
       }
     }),
     downloadAdhocProfLetter73FormLetter: builder.query<Blob, AdhocProfLetter73FormLetterRequest>({
       query: (params) => ({
-        url: "/adhoc/prof-letter73/download-form-letter",
+        url: "/ad-hoc/prof-letter73/download-form-letter",
         method: "GET",
         params: {
           profitYear: params.profitYear,
-          badgeNumbers: params.badgeNumbers
+          badgeNumbers: params.badgeNumbers,
+          isXerox: params.isXerox
         },
         responseHandler: (response) => response.blob()
       })

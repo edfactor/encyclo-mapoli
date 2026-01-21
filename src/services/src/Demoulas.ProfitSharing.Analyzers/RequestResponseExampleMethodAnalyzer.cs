@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -53,7 +51,7 @@ public sealed class RequestResponseExampleMethodAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        var classSymbol = context.SemanticModel.GetDeclaredSymbol(classDecl, context.CancellationToken) as INamedTypeSymbol;
+        var classSymbol = context.SemanticModel.GetDeclaredSymbol(classDecl, context.CancellationToken);
         if (classSymbol is null)
         {
             return;

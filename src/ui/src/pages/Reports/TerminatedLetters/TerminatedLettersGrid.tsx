@@ -1,16 +1,20 @@
 import { Print } from "@mui/icons-material";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import {
   Button,
+  ButtonGroup,
   CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  Menu,
+  MenuItem,
   Tooltip,
   Typography
 } from "@mui/material";
 import { SelectionChangedEvent } from "ag-grid-community";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { TerminatedLettersDetail, TerminatedLettersResponse } from "reduxstore/types";
 import { formatNumberWithComma, ISortParams } from "smart-ui-library";
 import { DSMPaginatedGrid } from "../../../components/DSMPaginatedGrid/DSMPaginatedGrid";
@@ -29,7 +33,9 @@ interface TerminatedLettersGridProps {
   isPrintDialogOpen: boolean;
   setIsPrintDialogOpen: (open: boolean) => void;
   printContent: string;
-  printTerminatedLetters: (content: string) => void;
+  printTerminatedLetters: (content: string, title: string) => void;
+  isXerox: boolean;
+  setIsXerox: (value: boolean) => void;
 }
 
 const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
@@ -43,7 +49,9 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
   isPrintDialogOpen,
   setIsPrintDialogOpen,
   printContent,
-  printTerminatedLetters
+  printTerminatedLetters,
+  isXerox,
+  setIsXerox
 }) => {
   const { sortParams, handleSortChange } = gridPagination;
 
@@ -59,6 +67,23 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
   const columnDefs = useMemo(() => GetTerminatedLettersColumns(), []);
 
   const isPrintDisabled = selectedRows.length === 0;
+  const printModeLabel = isXerox ? "Xerox" : "Default";
+  const dialogTitle = `Print Preview - Terminated Letters (${printModeLabel})`;
+  const [printerMenuAnchorEl, setPrinterMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const isPrinterMenuOpen = Boolean(printerMenuAnchorEl);
+
+  const handleOpenPrinterMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setPrinterMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleClosePrinterMenu = () => {
+    setPrinterMenuAnchorEl(null);
+  };
+
+  const handleSelectPrinter = (value: "default" | "xerox") => {
+    setIsXerox(value === "xerox");
+    handleClosePrinterMenu();
+  };
 
   const paginationProps = {
     pageNumber: gridPagination.pageNumber,
@@ -71,16 +96,28 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
 
   const renderPrintButton = () => {
     const button = (
-      <Button
+      <ButtonGroup
         variant="outlined"
         color="primary"
         size="medium"
-        startIcon={isDownloading ? <CircularProgress size={20} /> : <Print />}
-        onClick={handlePrint}
-        disabled={isPrintDisabled || isDownloading}
-        sx={{ marginLeft: 2, marginRight: "20px" }}>
-        {isDownloading ? "Generating..." : "Print"}
-      </Button>
+        className="ml-2 mr-5">
+        <Button
+          startIcon={isDownloading ? <CircularProgress size={20} /> : <Print />}
+          onClick={handlePrint}
+          disabled={isPrintDisabled || isDownloading}
+          className="whitespace-nowrap">
+          {isDownloading ? "Generating..." : "Print"}
+        </Button>
+        <Button
+          onClick={handleOpenPrinterMenu}
+          aria-label="Select printer"
+          aria-controls={isPrinterMenuOpen ? "terminated-letters-printer-menu" : undefined}
+          aria-haspopup="true"
+          aria-expanded={isPrinterMenuOpen ? "true" : undefined}
+          className="min-w-0 px-2">
+          <ArrowDropDownIcon />
+        </Button>
+      </ButtonGroup>
     );
 
     if (isPrintDisabled) {
@@ -97,7 +134,7 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
   };
 
   return (
-    <div style={{ marginRight: "24px" }}>
+    <div className="mr-6">
       {reportData && reportData.response && (
         <DSMPaginatedGrid
           preferenceKey={GRID_KEYS.TERMINATED_LETTERS}
@@ -114,7 +151,7 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
           }}
           showPagination={reportData.response.results && reportData.response.results.length > 0}
           header={
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <div className="mb-4 flex items-center justify-between">
               <Typography
                 variant="h6"
                 component="h2"
@@ -122,28 +159,39 @@ const TerminatedLettersGrid: React.FC<TerminatedLettersGridProps> = ({
                 EMPLOYEES NEEDING INSTRUCTIONS TO WITHDRAW VESTED SAVINGS (
                 {formatNumberWithComma(reportData.response.total)} Records)
               </Typography>
-              {renderPrintButton()}
+              <div className="flex items-center">{renderPrintButton()}</div>
             </div>
           }
         />
       )}
+
+      <Menu
+        id="terminated-letters-printer-menu"
+        anchorEl={printerMenuAnchorEl}
+        open={isPrinterMenuOpen}
+        onClose={handleClosePrinterMenu}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}>
+        <MenuItem onClick={() => handleSelectPrinter("default")}>Default</MenuItem>
+        <MenuItem onClick={() => handleSelectPrinter("xerox")}>Xerox</MenuItem>
+      </Menu>
 
       <Dialog
         open={isPrintDialogOpen}
         onClose={() => setIsPrintDialogOpen(false)}
         maxWidth="lg"
         fullWidth>
-        <DialogTitle>Print Preview - Terminated Letters</DialogTitle>
+        <DialogTitle>{dialogTitle}</DialogTitle>
         <DialogContent>
-          <pre style={{ whiteSpace: "pre-wrap", fontFamily: "monospace", fontSize: "12px" }}>{printContent}</pre>
+          <pre className="whitespace-pre-wrap font-mono text-xs">{printContent}</pre>
         </DialogContent>
         <DialogActions sx={{ paddingRight: "25px" }}>
-          <Button onClick={() => setIsPrintDialogOpen(false)}>Close</Button>
           <Button
-            onClick={() => printTerminatedLetters(printContent)}
+            onClick={() => printTerminatedLetters(printContent, dialogTitle)}
             variant="contained">
             Print
           </Button>
+          <Button onClick={() => setIsPrintDialogOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
     </div>

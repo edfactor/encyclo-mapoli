@@ -133,6 +133,7 @@ DECLARE
     PROFIT_SHARING_ADJUSTMENTS_PAGE CONSTANT NUMBER := 175;
     MANAGE_RMD_FACTORS CONSTANT NUMBER := 178;
     MANAGE_BANKS CONSTANT NUMBER := 180;
+    MANAGE_TAX_CODES CONSTANT NUMBER := 181;
 
     -- PROFIT_SHARE_REPORT_FINAL_RUN CONSTANT NUMBER := 149; -- REMOVED (was under FISCAL_CLOSE)
     -- PRINT_PROFIT_CERTS CONSTANT NUMBER := 150; -- REMOVED (was under FISCAL_CLOSE)
@@ -238,6 +239,30 @@ BEGIN
     DELETE FROM NAVIGATION_CUSTOM_SETTING;
     DELETE FROM NAVIGATION;
     DELETE FROM NAVIGATION_ROLE;
+
+    MERGE INTO NAVIGATION_STATUS target
+    USING (SELECT 1 AS id, 'Not Started' AS name FROM dual) source
+    ON (target.ID = source.id)
+    WHEN NOT MATCHED THEN
+        INSERT (ID, NAME) VALUES (source.id, source.name);
+
+    MERGE INTO NAVIGATION_STATUS target
+    USING (SELECT 2 AS id, 'In Progress' AS name FROM dual) source
+    ON (target.ID = source.id)
+    WHEN NOT MATCHED THEN
+        INSERT (ID, NAME) VALUES (source.id, source.name);
+
+    MERGE INTO NAVIGATION_STATUS target
+    USING (SELECT 3 AS id, 'On Hold' AS name FROM dual) source
+    ON (target.ID = source.id)
+    WHEN NOT MATCHED THEN
+        INSERT (ID, NAME) VALUES (source.id, source.name);
+
+    MERGE INTO NAVIGATION_STATUS target
+    USING (SELECT 4 AS id, 'Complete' AS name FROM dual) source
+    ON (target.ID = source.id)
+    WHEN NOT MATCHED THEN
+        INSERT (ID, NAME) VALUES (source.id, source.name);
     
     -- Populate NAVIGATION_ROLE table with all roles
     -- This is the definitive source for navigation roles
@@ -290,6 +315,7 @@ BEGIN
     insert_navigation_item(MANAGE_RMD_FACTORS, ADMIN_CONFIGURATION_GROUP, 'Manage RMD Factors', '', 'manage-rmd-factors', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(MANAGE_COMMENT_TYPES_PAGE, ADMIN_CONFIGURATION_GROUP, 'Manage Comment Types', '', 'manage-comment-types', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, IS_NAVIGABLE);
     insert_navigation_item(MANAGE_BANKS, ADMIN_CONFIGURATION_GROUP, 'Manage Banks', '', 'manage-banks', STATUS_NORMAL, ORDER_FIFTH, '', ENABLED, IS_NAVIGABLE);
+    insert_navigation_item(MANAGE_TAX_CODES, ADMIN_CONFIGURATION_GROUP, 'Manage Tax Codes', '', 'manage-tax-codes', STATUS_NORMAL, ORDER_SIXTH, '', ENABLED, IS_NAVIGABLE);
     
     -- Data Quality & Diagnostics Group
     insert_navigation_item(ADMIN_DATA_QUALITY_GROUP, ADMINISTRATIVE_MENU, 'Data Quality & Diagnostics', '', '', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, IS_NAVIGABLE);
@@ -372,6 +398,8 @@ BEGIN
     assign_navigation_role(MANAGE_BANKS, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(MANAGE_COMMENT_TYPES_PAGE, IT_DEVOPS);
     assign_navigation_role(MANAGE_COMMENT_TYPES_PAGE, SYSTEM_ADMINISTRATOR);
+    assign_navigation_role(MANAGE_TAX_CODES, IT_DEVOPS);
+    assign_navigation_role(MANAGE_TAX_CODES, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(PROFIT_SHARING_ADJUSTMENTS_PAGE, IT_DEVOPS);
     assign_navigation_role(PROFIT_SHARING_ADJUSTMENTS_PAGE, SYSTEM_ADMINISTRATOR);
     assign_navigation_role(AUDIT_SEARCH_PAGE, SYSTEM_ADMINISTRATOR);

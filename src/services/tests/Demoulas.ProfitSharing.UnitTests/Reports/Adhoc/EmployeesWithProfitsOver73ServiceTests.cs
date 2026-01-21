@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
@@ -50,7 +49,7 @@ public sealed class EmployeesWithProfitsOver73ServiceTests : ApiTestBase<Program
 
         // Assert
         service.ShouldNotBeNull();
-        service.ShouldBeOfType<global::Demoulas.ProfitSharing.Services.Reports.EmployeesWithProfitsOver73Service>();
+        service.ShouldBeOfType<global::Demoulas.ProfitSharing.Services.Services.Reports.EmployeesWithProfitsOver73Service>();
     }
 
     #endregion

@@ -16,6 +16,11 @@ export interface YearRangeRequest {
   endProfitYear: number;
 }
 
+export interface TaxCodeLookupRequest {
+  availableForDistribution?: boolean;
+  availableForForfeiture?: boolean;
+}
+
 export interface CalendarResponseDto {
   fiscalBeginDate: string;
   fiscalEndDate: string;

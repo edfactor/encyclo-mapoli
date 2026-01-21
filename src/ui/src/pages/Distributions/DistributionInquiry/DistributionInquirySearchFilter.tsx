@@ -15,6 +15,7 @@ import {
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { useDispatch } from "react-redux";
+import { useGetTaxCodesQuery } from "reduxstore/api/LookupsApi";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import {
@@ -59,6 +60,9 @@ const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterP
   ({ onSearch, onReset, isLoading }) => {
     const dispatch = useDispatch();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { data: taxCodesData, isLoading: isLoadingTaxCodes } = useGetTaxCodesQuery({
+      availableForDistribution: true
+    });
 
     const {
       control,
@@ -415,12 +419,17 @@ const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterP
                   fullWidth
                   size="small"
                   variant="outlined"
+                  disabled={isLoadingTaxCodes}
                   error={!!errors.taxCode}
                   helperText={errors.taxCode?.message}>
                   <MenuItem value="">All</MenuItem>
-                  <MenuItem value="1">1</MenuItem>
-                  <MenuItem value="3">3</MenuItem>
-                  <MenuItem value="7">7</MenuItem>
+                  {taxCodesData?.map((taxCode) => (
+                    <MenuItem
+                      key={taxCode.id}
+                      value={taxCode.id}>
+                      {taxCode.id} - {taxCode.name}
+                    </MenuItem>
+                  ))}
                 </TextField>
               )}
             />

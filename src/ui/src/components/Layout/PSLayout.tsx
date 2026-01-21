@@ -29,7 +29,7 @@ export const PSLayout: React.FC<DSMLayoutProps> = ({
   // Check if fake time banner will be displayed (skip API call if not authenticated)
   const { data: fakeTimeStatus } = useGetFakeTimeStatusQuery(undefined, {
     skip: !hasToken,
-    pollingInterval: 60000
+    pollingInterval: 120000
   });
 
   const isFakeTimeBannerVisible = hasToken && fakeTimeStatus?.isActive;

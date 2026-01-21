@@ -1,8 +1,6 @@
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
 using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using FastEndpoints;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 

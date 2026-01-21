@@ -5,7 +5,7 @@ using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.IntegrationTests.TotalSvc;
-using Demoulas.ProfitSharing.Services.Reports;
+using Demoulas.ProfitSharing.Services.Services.Reports;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shouldly;

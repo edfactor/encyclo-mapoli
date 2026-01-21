@@ -4,10 +4,11 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.PAY443;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.Formatters;
-using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
-using Demoulas.ProfitSharing.Services.ProfitShareEdit;
+using Demoulas.ProfitSharing.Services.Services.Adjustments.ProfitShareEdit;
+using Demoulas.ProfitSharing.Services.Services.Lookups;
+using Demoulas.ProfitSharing.Services.Services.Reports;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 
