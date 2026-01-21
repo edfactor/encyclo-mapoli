@@ -18,6 +18,7 @@ export * from "./it-operations/state-taxes";
 // Administration types
 export * from "./administration/comment-types";
 export * from "./administration/rmd-factors";
+export * from "./administration/tax-codes";
 
 // Employee types
 export * from "./employee/employee";

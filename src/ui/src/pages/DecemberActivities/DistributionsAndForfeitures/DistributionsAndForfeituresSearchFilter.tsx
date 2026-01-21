@@ -51,7 +51,10 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
   const [triggerSearch, { isFetching: isSearchFetching }] = useLazyGetDistributionsAndForfeituresQuery();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { data: statesData, isLoading: isLoadingStates } = useGetStatesQuery();
-  const { data: taxCodesData, isLoading: isLoadingTaxCodes } = useGetTaxCodesQuery();
+  const { data: taxCodesData, isLoading: isLoadingTaxCodes } = useGetTaxCodesQuery({
+    availableForDistribution: true,
+    availableForForfeiture: true
+  });
   const dispatch = useDispatch();
   //  const fiscalData = useFiscalCalendarYear();
   const profitYear = useDecemberFlowProfitYear();

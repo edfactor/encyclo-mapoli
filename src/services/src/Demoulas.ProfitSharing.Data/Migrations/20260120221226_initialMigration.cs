@@ -672,7 +672,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 columns: table => new
                 {
                     ID = table.Column<string>(type: "NVARCHAR2(1)", nullable: false),
-                    NAME = table.Column<string>(type: "NVARCHAR2(128)", maxLength: 128, nullable: false)
+                    NAME = table.Column<string>(type: "NVARCHAR2(128)", maxLength: 128, nullable: false),
+                    IS_AVAILABLE_DISTRIBUTION = table.Column<bool>(type: "NUMBER(1)", nullable: false),
+                    IS_AVAILABLE_FORFEITURE = table.Column<bool>(type: "NUMBER(1)", nullable: false),
+                    ISPROTECTED = table.Column<bool>(type: "NUMBER(1)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1555,7 +1558,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             migrationBuilder.InsertData(
                 table: "BANK",
                 columns: new[] { "ID", "CITY", "CREATED_AT_UTC", "CREATEDBY", "FEDACH_CHANGE_DATE", "FEDWIRE_LOCATION", "FEDWIRE_REVISION_DATE", "FEDWIRE_TELEGRAPHIC_NAME", "MODIFIED_AT_UTC", "MODIFIEDBY", "NAME", "OFFICE_TYPE", "PHONE", "ROUTING_NUMBER", "SERVICING_FED_ADDRESS", "SERVICING_FED_ROUTING_NUMBER", "STATE", "STATUS" },
-                values: new object[] { 1, "Lake Success", new DateTimeOffset(new DateTime(2026, 1, 16, 0, 18, 48, 696, DateTimeKind.Unspecified).AddTicks(9709), new TimeSpan(0, 0, 0, 0, 0)), "SYSTEM", new DateTime(2024, 7, 30, 0, 0, 0, 0, DateTimeKind.Unspecified), "Miami, FL", new DateTime(2023, 7, 6, 0, 0, 0, 0, DateTimeKind.Unspecified), "NEWTEK BANK, NA", null, null, "Newtek Bank, NA", "Main Office", "516-254-7586", "026004297", "100 Orchard Street, East Rutherford, NJ", "021001208", "NY", "Active" });
+                values: new object[] { 1, "Lake Success", new DateTimeOffset(new DateTime(2026, 1, 20, 22, 12, 25, 874, DateTimeKind.Unspecified).AddTicks(3574), new TimeSpan(0, 0, 0, 0, 0)), "SYSTEM", new DateTime(2024, 7, 30, 0, 0, 0, 0, DateTimeKind.Unspecified), "Miami, FL", new DateTime(2023, 7, 6, 0, 0, 0, 0, DateTimeKind.Unspecified), "NEWTEK BANK, NA", null, null, "Newtek Bank, NA", "Main Office", "516-254-7586", "026004297", "100 Orchard Street, East Rutherford, NJ", "021001208", "NY", "Active" });
 
             migrationBuilder.InsertData(
                 table: "BENEFICIARY_TYPE",
@@ -1981,62 +1984,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "NAVIGATION_ROLE",
-                columns: new[] { "ID", "NAME" },
-                values: new object[,]
-                {
-                    { (byte)1, "System-Administrator" },
-                    { (byte)2, "Finance-Manager" },
-                    { (byte)3, "Distributions-Clerk" },
-                    { (byte)4, "Hardship-Administrator" },
-                    { (byte)5, "Impersonation" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "NAVIGATION_ROLE",
-                columns: new[] { "ID", "IS_READ_ONLY", "NAME" },
-                values: new object[] { (byte)6, true, "IT-DevOps" });
-
-            migrationBuilder.InsertData(
-                table: "NAVIGATION_ROLE",
-                columns: new[] { "ID", "NAME" },
-                values: new object[,]
-                {
-                    { (byte)7, "IT-Operations" },
-                    { (byte)8, "Executive-Administrator" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "NAVIGATION_ROLE",
-                columns: new[] { "ID", "IS_READ_ONLY", "NAME" },
-                values: new object[] { (byte)9, true, "Auditor" });
-
-            migrationBuilder.InsertData(
-                table: "NAVIGATION_ROLE",
-                columns: new[] { "ID", "NAME" },
-                values: new object[] { (byte)10, "Beneficiary-Administrator" });
-
-            migrationBuilder.InsertData(
-                table: "NAVIGATION_ROLE",
-                columns: new[] { "ID", "IS_READ_ONLY", "NAME" },
-                values: new object[,]
-                {
-                    { (byte)11, true, "HR-ReadOnly" },
-                    { (byte)12, true, "SSN-Unmasking" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "NAVIGATION_STATUS",
-                columns: new[] { "ID", "NAME" },
-                values: new object[,]
-                {
-                    { (byte)1, "Not Started" },
-                    { (byte)2, "In Progress" },
-                    { (byte)3, "On Hold" },
-                    { (byte)4, "Complete" }
-                });
-
-            migrationBuilder.InsertData(
                 table: "PAY_CLASSIFICATION",
                 columns: new[] { "ID", "NAME" },
                 values: new object[,]
@@ -2299,28 +2246,28 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "TAX_CODE",
-                columns: new[] { "ID", "NAME" },
+                columns: new[] { "ID", "IS_AVAILABLE_DISTRIBUTION", "IS_AVAILABLE_FORFEITURE", "ISPROTECTED", "NAME" },
                 values: new object[,]
                 {
-                    { "0", "Unknown - not legal tax code, yet 24 records in the obfuscated set have this value." },
-                    { "1", "Early (Premature) dist no known exception" },
-                    { "2", "Early (Premature) dist exception applies" },
-                    { "3", "Disability" },
-                    { "4", "Death" },
-                    { "5", "Prohibited transaction" },
-                    { "6", "Section 1035 exchange" },
-                    { "7", "Normal distribution" },
-                    { "8", "Excess contributions + earnings/deferrals" },
-                    { "9", "PS 58 cost" },
-                    { "A", "Qualifies for 5- or 10-year averaging" },
-                    { "B", "Qualifies for death benefit exclusion" },
-                    { "C", "Qualifies for both A and B" },
-                    { "D", "Excess contributions + earnings deferrals" },
-                    { "E", "Excess annual additions under section 415" },
-                    { "F", "Charitable gift annuity" },
-                    { "G", "Direct rollover to IRA" },
-                    { "H", "Direct rollover to plan/tax sheltered annuity" },
-                    { "P", "Excess contributions + earnings/deferrals" }
+                    { "0", false, false, true, "Unknown - not legal tax code, yet 24 records in the obfuscated set have this value." },
+                    { "1", true, true, false, "Early (Premature) dist no known exception" },
+                    { "2", true, true, false, "Early (Premature) dist exception applies" },
+                    { "3", false, false, false, "Disability" },
+                    { "4", true, true, false, "Death" },
+                    { "5", false, false, false, "Prohibited transaction" },
+                    { "6", false, false, false, "Section 1035 exchange" },
+                    { "7", true, true, true, "Normal distribution" },
+                    { "8", false, false, false, "Excess contributions + earnings/deferrals" },
+                    { "9", false, false, false, "PS 58 cost" },
+                    { "A", false, false, false, "Qualifies for 5- or 10-year averaging" },
+                    { "B", false, false, false, "Qualifies for death benefit exclusion" },
+                    { "C", false, false, false, "Qualifies for both A and B" },
+                    { "D", false, false, false, "Excess contributions + earnings deferrals" },
+                    { "E", false, false, false, "Excess annual additions under section 415" },
+                    { "F", false, false, false, "Charitable gift annuity" },
+                    { "G", true, true, false, "Direct rollover to IRA" },
+                    { "H", false, false, false, "Direct rollover to plan/tax sheltered annuity" },
+                    { "P", false, false, false, "Excess contributions + earnings/deferrals" }
                 });
 
             migrationBuilder.InsertData(
@@ -2384,7 +2331,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             migrationBuilder.InsertData(
                 table: "BANK_ACCOUNT",
                 columns: new[] { "ID", "ACCOUNT_NAME", "ACCOUNT_NUMBER", "BANK_ID", "CREATED_AT_UTC", "CREATEDBY", "DISCONTINUED_DATE", "EFFECTIVE_DATE", "FED_ACH_CHANGE_DATE", "FEDWIRE_LOCATION", "FEDWIRE_REVISION_DATE", "FEDWIRE_TELEGRAPHIC_NAME", "IS_PRIMARY", "MODIFIED_AT_UTC", "MODIFIEDBY", "NOTES", "ROUTING_NUMBER", "SERVICING_FED_ADDRESS", "SERVICING_FED_ROUTING_NUMBER" },
-                values: new object[] { 1, "Profit Sharing Distribution Account", "PLACEHOLDER", 1, new DateTimeOffset(new DateTime(2026, 1, 16, 0, 18, 48, 701, DateTimeKind.Unspecified).AddTicks(6239), new TimeSpan(0, 0, 0, 0, 0)), "SYSTEM", null, null, null, null, null, null, true, null, null, null, "026004297", null, null });
+                values: new object[] { 1, "Profit Sharing Distribution Account", "PLACEHOLDER", 1, new DateTimeOffset(new DateTime(2026, 1, 20, 22, 12, 25, 878, DateTimeKind.Unspecified).AddTicks(5910), new TimeSpan(0, 0, 0, 0, 0)), "SYSTEM", null, null, null, null, null, null, true, null, null, null, "026004297", null, null });
 
             migrationBuilder.InsertData(
                 table: "VESTING_SCHEDULE_DETAIL",

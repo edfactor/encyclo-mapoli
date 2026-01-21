@@ -37,6 +37,232 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             modelBuilder.HasSequence<int>("PROFIT_SHARE_CHECK_NUMBER_SEQ")
                 .HasMin(1L);
 
+            modelBuilder.Entity("Demoulas.Common.Data.Services.Entities.Entities.Audit.AuditEvent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(19)")
+                        .HasColumnName("AUDIT_EVENT_ID");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("ChangesHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("NVARCHAR2(64)")
+                        .HasColumnName("CHANGES_HASH");
+
+                    b.Property<string>("ChangesJson")
+                        .HasColumnType("CLOB")
+                        .HasColumnName("CHANGES_JSON");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("CREATED_AT")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
+                    b.Property<string>("Operation")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("NVARCHAR2(24)")
+                        .HasColumnName("OPERATION");
+
+                    b.Property<string>("PrimaryKey")
+                        .HasMaxLength(512)
+                        .HasColumnType("NVARCHAR2(512)")
+                        .HasColumnName("PRIMARY_KEY");
+
+                    b.Property<string>("SessionId")
+                        .HasMaxLength(20)
+                        .HasColumnType("NVARCHAR2(20)")
+                        .HasColumnName("SESSION_ID");
+
+                    b.Property<string>("TableName")
+                        .HasMaxLength(128)
+                        .HasColumnType("NVARCHAR2(128)")
+                        .HasColumnName("TABLE_NAME");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(96)
+                        .HasColumnType("NVARCHAR2(96)")
+                        .HasColumnName("USER_NAME")
+                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
+
+                    b.HasKey("Id")
+                        .HasName("PK_AUDIT_EVENT");
+
+                    b.HasIndex(new[] { "SessionId", "CreatedAt" }, "IX_SessionIdCreatedAt")
+                        .HasDatabaseName("IX_AUDIT_EVENT_SESSION_ID_CREATEDAT");
+
+                    b.HasIndex(new[] { "TableName" }, "IX_TableName")
+                        .HasDatabaseName("IX_AUDIT_EVENT_TABLENAME");
+
+                    b.ToTable("AUDIT_EVENT", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.Common.Data.Services.Entities.Entities.Navigation.Navigation", b =>
+                {
+                    b.Property<short>("Id")
+                        .HasColumnType("NUMBER(5)")
+                        .HasColumnName("ID");
+
+                    b.Property<bool?>("Disabled")
+                        .HasColumnType("NUMBER(1)")
+                        .HasColumnName("DISABLED");
+
+                    b.Property<string>("Icon")
+                        .HasMaxLength(200)
+                        .HasColumnType("NVARCHAR2(200)")
+                        .HasColumnName("ICON");
+
+                    b.Property<bool?>("IsNavigable")
+                        .HasColumnType("NUMBER(1)")
+                        .HasColumnName("IS_NAVIGABLE");
+
+                    b.Property<byte>("OrderNumber")
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("ORDER_NUMBER");
+
+                    b.Property<short?>("ParentId")
+                        .HasColumnType("NUMBER(5)")
+                        .HasColumnName("PARENT_ID");
+
+                    b.Property<byte?>("StatusId")
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("STATUS_ID");
+
+                    b.Property<string>("SubTitle")
+                        .HasMaxLength(70)
+                        .HasColumnType("NVARCHAR2(70)")
+                        .HasColumnName("SUB_TITLE");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("NVARCHAR2(100)")
+                        .HasColumnName("TITLE");
+
+                    b.Property<string>("Url")
+                        .HasMaxLength(200)
+                        .HasColumnType("NVARCHAR2(200)")
+                        .HasColumnName("URL");
+
+                    b.HasKey("Id")
+                        .HasName("PK_NAVIGATION");
+
+                    b.HasIndex("ParentId")
+                        .HasDatabaseName("IX_NAVIGATION_PARENT_ID");
+
+                    b.HasIndex("StatusId")
+                        .HasDatabaseName("IX_NAVIGATION_STATUS_ID");
+
+                    b.ToTable("NAVIGATION", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.Common.Data.Services.Entities.Entities.Navigation.NavigationCustomSetting", b =>
+                {
+                    b.Property<short>("NavigationId")
+                        .HasColumnType("NUMBER(5)")
+                        .HasColumnName("NAVIGATION_ID");
+
+                    b.Property<string>("Key")
+                        .HasMaxLength(128)
+                        .HasColumnType("NVARCHAR2(128)")
+                        .HasColumnName("KEY");
+
+                    b.Property<string>("ValueJson")
+                        .IsRequired()
+                        .HasColumnType("CLOB")
+                        .HasColumnName("VALUE_JSON");
+
+                    b.HasKey("NavigationId", "Key")
+                        .HasName("PK_NAVIGATION_CUSTOM_SETTING");
+
+                    b.ToTable("NAVIGATION_CUSTOM_SETTING", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.Common.Data.Services.Entities.Entities.Navigation.NavigationRole", b =>
+                {
+                    b.Property<byte>("Id")
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("ID");
+
+                    b.Property<bool>("IsReadOnly")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(1)")
+                        .HasDefaultValue(false)
+                        .HasColumnName("IS_READ_ONLY");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(65)
+                        .HasColumnType("NVARCHAR2(65)")
+                        .HasColumnName("NAME");
+
+                    b.HasKey("Id")
+                        .HasName("PK_NAVIGATION_ROLE");
+
+                    b.ToTable("NAVIGATION_ROLE", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.Common.Data.Services.Entities.Entities.Navigation.NavigationStatus", b =>
+                {
+                    b.Property<byte>("Id")
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("ID");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("NVARCHAR2(64)")
+                        .HasColumnName("NAME");
+
+                    b.HasKey("Id")
+                        .HasName("PK_NAVIGATION_STATUS");
+
+                    b.ToTable("NAVIGATION_STATUS", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.Common.Data.Services.Entities.Entities.Navigation.NavigationTracking", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset?>("LastModified")
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("LAST_MODIFIED");
+
+                    b.Property<short>("NavigationId")
+                        .HasColumnType("NUMBER(5)")
+                        .HasColumnName("NAVIGATION_ID");
+
+                    b.Property<byte?>("StatusId")
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("STATUS_ID");
+
+                    b.Property<string>("Username")
+                        .HasMaxLength(60)
+                        .HasColumnType("NVARCHAR2(60)")
+                        .HasColumnName("USERNAME");
+
+                    b.HasKey("Id")
+                        .HasName("PK_NAVIGATION_TRACKING");
+
+                    b.HasIndex("NavigationId")
+                        .HasDatabaseName("IX_NAVIGATION_TRACKING_NAVIGATIONID");
+
+                    b.HasIndex("StatusId")
+                        .HasDatabaseName("IX_NAVIGATION_TRACKING_STATUS_ID");
+
+                    b.ToTable("NAVIGATION_TRACKING", (string)null);
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.AnnuityRate", b =>
                 {
                     b.Property<int>("Id")
@@ -131,71 +357,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasName("PK_ANNUITY_RATE_CONFIG");
 
                     b.ToTable("ANNUITY_RATE_CONFIG", (string)null);
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Audit.AuditEvent", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(19)")
-                        .HasColumnName("AUDIT_EVENT_ID");
-
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("ChangesHash")
-                        .HasMaxLength(64)
-                        .HasColumnType("NVARCHAR2(64)")
-                        .HasColumnName("CHANGES_HASH");
-
-                    b.Property<string>("ChangesJson")
-                        .HasColumnType("CLOB")
-                        .HasColumnName("CHANGES_JSON");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("CREATED_AT")
-                        .HasDefaultValueSql("SYSTIMESTAMP");
-
-                    b.Property<string>("Operation")
-                        .IsRequired()
-                        .HasMaxLength(24)
-                        .HasColumnType("NVARCHAR2(24)")
-                        .HasColumnName("OPERATION");
-
-                    b.Property<string>("PrimaryKey")
-                        .HasMaxLength(512)
-                        .HasColumnType("NVARCHAR2(512)")
-                        .HasColumnName("PRIMARY_KEY");
-
-                    b.Property<string>("SessionId")
-                        .HasMaxLength(20)
-                        .HasColumnType("NVARCHAR2(20)")
-                        .HasColumnName("SESSION_ID");
-
-                    b.Property<string>("TableName")
-                        .HasMaxLength(128)
-                        .HasColumnType("NVARCHAR2(128)")
-                        .HasColumnName("TABLE_NAME");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(96)
-                        .HasColumnType("NVARCHAR2(96)")
-                        .HasColumnName("USER_NAME")
-                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
-
-                    b.HasKey("Id")
-                        .HasName("PK_AUDIT_EVENT");
-
-                    b.HasIndex(new[] { "SessionId", "CreatedAt" }, "IX_SessionIdCreatedAt")
-                        .HasDatabaseName("IX_AUDIT_EVENT_SESSION_ID_CREATEDAT");
-
-                    b.HasIndex(new[] { "TableName" }, "IX_TableName")
-                        .HasDatabaseName("IX_AUDIT_EVENT_TABLENAME");
-
-                    b.ToTable("AUDIT_EVENT", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Audit.BeneficiaryArchive", b =>
@@ -535,7 +696,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = 1,
                             City = "Lake Success",
-                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 16, 0, 18, 48, 696, DateTimeKind.Unspecified).AddTicks(9709), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 20, 22, 12, 25, 874, DateTimeKind.Unspecified).AddTicks(3574), new TimeSpan(0, 0, 0, 0, 0)),
                             CreatedBy = "SYSTEM",
                             FedAchChangeDate = new DateTime(2024, 7, 30, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             FedwireLocation = "Miami, FL",
@@ -684,7 +845,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             AccountName = "Profit Sharing Distribution Account",
                             AccountNumber = "PLACEHOLDER",
                             BankId = 1,
-                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 16, 0, 18, 48, 701, DateTimeKind.Unspecified).AddTicks(6239), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedAtUtc = new DateTimeOffset(new DateTime(2026, 1, 20, 22, 12, 25, 878, DateTimeKind.Unspecified).AddTicks(5910), new TimeSpan(0, 0, 0, 0, 0)),
                             CreatedBy = "SYSTEM",
                             IsDisabled = false,
                             IsPrimary = true,
@@ -4232,263 +4393,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", b =>
-                {
-                    b.Property<short>("Id")
-                        .HasColumnType("NUMBER(5)")
-                        .HasColumnName("ID");
-
-                    b.Property<bool?>("Disabled")
-                        .HasColumnType("NUMBER(1)")
-                        .HasColumnName("DISABLED");
-
-                    b.Property<string>("Icon")
-                        .HasMaxLength(200)
-                        .HasColumnType("NVARCHAR2(200)")
-                        .HasColumnName("ICON");
-
-                    b.Property<bool?>("IsNavigable")
-                        .HasColumnType("NUMBER(1)")
-                        .HasColumnName("IS_NAVIGABLE");
-
-                    b.Property<byte>("OrderNumber")
-                        .HasColumnType("NUMBER(3)")
-                        .HasColumnName("ORDER_NUMBER");
-
-                    b.Property<short?>("ParentId")
-                        .HasColumnType("NUMBER(5)")
-                        .HasColumnName("PARENT_ID");
-
-                    b.Property<byte?>("StatusId")
-                        .HasColumnType("NUMBER(3)")
-                        .HasColumnName("STATUS_ID");
-
-                    b.Property<string>("SubTitle")
-                        .HasMaxLength(70)
-                        .HasColumnType("NVARCHAR2(70)")
-                        .HasColumnName("SUB_TITLE");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("NVARCHAR2(100)")
-                        .HasColumnName("TITLE");
-
-                    b.Property<string>("Url")
-                        .HasMaxLength(200)
-                        .HasColumnType("NVARCHAR2(200)")
-                        .HasColumnName("URL");
-
-                    b.HasKey("Id")
-                        .HasName("PK_NAVIGATION");
-
-                    b.HasIndex("ParentId")
-                        .HasDatabaseName("IX_NAVIGATION_PARENT_ID");
-
-                    b.HasIndex("StatusId")
-                        .HasDatabaseName("IX_NAVIGATION_STATUS_ID");
-
-                    b.ToTable("NAVIGATION", (string)null);
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.NavigationCustomSetting", b =>
-                {
-                    b.Property<short>("NavigationId")
-                        .HasColumnType("NUMBER(5)")
-                        .HasColumnName("NAVIGATION_ID");
-
-                    b.Property<string>("Key")
-                        .HasMaxLength(128)
-                        .HasColumnType("NVARCHAR2(128)")
-                        .HasColumnName("KEY");
-
-                    b.Property<string>("ValueJson")
-                        .IsRequired()
-                        .HasColumnType("CLOB")
-                        .HasColumnName("VALUE_JSON");
-
-                    b.HasKey("NavigationId", "Key")
-                        .HasName("PK_NAVIGATION_CUSTOM_SETTING");
-
-                    b.ToTable("NAVIGATION_CUSTOM_SETTING", (string)null);
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.NavigationRole", b =>
-                {
-                    b.Property<byte>("Id")
-                        .HasColumnType("NUMBER(3)")
-                        .HasColumnName("ID");
-
-                    b.Property<bool>("IsReadOnly")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(1)")
-                        .HasDefaultValue(false)
-                        .HasColumnName("IS_READ_ONLY");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(65)
-                        .HasColumnType("NVARCHAR2(65)")
-                        .HasColumnName("NAME");
-
-                    b.HasKey("Id")
-                        .HasName("PK_NAVIGATION_ROLE");
-
-                    b.ToTable("NAVIGATION_ROLE", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = (byte)1,
-                            IsReadOnly = false,
-                            Name = "System-Administrator"
-                        },
-                        new
-                        {
-                            Id = (byte)10,
-                            IsReadOnly = false,
-                            Name = "Beneficiary-Administrator"
-                        },
-                        new
-                        {
-                            Id = (byte)2,
-                            IsReadOnly = false,
-                            Name = "Finance-Manager"
-                        },
-                        new
-                        {
-                            Id = (byte)3,
-                            IsReadOnly = false,
-                            Name = "Distributions-Clerk"
-                        },
-                        new
-                        {
-                            Id = (byte)4,
-                            IsReadOnly = false,
-                            Name = "Hardship-Administrator"
-                        },
-                        new
-                        {
-                            Id = (byte)5,
-                            IsReadOnly = false,
-                            Name = "Impersonation"
-                        },
-                        new
-                        {
-                            Id = (byte)6,
-                            IsReadOnly = true,
-                            Name = "IT-DevOps"
-                        },
-                        new
-                        {
-                            Id = (byte)7,
-                            IsReadOnly = false,
-                            Name = "IT-Operations"
-                        },
-                        new
-                        {
-                            Id = (byte)8,
-                            IsReadOnly = false,
-                            Name = "Executive-Administrator"
-                        },
-                        new
-                        {
-                            Id = (byte)9,
-                            IsReadOnly = true,
-                            Name = "Auditor"
-                        },
-                        new
-                        {
-                            Id = (byte)11,
-                            IsReadOnly = true,
-                            Name = "HR-ReadOnly"
-                        },
-                        new
-                        {
-                            Id = (byte)12,
-                            IsReadOnly = true,
-                            Name = "SSN-Unmasking"
-                        });
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.NavigationStatus", b =>
-                {
-                    b.Property<byte>("Id")
-                        .HasColumnType("NUMBER(3)")
-                        .HasColumnName("ID");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("NVARCHAR2(64)")
-                        .HasColumnName("NAME");
-
-                    b.HasKey("Id")
-                        .HasName("PK_NAVIGATION_STATUS");
-
-                    b.ToTable("NAVIGATION_STATUS", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = (byte)1,
-                            Name = "Not Started"
-                        },
-                        new
-                        {
-                            Id = (byte)2,
-                            Name = "In Progress"
-                        },
-                        new
-                        {
-                            Id = (byte)3,
-                            Name = "On Hold"
-                        },
-                        new
-                        {
-                            Id = (byte)4,
-                            Name = "Complete"
-                        });
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.NavigationTracking", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("ID");
-
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTimeOffset?>("LastModified")
-                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("LAST_MODIFIED");
-
-                    b.Property<short>("NavigationId")
-                        .HasColumnType("NUMBER(5)")
-                        .HasColumnName("NAVIGATION_ID");
-
-                    b.Property<byte?>("StatusId")
-                        .HasColumnType("NUMBER(3)")
-                        .HasColumnName("STATUS_ID");
-
-                    b.Property<string>("Username")
-                        .HasMaxLength(60)
-                        .HasColumnType("NVARCHAR2(60)")
-                        .HasColumnName("USERNAME");
-
-                    b.HasKey("Id")
-                        .HasName("PK_NAVIGATION_TRACKING");
-
-                    b.HasIndex("NavigationId")
-                        .HasDatabaseName("IX_NAVIGATION_TRACKING_NAVIGATIONID");
-
-                    b.HasIndex("StatusId")
-                        .HasDatabaseName("IX_NAVIGATION_TRACKING_STATUS_ID");
-
-                    b.ToTable("NAVIGATION_TRACKING", (string)null);
-                });
-
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.PayClassification", b =>
                 {
                     b.Property<string>("Id")
@@ -6366,6 +6270,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NVARCHAR2(1)")
                         .HasColumnName("ID");
 
+                    b.Property<bool>("IsAvailableForDistribution")
+                        .HasColumnType("NUMBER(1)")
+                        .HasColumnName("IS_AVAILABLE_DISTRIBUTION");
+
+                    b.Property<bool>("IsAvailableForForfeiture")
+                        .HasColumnType("NUMBER(1)")
+                        .HasColumnName("IS_AVAILABLE_FORFEITURE");
+
+                    b.Property<bool>("IsProtected")
+                        .HasColumnType("NUMBER(1)")
+                        .HasColumnName("ISPROTECTED");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(128)
@@ -6381,96 +6297,153 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         new
                         {
                             Id = "0",
+                            IsAvailableForDistribution = false,
+                            IsAvailableForForfeiture = false,
+                            IsProtected = true,
                             Name = "Unknown - not legal tax code, yet 24 records in the obfuscated set have this value."
                         },
                         new
                         {
                             Id = "1",
+                            IsAvailableForDistribution = true,
+                            IsAvailableForForfeiture = true,
+                            IsProtected = false,
                             Name = "Early (Premature) dist no known exception"
                         },
                         new
                         {
                             Id = "2",
+                            IsAvailableForDistribution = true,
+                            IsAvailableForForfeiture = true,
+                            IsProtected = false,
                             Name = "Early (Premature) dist exception applies"
                         },
                         new
                         {
                             Id = "3",
+                            IsAvailableForDistribution = false,
+                            IsAvailableForForfeiture = false,
+                            IsProtected = false,
                             Name = "Disability"
                         },
                         new
                         {
                             Id = "4",
+                            IsAvailableForDistribution = true,
+                            IsAvailableForForfeiture = true,
+                            IsProtected = false,
                             Name = "Death"
                         },
                         new
                         {
                             Id = "5",
+                            IsAvailableForDistribution = false,
+                            IsAvailableForForfeiture = false,
+                            IsProtected = false,
                             Name = "Prohibited transaction"
                         },
                         new
                         {
                             Id = "6",
+                            IsAvailableForDistribution = false,
+                            IsAvailableForForfeiture = false,
+                            IsProtected = false,
                             Name = "Section 1035 exchange"
                         },
                         new
                         {
                             Id = "7",
+                            IsAvailableForDistribution = true,
+                            IsAvailableForForfeiture = true,
+                            IsProtected = true,
                             Name = "Normal distribution"
                         },
                         new
                         {
                             Id = "8",
+                            IsAvailableForDistribution = false,
+                            IsAvailableForForfeiture = false,
+                            IsProtected = false,
                             Name = "Excess contributions + earnings/deferrals"
                         },
                         new
                         {
                             Id = "9",
+                            IsAvailableForDistribution = false,
+                            IsAvailableForForfeiture = false,
+                            IsProtected = false,
                             Name = "PS 58 cost"
                         },
                         new
                         {
                             Id = "A",
+                            IsAvailableForDistribution = false,
+                            IsAvailableForForfeiture = false,
+                            IsProtected = false,
                             Name = "Qualifies for 5- or 10-year averaging"
                         },
                         new
                         {
                             Id = "B",
+                            IsAvailableForDistribution = false,
+                            IsAvailableForForfeiture = false,
+                            IsProtected = false,
                             Name = "Qualifies for death benefit exclusion"
                         },
                         new
                         {
                             Id = "C",
+                            IsAvailableForDistribution = false,
+                            IsAvailableForForfeiture = false,
+                            IsProtected = false,
                             Name = "Qualifies for both A and B"
                         },
                         new
                         {
                             Id = "D",
+                            IsAvailableForDistribution = false,
+                            IsAvailableForForfeiture = false,
+                            IsProtected = false,
                             Name = "Excess contributions + earnings deferrals"
                         },
                         new
                         {
                             Id = "E",
+                            IsAvailableForDistribution = false,
+                            IsAvailableForForfeiture = false,
+                            IsProtected = false,
                             Name = "Excess annual additions under section 415"
                         },
                         new
                         {
                             Id = "F",
+                            IsAvailableForDistribution = false,
+                            IsAvailableForForfeiture = false,
+                            IsProtected = false,
                             Name = "Charitable gift annuity"
                         },
                         new
                         {
                             Id = "G",
+                            IsAvailableForDistribution = true,
+                            IsAvailableForForfeiture = true,
+                            IsProtected = false,
                             Name = "Direct rollover to IRA"
                         },
                         new
                         {
                             Id = "H",
+                            IsAvailableForDistribution = false,
+                            IsAvailableForForfeiture = false,
+                            IsProtected = false,
                             Name = "Direct rollover to plan/tax sheltered annuity"
                         },
                         new
                         {
                             Id = "P",
+                            IsAvailableForDistribution = false,
+                            IsAvailableForForfeiture = false,
+                            IsProtected = false,
                             Name = "Excess contributions + earnings/deferrals"
                         });
                 });
@@ -7281,6 +7254,57 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasDatabaseName("IX_NAVIGATION_ASSIGNED_ROLES_REQUIREDROLESID");
 
                     b.ToTable("NAVIGATION_ASSIGNED_ROLES", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.Common.Data.Services.Entities.Entities.Navigation.Navigation", b =>
+                {
+                    b.HasOne("Demoulas.Common.Data.Services.Entities.Entities.Navigation.Navigation", "Parent")
+                        .WithMany("Items")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_NAVIGATION_NAVIGATION_PARENT_ID");
+
+                    b.HasOne("Demoulas.Common.Data.Services.Entities.Entities.Navigation.NavigationStatus", "NavigationStatus")
+                        .WithMany("Navigations")
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_NAVIGATION_NAVIGATIONSTATUSES_STATUS_ID");
+
+                    b.Navigation("NavigationStatus");
+
+                    b.Navigation("Parent");
+                });
+
+            modelBuilder.Entity("Demoulas.Common.Data.Services.Entities.Entities.Navigation.NavigationCustomSetting", b =>
+                {
+                    b.HasOne("Demoulas.Common.Data.Services.Entities.Entities.Navigation.Navigation", "Navigation")
+                        .WithMany("CustomSettings")
+                        .HasForeignKey("NavigationId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_NAVIGATION_CUSTOM_SETTING_NAVIGATION_NAVIGATIONID");
+
+                    b.Navigation("Navigation");
+                });
+
+            modelBuilder.Entity("Demoulas.Common.Data.Services.Entities.Entities.Navigation.NavigationTracking", b =>
+                {
+                    b.HasOne("Demoulas.Common.Data.Services.Entities.Entities.Navigation.Navigation", "Navigation")
+                        .WithMany("NavigationTrackings")
+                        .HasForeignKey("NavigationId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_NAVIGATION_TRACKING_NAVIGATION_NAVIGATIONID");
+
+                    b.HasOne("Demoulas.Common.Data.Services.Entities.Entities.Navigation.NavigationStatus", "NavigationStatus")
+                        .WithMany("NavigationTrackings")
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_NAVIGATION_TRACKING_NAVIGATION_STATUS_STATUS_ID");
+
+                    b.Navigation("Navigation");
+
+                    b.Navigation("NavigationStatus");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Audit.BeneficiaryContactArchive", b =>
@@ -8095,57 +8119,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("ExcludedType");
                 });
 
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", b =>
-                {
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", "Parent")
-                        .WithMany("Items")
-                        .HasForeignKey("ParentId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_NAVIGATION_NAVIGATION_PARENT_ID");
-
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Navigations.NavigationStatus", "NavigationStatus")
-                        .WithMany("Navigations")
-                        .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_NAVIGATION_NAVIGATIONSTATUSES_STATUS_ID");
-
-                    b.Navigation("NavigationStatus");
-
-                    b.Navigation("Parent");
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.NavigationCustomSetting", b =>
-                {
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", "Navigation")
-                        .WithMany("CustomSettings")
-                        .HasForeignKey("NavigationId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_NAVIGATION_CUSTOM_SETTING_NAVIGATION_NAVIGATIONID");
-
-                    b.Navigation("Navigation");
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.NavigationTracking", b =>
-                {
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", "Navigation")
-                        .WithMany("NavigationTrackings")
-                        .HasForeignKey("NavigationId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_NAVIGATION_TRACKING_NAVIGATION_NAVIGATIONID");
-
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Navigations.NavigationStatus", "NavigationStatus")
-                        .WithMany("NavigationTrackings")
-                        .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_NAVIGATION_TRACKING_NAVIGATION_STATUS_STATUS_ID");
-
-                    b.Navigation("Navigation");
-
-                    b.Navigation("NavigationStatus");
-                });
-
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.PayProfit", b =>
                 {
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.BeneficiaryType", "BeneficiaryType")
@@ -8299,14 +8272,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("NAVIGATION_PREREQUISITES", b =>
                 {
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", null)
+                    b.HasOne("Demoulas.Common.Data.Services.Entities.Entities.Navigation.Navigation", null)
                         .WithMany()
                         .HasForeignKey("NAVIGATION_ID")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_NAV_PREREQ_DEPENDENT");
 
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", null)
+                    b.HasOne("Demoulas.Common.Data.Services.Entities.Entities.Navigation.Navigation", null)
                         .WithMany()
                         .HasForeignKey("PREREQUISITE_ID")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -8316,19 +8289,35 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("NavigationNavigationRole", b =>
                 {
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", null)
+                    b.HasOne("Demoulas.Common.Data.Services.Entities.Entities.Navigation.Navigation", null)
                         .WithMany()
                         .HasForeignKey("NavigationId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_NAVIGATION_ASSIGNED_ROLES_NAVIGATION_NAVIGATIONID");
 
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Navigations.NavigationRole", null)
+                    b.HasOne("Demoulas.Common.Data.Services.Entities.Entities.Navigation.NavigationRole", null)
                         .WithMany()
                         .HasForeignKey("RequiredRolesId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_NAVIGATION_ASSIGNED_ROLES_NAVIGATIONROLES_REQUIREDROLESID");
+                });
+
+            modelBuilder.Entity("Demoulas.Common.Data.Services.Entities.Entities.Navigation.Navigation", b =>
+                {
+                    b.Navigation("CustomSettings");
+
+                    b.Navigation("Items");
+
+                    b.Navigation("NavigationTrackings");
+                });
+
+            modelBuilder.Entity("Demoulas.Common.Data.Services.Entities.Entities.Navigation.NavigationStatus", b =>
+                {
+                    b.Navigation("NavigationTrackings");
+
+                    b.Navigation("Navigations");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Bank", b =>
@@ -8384,22 +8373,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Gender", b =>
                 {
                     b.Navigation("Demographics");
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", b =>
-                {
-                    b.Navigation("CustomSettings");
-
-                    b.Navigation("Items");
-
-                    b.Navigation("NavigationTrackings");
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.NavigationStatus", b =>
-                {
-                    b.Navigation("NavigationTrackings");
-
-                    b.Navigation("Navigations");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.PayClassification", b =>

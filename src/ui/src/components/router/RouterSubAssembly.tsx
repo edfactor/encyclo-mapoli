@@ -79,6 +79,7 @@ const ManageStateTaxes = lazy(() => import("../../pages/Administration/ManageSta
 const ManageAnnuityRates = lazy(() => import("../../pages/Administration/ManageAnnuityRates/ManageAnnuityRates"));
 const ManageRmdFactors = lazy(() => import("../../pages/Administration/ManageRmdFactors/ManageRmdFactors"));
 const ManageCommentTypes = lazy(() => import("../../pages/Administration/ManageCommentTypes/ManageCommentTypes"));
+const ManageTaxCodes = lazy(() => import("../../pages/Administration/ManageTaxCodes/ManageTaxCodes"));
 const ProfitSharingAdjustments = lazy(
   () => import("../../pages/Administration/ProfitSharingAdjustments/ProfitSharingAdjustments")
 );
@@ -693,6 +694,17 @@ const RouterSubAssembly: React.FC = () => {
                       requiredRoles={[ImpersonationRoles.ItDevOps, ImpersonationRoles.ProfitSharingAdministrator]}>
                       <Suspense fallback={<PageLoadingFallback />}>
                         <ManageCommentTypes />
+                      </Suspense>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path={ROUTES.MANAGE_TAX_CODES}
+                  element={
+                    <ProtectedRoute
+                      requiredRoles={[ImpersonationRoles.ItDevOps, ImpersonationRoles.ProfitSharingAdministrator]}>
+                      <Suspense fallback={<PageLoadingFallback />}>
+                        <ManageTaxCodes />
                       </Suspense>
                     </ProtectedRoute>
                   }
