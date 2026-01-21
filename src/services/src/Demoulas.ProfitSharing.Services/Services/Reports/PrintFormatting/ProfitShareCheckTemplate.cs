@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using Demoulas.ProfitSharing.Common.Extensions;
 
-namespace Demoulas.ProfitSharing.Services.PrintFormatting;
+namespace Demoulas.ProfitSharing.Services.Services.Reports.PrintFormatting;
 
 /// <summary>
 /// DJDE template for Demoulas profit sharing checks on Xerox 4635 printer.

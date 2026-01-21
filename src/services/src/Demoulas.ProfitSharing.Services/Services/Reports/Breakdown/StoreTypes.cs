@@ -1,5 +1,5 @@
 ﻿
-namespace Demoulas.ProfitSharing.Services.Reports.Breakdown;
+namespace Demoulas.ProfitSharing.Services.Services.Reports.Breakdown;
 
 // https://bitbucket.org/demoulas/hpux/src/master/copy/WS-DETERMINE-STORE-TYPE.cpy
 

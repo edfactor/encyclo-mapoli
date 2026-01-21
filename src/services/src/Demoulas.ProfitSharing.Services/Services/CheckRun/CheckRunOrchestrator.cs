@@ -3,7 +3,7 @@ using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Interfaces.CheckRun;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Services.CheckRun;
+namespace Demoulas.ProfitSharing.Services.Services.CheckRun;
 
 /// <summary>
 /// Orchestrates the complete check run process: file generation (MICR, DJDE, PositivePay) and FTP transfer.

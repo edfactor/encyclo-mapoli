@@ -11,7 +11,7 @@ using Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Services;
+namespace Demoulas.ProfitSharing.Services.Services.Reports;
 
 /// <summary>
 /// Provides services for calculating and retrieving various profit-sharing totals and related data.

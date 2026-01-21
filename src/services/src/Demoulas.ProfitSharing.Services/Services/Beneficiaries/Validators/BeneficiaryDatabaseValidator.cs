@@ -4,7 +4,7 @@ using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Services.Beneficiaries.Validators;
+namespace Demoulas.ProfitSharing.Services.Services.Beneficiaries.Validators;
 
 public class BeneficiaryDatabaseValidator : AbstractValidator<BeneficiaryDatabaseValidationModel>
 {

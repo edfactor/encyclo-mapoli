@@ -5,7 +5,7 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
+namespace Demoulas.ProfitSharing.Services.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 
 public class TerminatedEmployeeService : ITerminatedEmployeeService
 {

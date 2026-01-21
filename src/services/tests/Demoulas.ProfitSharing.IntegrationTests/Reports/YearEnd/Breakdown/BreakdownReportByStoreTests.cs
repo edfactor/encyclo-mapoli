@@ -3,7 +3,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
-using Demoulas.ProfitSharing.Services.Reports.Breakdown;
+using Demoulas.ProfitSharing.Services.Services.Reports.Breakdown;
 using Moq;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Breakdown;

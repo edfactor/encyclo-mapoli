@@ -12,7 +12,7 @@ using Demoulas.ProfitSharing.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Services.Administration;
+namespace Demoulas.ProfitSharing.Services.Services.Administration;
 
 public sealed class CommentTypeService : ICommentTypeService
 {

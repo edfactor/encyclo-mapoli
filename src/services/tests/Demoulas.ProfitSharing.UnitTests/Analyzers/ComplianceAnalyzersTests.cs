@@ -1,6 +1,5 @@
-﻿using Demoulas.ProfitSharing.Analyzers;
+using Demoulas.ProfitSharing.Analyzers;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Testing;
 
 namespace Demoulas.ProfitSharing.UnitTests.Analyzers;
 

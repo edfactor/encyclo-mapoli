@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Services.EnrollmentFlag;
+﻿namespace Demoulas.ProfitSharing.Services.Services.Lookups.EnrollmentFlag;
 
 /// <summary>
 /// Represents the vesting state of an employee based on years of service.

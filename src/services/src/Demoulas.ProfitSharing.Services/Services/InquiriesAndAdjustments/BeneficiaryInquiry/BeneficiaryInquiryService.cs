@@ -12,7 +12,7 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Services.BeneficiaryInquiry;
+namespace Demoulas.ProfitSharing.Services.Services.InquiriesAndAdjustments.BeneficiaryInquiry;
 
 public class BeneficiaryInquiryService : IBeneficiaryInquiryService
 {

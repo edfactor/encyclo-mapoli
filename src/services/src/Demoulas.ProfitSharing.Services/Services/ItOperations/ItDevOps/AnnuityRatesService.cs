@@ -13,7 +13,7 @@ using Demoulas.ProfitSharing.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Services.ItDevOps;
+namespace Demoulas.ProfitSharing.Services.Services.ItOperations.ItDevOps;
 
 public sealed class AnnuityRatesService : IAnnuityRatesService
 {

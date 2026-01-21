@@ -6,7 +6,7 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Services.CheckRun;
+namespace Demoulas.ProfitSharing.Services.Services.CheckRun;
 
 /// <summary>
 /// Service for managing check run workflows including state tracking and reprint limit enforcement.

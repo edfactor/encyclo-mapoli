@@ -11,10 +11,11 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.Services.Reports;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Services;
+namespace Demoulas.ProfitSharing.Services.Services.Distributions;
 
 public sealed class DistributionService : IDistributionService
 {

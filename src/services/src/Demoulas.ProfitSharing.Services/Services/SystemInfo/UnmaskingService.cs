@@ -7,7 +7,7 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Services;
+namespace Demoulas.ProfitSharing.Services.Services.SystemInfo;
 
 /// <summary>
 /// Service for unmasking sensitive demographic data (SSN) for compliance and verification purposes.

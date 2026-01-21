@@ -10,12 +10,10 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
-using Demoulas.Util.Extensions;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
-
-namespace Demoulas.ProfitSharing.Services.Reports.Breakdown;
+namespace Demoulas.ProfitSharing.Services.Services.Reports.Breakdown;
 
 public sealed class BreakdownReportService : IBreakdownService
 {

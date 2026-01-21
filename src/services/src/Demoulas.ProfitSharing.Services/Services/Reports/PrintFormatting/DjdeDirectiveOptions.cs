@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.Services.PrintFormatting;
+namespace Demoulas.ProfitSharing.Services.Services.Reports.PrintFormatting;
 
 /// <summary>
 /// Configurable Xerox DJDE directives used for report and certificate print output.

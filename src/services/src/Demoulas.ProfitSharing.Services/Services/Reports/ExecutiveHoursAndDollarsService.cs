@@ -10,7 +10,7 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Services.Reports;
+namespace Demoulas.ProfitSharing.Services.Services.Reports;
 
 public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsService
 {

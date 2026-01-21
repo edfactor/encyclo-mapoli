@@ -2,7 +2,7 @@ using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 
-namespace Demoulas.ProfitSharing.Services.EnrollmentFlag;
+namespace Demoulas.ProfitSharing.Services.Services.Lookups.EnrollmentFlag;
 
 /// <summary>
 /// Summarizes enrollment status by analyzing profit detail transaction history.

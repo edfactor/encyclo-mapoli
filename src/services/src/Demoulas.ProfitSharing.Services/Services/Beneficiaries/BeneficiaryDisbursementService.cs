@@ -5,9 +5,10 @@ using Demoulas.ProfitSharing.Common.Time;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.Services.Reports;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Services.Beneficiaries;
+namespace Demoulas.ProfitSharing.Services.Services.Beneficiaries;
 
 public sealed class BeneficiaryDisbursementService : IBeneficiaryDisbursementService
 {

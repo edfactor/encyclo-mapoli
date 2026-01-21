@@ -3,7 +3,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Services.Caching;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Services.Lookup;
+namespace Demoulas.ProfitSharing.Services.Services.Lookups;
 
 public sealed class StateTaxLookupService : IStateTaxLookupService
 {

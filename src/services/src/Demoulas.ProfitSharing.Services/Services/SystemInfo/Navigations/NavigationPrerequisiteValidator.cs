@@ -5,7 +5,7 @@ using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using FluentValidation;
 using FluentValidation.Results;
 
-namespace Demoulas.ProfitSharing.Services.Navigations;
+namespace Demoulas.ProfitSharing.Services.Services.SystemInfo.Navigations;
 
 public class NavigationPrerequisiteValidator : INavigationPrerequisiteValidator
 {

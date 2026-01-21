@@ -8,7 +8,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 
-namespace Demoulas.ProfitSharing.Services.ProfitShareEdit;
+namespace Demoulas.ProfitSharing.Services.Services.Adjustments.ProfitShareEdit;
 
 /// <summary>
 /// <para>

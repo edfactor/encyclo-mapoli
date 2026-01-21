@@ -19,7 +19,7 @@ using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Services.Reports;
+namespace Demoulas.ProfitSharing.Services.Services.Reports;
 
 /// <summary>
 /// Service for generating year-end profit sharing summary and detail reports.

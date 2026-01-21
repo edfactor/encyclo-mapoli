@@ -1,7 +1,6 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using ArchUnitNET.Domain;
 using ArchUnitNET.Fluent;
-using Microsoft.Extensions.Caching.Memory;
 using static ArchUnitNET.Fluent.ArchRuleDefinition;
 
 namespace Demoulas.ProfitSharing.UnitTests.Architecture.Architecture;

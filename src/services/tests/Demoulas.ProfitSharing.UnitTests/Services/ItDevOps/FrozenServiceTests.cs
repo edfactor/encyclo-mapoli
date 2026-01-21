@@ -1,10 +1,9 @@
-﻿using System.ComponentModel;
-using System.Linq.Expressions;
+using System.ComponentModel;
 using System.Reflection;
 using Demoulas.ProfitSharing.Common.Contracts.Shared;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services.ItDevOps;
+using Demoulas.ProfitSharing.Services.Services.ItOperations.ItDevOps;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services.ItDevOps;

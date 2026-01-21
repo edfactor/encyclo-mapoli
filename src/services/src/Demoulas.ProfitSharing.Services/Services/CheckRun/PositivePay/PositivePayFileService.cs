@@ -9,7 +9,7 @@ using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Services.PositivePay;
+namespace Demoulas.ProfitSharing.Services.Services.CheckRun.PositivePay;
 
 /// <summary>
 /// Service for generating Positive Pay CSV files for Payroll reconciliation.

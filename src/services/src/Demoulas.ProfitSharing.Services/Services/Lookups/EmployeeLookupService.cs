@@ -3,7 +3,7 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Services.Lookup;
+namespace Demoulas.ProfitSharing.Services.Services.Lookups;
 
 public sealed class EmployeeLookupService(IProfitSharingDataContextFactory factory, IDemographicReaderService demographicReaderService) : IEmployeeLookupService
 {

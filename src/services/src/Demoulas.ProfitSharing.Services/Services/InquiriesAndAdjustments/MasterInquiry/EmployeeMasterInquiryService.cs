@@ -13,7 +13,7 @@ using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Services.MasterInquiry;
+namespace Demoulas.ProfitSharing.Services.Services.InquiriesAndAdjustments.MasterInquiry;
 
 /// <summary>
 /// Service handling employee/demographic master inquiry operations.

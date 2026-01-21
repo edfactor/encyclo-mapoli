@@ -1,6 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities;
 
-namespace Demoulas.ProfitSharing.Services.MasterInquiry;
+namespace Demoulas.ProfitSharing.Services.Services.InquiriesAndAdjustments.MasterInquiry;
 
 /// <summary>
 /// Internal DTO representing a master inquiry item with member demographics and profit details.

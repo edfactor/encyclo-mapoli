@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Services.PrintFormatting;
+﻿namespace Demoulas.ProfitSharing.Services.Services.Reports.PrintFormatting;
 
 /// <summary>
 /// Factory for creating bank-specific MICR formatters based on routing number.

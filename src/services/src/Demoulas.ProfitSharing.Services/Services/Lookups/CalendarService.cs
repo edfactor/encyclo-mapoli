@@ -6,7 +6,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace Demoulas.ProfitSharing.Services;
+namespace Demoulas.ProfitSharing.Services.Services.Lookups;
 /// <summary>
 /// Hosted service for calendar operations, periodically refreshing calendar data in distributed cache.
 /// </summary>

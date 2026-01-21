@@ -5,7 +5,7 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Services.MergeProfitDetails;
+namespace Demoulas.ProfitSharing.Services.Services.Distributions.MergeProfitDetails;
 
 public class MergeProfitDetailsService : IMergeProfitDetailsService
 {
