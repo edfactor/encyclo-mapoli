@@ -326,7 +326,9 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-            <FormControl error={!!errors.memberType}>
+            <FormControl
+              error={!!errors.memberType}
+              disabled={isMemberTypeDisabled}>
               <FormLabel>Member Type</FormLabel>
               <Controller
                 name="memberType"
@@ -334,7 +336,6 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
                 render={({ field }) => (
                   <RadioGroup
                     {...field}
-                    disabled={isMemberTypeDisabled}
                     onChange={(event) => {
                       field.onChange(event);
                     }}
