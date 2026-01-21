@@ -101,7 +101,10 @@ public sealed class CertificateService : ICertificateService
             #endregion
 
             #region Spacing
-            sb.Append("{\r\n");
+            if (request.IsXerox)
+            {
+                sb.Append("{\r\n");
+            }
             #endregion
 
             #region Balances
@@ -154,7 +157,10 @@ public sealed class CertificateService : ICertificateService
 
             #region Formfeed
             sb.Append("\f");
-            sb.Append("{\r\n");
+            if (request.IsXerox)
+            {
+                sb.Append("{\r\n");
+            }
             sb.Append(linefeeds_4);
             #endregion
 
