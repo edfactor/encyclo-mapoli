@@ -7,15 +7,35 @@ namespace YEMatch.AssertActivities;
 // The base class for activities which directly interact with the database
 public abstract class BaseSqlActivity : BaseActivity
 {
+    protected readonly string ReadySchemaName;
     protected readonly string ReadyConnString;
     protected readonly string SmartConnString;
 
-
     protected BaseSqlActivity()
     {
-        IConfigurationRoot secretConfig = new ConfigurationBuilder().AddUserSecrets<ReadyActivity>().Build();
-        ReadyConnString = secretConfig["ReadyConnectionString"]!;
-        SmartConnString = secretConfig["SmartConnectionString"]!;
+        // Build configuration from appsettings.json and user secrets
+        IConfigurationRoot config = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json", optional: true)
+            .AddUserSecrets<ReadyActivity>()
+            .Build();
+
+        // Get the schema name from configuration (defaults to "tbherrmann")
+        ReadySchemaName = config["YeMatch:ReadySchemaName"] ?? "tbherrmann";
+
+        // Build connection string keys using the schema name pattern:
+        // YeMatch:{schemaName}:ReadyConnectionString and YeMatch:{schemaName}:SmartConnectionString
+        string readyConnKey = $"YeMatch:{ReadySchemaName}:ReadyConnectionString";
+        string smartConnKey = "SmartConnectionString";
+
+        ReadyConnString = config[readyConnKey]
+                          ?? throw new InvalidOperationException(
+                              $"Connection string not found for key '{readyConnKey}'. " +
+                              $"Please configure it in user secrets: dotnet user-secrets set \"{readyConnKey}\" \"your-connection-string\"");
+
+        SmartConnString = config[smartConnKey]
+                          ?? throw new InvalidOperationException(
+                              $"Connection string not found for key '{smartConnKey}'. " +
+                              $"Please configure it in user secrets: dotnet user-secrets set \"{smartConnKey}\" \"your-connection-string\"");
     }
 
     // Compares two sql statements by subtracting the resuls from each results.  This yields the differences.
