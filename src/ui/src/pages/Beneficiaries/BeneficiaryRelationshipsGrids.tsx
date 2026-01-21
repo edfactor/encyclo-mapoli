@@ -1,4 +1,4 @@
-import { Alert, Snackbar, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, Snackbar, TextField, Typography } from "@mui/material";
 import { FocusEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +20,7 @@ interface BeneficiaryRelationshipsProps {
   selectedMember: BeneficiaryDetail | null;
   count: number;
   onEditBeneficiary: (selectedMember: BeneficiaryDto | undefined) => void;
+  onAddBeneficiary?: () => void;
   onBeneficiariesChange?: (beneficiaries: BeneficiaryDto[]) => void;
   onBadgeClick?: (beneficiary: BeneficiaryDto) => void;
 }
@@ -28,6 +29,7 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
   selectedMember,
   count,
   onEditBeneficiary,
+  onAddBeneficiary,
   onBeneficiariesChange,
   onBadgeClick
 }) => {
@@ -179,13 +181,14 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
       return (
         <>
           <TextField
-            type="number"
+            type="text"
             defaultValue={percentage}
             onBlur={(e) => validatePercentageOfBeneficiaries(e, id)}
             inputProps={{
               min: 0,
               max: 100,
-              step: 1
+              step: 1,
+              inputMode: "numeric"
             }}
             size="small"
           />
@@ -241,13 +244,28 @@ const BeneficiaryRelationshipsGrids: React.FC<BeneficiaryRelationshipsProps> = (
       )}
       {!!relationships.beneficiaryList && (
         <>
-          <div className="beneficiaries-list-header">
+          <Box
+            className="beneficiaries-list-header"
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              paddingX: "24px",
+              marginY: "8px"
+            }}>
             <Typography
               variant="h2"
-              sx={{ color: "#0258A5", paddingX: "24px", marginY: "8px" }}>
+              sx={{ color: "#0258A5" }}>
               {`Beneficiaries (${relationships.beneficiaryList?.total || 0} ${relationships.beneficiaryList?.total === 1 ? "Record" : "Records"})`}
             </Typography>
-          </div>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={onAddBeneficiary}
+              disabled={!onAddBeneficiary}>
+              Add Beneficiary for {selectedMember?.fullName ?? "Member"}
+            </Button>
+          </Box>
           <DSMPaginatedGrid<BeneficiaryDto>
             preferenceKey={GRID_KEYS.BENEFICIARIES_LIST}
             data={relationships.beneficiaryList?.results ?? []}

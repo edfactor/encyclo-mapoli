@@ -173,6 +173,7 @@ const BeneficiaryInquiryContent = () => {
             isLoading={isFetching}
             pageNumber={search.pageNumber}
             pageSize={search.pageSize}
+            sortParams={search.sortParams}
             onRowClick={onBadgeClick}
             onPageNumberChange={(page) => search.handlePaginationChange(page, search.pageSize)}
             onPageSizeChange={(size) => search.handlePaginationChange(0, size)}

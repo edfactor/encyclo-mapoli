@@ -16,6 +16,7 @@ import * as yup from "yup";
 import { MAX_EMPLOYEE_BADGE_LENGTH } from "../../constants";
 import { BeneficiarySearchAPIRequest, BeneficiarySearchForm } from "../../types";
 import { badgeNumberOrPSNValidator, ssnValidator } from "../../utils/FormValidators";
+import { parseBadgeAndPSN } from "./utils/badgeUtils";
 
 const schema = yup.object().shape({
   badgeNumber: badgeNumberOrPSNValidator,
@@ -57,22 +58,18 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
   const ssnValue = useWatch({ control, name: "ssn" });
   const nameValue = useWatch({ control, name: "name" });
   const badgeNumberValue = useWatch({ control, name: "badgeNumber" });
+  const memberTypeValue = useWatch({ control, name: "memberType" });
 
   // Auto-detect member type based on badge number length
   const handleBadgeNumberChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const badgeStr = e.target.value;
-      let memberType: number;
 
       if (badgeStr.length === 0) {
-        memberType = 0; // all
-      } else if (badgeStr.length >= 8) {
-        memberType = 2; // beneficiaries
-      } else {
-        memberType = 1; // employees
+        setValue("memberType", 0);
+      } else if (badgeStr.length > MAX_EMPLOYEE_BADGE_LENGTH) {
+        setValue("memberType", 2);
       }
-
-      setValue("memberType", memberType as 0 | 1 | 2);
     },
     [setValue]
   );
@@ -109,22 +106,24 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
       if (!isDisabled) return undefined;
 
       if (fieldName === "ssn") {
-        if (hasName) return "Disabled: Name field is in use. Press Reset to clear and re-enable.";
-        if (hasBadgeNumber) return "Disabled: Badge/PSN field is in use. Press Reset to clear and re-enable.";
+        if (hasName) return "Disabled while Name is in use. Reset to change.";
+        if (hasBadgeNumber) return "Disabled while Badge/PSN is in use. Reset to change.";
       }
       if (fieldName === "name") {
-        if (hasSSN) return "Disabled: SSN field is in use. Press Reset to clear and re-enable.";
-        if (hasBadgeNumber) return "Disabled: Badge/PSN field is in use. Press Reset to clear and re-enable.";
+        if (hasSSN) return "Disabled while SSN is in use. Reset to change.";
+        if (hasBadgeNumber) return "Disabled while Badge/PSN is in use. Reset to change.";
       }
       if (fieldName === "badgeNumber") {
-        if (hasSSN) return "Disabled: SSN field is in use. Press Reset to clear and re-enable.";
-        if (hasName) return "Disabled: Name field is in use. Press Reset to clear and re-enable.";
+        if (hasSSN) return "Disabled while SSN is in use. Reset to change.";
+        if (hasName) return "Disabled while Name is in use. Reset to change.";
       }
 
       return undefined;
     },
     [hasSSN, hasName, hasBadgeNumber]
   );
+
+  const isMemberTypeDisabled = badgeNumberValue != null && String(badgeNumberValue).length > MAX_EMPLOYEE_BADGE_LENGTH;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -136,20 +135,9 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
 
   const onSubmit = (data: BeneficiarySearchForm) => {
     const { badgeNumber, name, ssn, memberType } = data;
-    let badge: number | undefined = undefined;
-    let psn: number | undefined = undefined;
-
-    if (badgeNumber) {
-      const badgeStr = badgeNumber.toString();
-      if (badgeStr.length <= MAX_EMPLOYEE_BADGE_LENGTH) {
-        // Badge only (7 digits or less)
-        badge = Number(badgeNumber);
-      } else {
-        // Badge + PSN (more than 7 digits)
-        badge = parseInt(badgeStr.slice(0, MAX_EMPLOYEE_BADGE_LENGTH - 1));
-        psn = parseInt(badgeStr.slice(MAX_EMPLOYEE_BADGE_LENGTH - 1));
-      }
-    }
+    const parsedBadge = badgeNumber ? parseBadgeAndPSN(badgeNumber) : undefined;
+    const badge = parsedBadge?.badge;
+    const psn = parsedBadge?.psn;
 
     if (isValid && !isSubmitting) {
       setIsSubmitting(true);
@@ -160,7 +148,7 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
         name: name || undefined,
         ssn: ssn || undefined,
         skip: 0,
-        take: 5,
+        take: 10,
         sortBy: "fullName",
         isSortDescending: true
       };
@@ -181,8 +169,8 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
 
   // Check if search button should be enabled
   const hasSearchCriteria = useMemo(() => {
-    return hasSSN || hasName || hasBadgeNumber;
-  }, [hasSSN, hasName, hasBadgeNumber]);
+    return hasSSN || hasName || hasBadgeNumber || memberTypeValue !== 0;
+  }, [hasSSN, hasName, hasBadgeNumber, memberTypeValue]);
 
   return (
     <form onSubmit={validateAndSubmit}>
@@ -210,6 +198,7 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
                   value={field.value ?? ""}
                   error={!!errors.ssn}
                   disabled={isSSNDisabled}
+                  inputProps={{ inputMode: "numeric" }}
                   onChange={(e) => {
                     const value = e.target.value;
                     // Only allow numeric input
@@ -300,6 +289,7 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
                   value={field.value ?? ""}
                   error={!!errors.badgeNumber}
                   disabled={isBadgeNumberDisabled}
+                  inputProps={{ inputMode: "numeric" }}
                   onChange={(e) => {
                     const value = e.target.value;
                     // Only allow numeric input
@@ -344,6 +334,7 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
                 render={({ field }) => (
                   <RadioGroup
                     {...field}
+                    disabled={isMemberTypeDisabled}
                     onChange={(event) => {
                       field.onChange(event);
                     }}

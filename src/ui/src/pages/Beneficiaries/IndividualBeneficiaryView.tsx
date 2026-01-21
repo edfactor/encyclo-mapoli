@@ -1,5 +1,4 @@
 import { BeneficiaryDetail, BeneficiaryDetailAPIRequest, BeneficiaryDto } from "@/types";
-import { Button, Box } from "@mui/material";
 import { useCallback, useState } from "react";
 import { useLazyGetBeneficiaryDetailQuery } from "reduxstore/api/BeneficiariesApi";
 import { BENEFICIARY_INQUIRY_MESSAGES } from "../../components/MissiveAlerts/MissiveMessages";
@@ -102,27 +101,11 @@ const IndividualBeneficiaryView: React.FC<IndividualBeneficiaryViewProps> = ({
         isLoading={isFetchingMemberDetails}
       />
 
-      <Box
-        sx={{
-          paddingX: "24px",
-          paddingTop: "24px",
-          paddingBottom: "16px",
-          display: "flex",
-          justifyContent: "flex-start",
-          alignItems: "center"
-        }}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => createOrUpdateBeneficiary(undefined)}>
-          Add Beneficiary for {selectedMember.fullName}
-        </Button>
-      </Box>
-
       <BeneficiaryRelationshipsGrids
         count={change}
         selectedMember={selectedMember}
         onEditBeneficiary={createOrUpdateBeneficiary}
+        onAddBeneficiary={() => createOrUpdateBeneficiary(undefined)}
         onBeneficiariesChange={handleBeneficiariesChange}
         onBadgeClick={handleBadgeClick}
       />

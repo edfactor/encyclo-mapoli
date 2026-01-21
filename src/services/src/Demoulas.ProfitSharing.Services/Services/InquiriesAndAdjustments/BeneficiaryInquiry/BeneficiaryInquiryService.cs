@@ -3,6 +3,7 @@ using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
+using Demoulas.ProfitSharing.Common.Contracts.Shared;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
@@ -183,15 +184,27 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 CountryIso = x.Contact != null && x.Contact.Address != null && x.Contact.Address.CountryIso != null ? x.Contact.Address.CountryIso : "",
                 PostalCode = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.PostalCode : null,
                 State = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.State : null,
-                Street = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.Street ?? "" : "",
+                Street = x.Contact != null && x.Contact.Address != null
+                    ? x.Contact.Address.Street != null ? x.Contact.Address.Street : string.Empty
+                    : string.Empty,
                 Street2 = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.Street2 : null,
-                FirstName = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.FirstName ?? "" : "",
-                LastName = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.LastName ?? "" : "",
-                EmailAddress = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.EmailAddress ?? "" : "",
-                FullName = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.FullName ?? "" : "",
+                FirstName = x.Contact != null && x.Contact.ContactInfo != null
+                    ? x.Contact.ContactInfo.FirstName != null ? x.Contact.ContactInfo.FirstName : string.Empty
+                    : string.Empty,
+                LastName = x.Contact != null && x.Contact.ContactInfo != null
+                    ? x.Contact.ContactInfo.LastName != null ? x.Contact.ContactInfo.LastName : string.Empty
+                    : string.Empty,
+                EmailAddress = x.Contact != null && x.Contact.ContactInfo != null
+                    ? x.Contact.ContactInfo.EmailAddress != null ? x.Contact.ContactInfo.EmailAddress : string.Empty
+                    : string.Empty,
+                FullName = string.Empty,
                 MiddleName = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.MiddleName : null,
-                MobileNumber = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.MobileNumber ?? "" : "",
-                PhoneNumber = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.PhoneNumber ?? "" : "",
+                MobileNumber = x.Contact != null && x.Contact.ContactInfo != null
+                    ? x.Contact.ContactInfo.MobileNumber != null ? x.Contact.ContactInfo.MobileNumber : string.Empty
+                    : string.Empty,
+                PhoneNumber = x.Contact != null && x.Contact.ContactInfo != null
+                    ? x.Contact.ContactInfo.PhoneNumber != null ? x.Contact.ContactInfo.PhoneNumber : string.Empty
+                    : string.Empty,
                 IsExecutive = false,
                 Relationship = x.Relationship
             });
@@ -216,15 +229,27 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 CountryIso = x.Demographic != null && x.Demographic.Address != null && x.Demographic.Address.CountryIso != null ? x.Demographic.Address.CountryIso : "",
                 PostalCode = x.Demographic != null && x.Demographic.Address != null ? x.Demographic.Address.PostalCode : null,
                 State = x.Demographic != null && x.Demographic.Address != null ? x.Demographic.Address.State : null,
-                Street = x.Demographic != null && x.Demographic.Address != null ? x.Demographic.Address.Street ?? "" : "",
+                Street = x.Demographic != null && x.Demographic.Address != null
+                    ? x.Demographic.Address.Street != null ? x.Demographic.Address.Street : string.Empty
+                    : string.Empty,
                 Street2 = x.Demographic != null && x.Demographic.Address != null ? x.Demographic.Address.Street2 : null,
-                FirstName = x.Demographic != null && x.Demographic.ContactInfo != null ? x.Demographic.ContactInfo.FirstName ?? "" : "",
-                LastName = x.Demographic != null && x.Demographic.ContactInfo != null ? x.Demographic.ContactInfo.LastName ?? "" : "",
-                EmailAddress = x.Demographic != null && x.Demographic.ContactInfo != null ? x.Demographic.ContactInfo.EmailAddress ?? "" : "",
-                FullName = x.Demographic != null && x.Demographic.ContactInfo != null ? x.Demographic.ContactInfo.FullName ?? "" : "",
+                FirstName = x.Demographic != null && x.Demographic.ContactInfo != null
+                    ? x.Demographic.ContactInfo.FirstName != null ? x.Demographic.ContactInfo.FirstName : string.Empty
+                    : string.Empty,
+                LastName = x.Demographic != null && x.Demographic.ContactInfo != null
+                    ? x.Demographic.ContactInfo.LastName != null ? x.Demographic.ContactInfo.LastName : string.Empty
+                    : string.Empty,
+                EmailAddress = x.Demographic != null && x.Demographic.ContactInfo != null
+                    ? x.Demographic.ContactInfo.EmailAddress != null ? x.Demographic.ContactInfo.EmailAddress : string.Empty
+                    : string.Empty,
+                FullName = string.Empty,
                 MiddleName = x.Demographic != null && x.Demographic.ContactInfo != null ? x.Demographic.ContactInfo.MiddleName : null,
-                MobileNumber = x.Demographic != null && x.Demographic.ContactInfo != null ? x.Demographic.ContactInfo.MobileNumber ?? "" : "",
-                PhoneNumber = x.Demographic != null && x.Demographic.ContactInfo != null ? x.Demographic.ContactInfo.PhoneNumber ?? "" : "",
+                MobileNumber = x.Demographic != null && x.Demographic.ContactInfo != null
+                    ? x.Demographic.ContactInfo.MobileNumber != null ? x.Demographic.ContactInfo.MobileNumber : string.Empty
+                    : string.Empty,
+                PhoneNumber = x.Demographic != null && x.Demographic.ContactInfo != null
+                    ? x.Demographic.ContactInfo.PhoneNumber != null ? x.Demographic.ContactInfo.PhoneNumber : string.Empty
+                    : string.Empty,
                 Relationship = x.Relationship,
                 IsExecutive = x.Demographic != null && x.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly,
             });
@@ -306,15 +331,27 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 CountryIso = x.Contact != null && x.Contact.Address != null && x.Contact.Address.CountryIso != null ? x.Contact.Address.CountryIso : "",
                 PostalCode = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.PostalCode : null,
                 State = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.State : null,
-                Street = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.Street ?? "" : "",
+                Street = x.Contact != null && x.Contact.Address != null
+                    ? x.Contact.Address.Street != null ? x.Contact.Address.Street : string.Empty
+                    : string.Empty,
                 Street2 = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.Street2 : null,
-                FirstName = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.FirstName ?? "" : "",
-                LastName = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.LastName ?? "" : "",
-                EmailAddress = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.EmailAddress ?? "" : "",
-                FullName = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.FullName ?? "" : "",
+                FirstName = x.Contact != null && x.Contact.ContactInfo != null
+                    ? x.Contact.ContactInfo.FirstName != null ? x.Contact.ContactInfo.FirstName : string.Empty
+                    : string.Empty,
+                LastName = x.Contact != null && x.Contact.ContactInfo != null
+                    ? x.Contact.ContactInfo.LastName != null ? x.Contact.ContactInfo.LastName : string.Empty
+                    : string.Empty,
+                EmailAddress = x.Contact != null && x.Contact.ContactInfo != null
+                    ? x.Contact.ContactInfo.EmailAddress != null ? x.Contact.ContactInfo.EmailAddress : string.Empty
+                    : string.Empty,
+                FullName = string.Empty,
                 MiddleName = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.MiddleName : null,
-                MobileNumber = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.MobileNumber ?? "" : "",
-                PhoneNumber = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.PhoneNumber ?? "" : "",
+                MobileNumber = x.Contact != null && x.Contact.ContactInfo != null
+                    ? x.Contact.ContactInfo.MobileNumber != null ? x.Contact.ContactInfo.MobileNumber : string.Empty
+                    : string.Empty,
+                PhoneNumber = x.Contact != null && x.Contact.ContactInfo != null
+                    ? x.Contact.ContactInfo.PhoneNumber != null ? x.Contact.ContactInfo.PhoneNumber : string.Empty
+                    : string.Empty,
                 IsExecutive = x.Demographic != null && x.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly,
                 Relationship = x.Relationship
             });
@@ -363,7 +400,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                             FirstName = r.FirstName,
                             LastName = r.LastName,
                             EmailAddress = r.EmailAddress,
-                            FullName = r.FullName,
+                            FullName = DtoCommonExtensions.ComputeFullNameWithInitial(r.LastName, r.FirstName, r.MiddleName),
                             MiddleName = r.MiddleName,
                             MobileNumber = r.MobileNumber,
                             PhoneNumber = r.PhoneNumber,
@@ -414,7 +451,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                             FirstName = r.FirstName,
                             LastName = r.LastName,
                             EmailAddress = r.EmailAddress,
-                            FullName = r.FullName,
+                            FullName = DtoCommonExtensions.ComputeFullNameWithInitial(r.LastName, r.FirstName, r.MiddleName),
                             MiddleName = r.MiddleName,
                             MobileNumber = r.MobileNumber,
                             PhoneNumber = r.PhoneNumber,
@@ -458,7 +495,15 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                     .Where(x => !x.IsDeleted && x.BadgeNumber == request.BadgeNumber && x.PsnSuffix == request.PsnSuffix)
                     .Select(x => new
                     {
-                        FullName = x.Contact!.ContactInfo!.FullName ?? string.Empty,
+                        LastName = x.Contact != null && x.Contact.ContactInfo != null
+                            ? x.Contact.ContactInfo.LastName != null ? x.Contact.ContactInfo.LastName : string.Empty
+                            : string.Empty,
+                        FirstName = x.Contact != null && x.Contact.ContactInfo != null
+                            ? x.Contact.ContactInfo.FirstName != null ? x.Contact.ContactInfo.FirstName : string.Empty
+                            : string.Empty,
+                        MiddleName = x.Contact != null && x.Contact.ContactInfo != null
+                            ? x.Contact.ContactInfo.MiddleName
+                            : null,
                         BadgeNumber = x.BadgeNumber,
                         City = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.City : null,
                         DateOfBirth = x.Contact!.DateOfBirth,
@@ -474,7 +519,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
 
             result = rows.Select(r => new BeneficiaryDetailResponse
             {
-                FullName = r.FullName,
+                FullName = DtoCommonExtensions.ComputeFullNameWithInitial(r.LastName, r.FirstName, r.MiddleName),
                 BadgeNumber = r.BadgeNumber,
                 City = r.City,
                 DateOfBirth = r.DateOfBirth,

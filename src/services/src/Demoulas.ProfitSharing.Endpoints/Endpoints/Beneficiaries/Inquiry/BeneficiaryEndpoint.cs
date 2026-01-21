@@ -1,8 +1,11 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Beneficiaries.Inquiry;
 
@@ -10,11 +13,13 @@ public class BeneficiaryEndpoint : ProfitSharingEndpoint<BeneficiaryRequestDto, 
 {
 
     private readonly IBeneficiaryInquiryService _beneficiaryService;
+    private readonly ILogger<BeneficiaryEndpoint> _logger;
 
-    public BeneficiaryEndpoint(IBeneficiaryInquiryService beneficiaryService)
+    public BeneficiaryEndpoint(IBeneficiaryInquiryService beneficiaryService, ILogger<BeneficiaryEndpoint> logger)
         : base(Navigation.Constants.Beneficiaries)
     {
         _beneficiaryService = beneficiaryService;
+        _logger = logger;
     }
 
     public override void Configure()
@@ -29,10 +34,24 @@ public class BeneficiaryEndpoint : ProfitSharingEndpoint<BeneficiaryRequestDto, 
         Group<BeneficiariesGroup>();
     }
 
-    protected override async Task<BeneficiaryResponse> HandleRequestAsync(BeneficiaryRequestDto req, CancellationToken ct)
+    protected override Task<BeneficiaryResponse> HandleRequestAsync(BeneficiaryRequestDto req, CancellationToken ct)
     {
-        var result = await _beneficiaryService.GetBeneficiaryAsync(req, ct);
-        return result ?? new BeneficiaryResponse();
+        return this.ExecuteWithTelemetry(HttpContext, _logger, req, async () =>
+        {
+            var result = await _beneficiaryService.GetBeneficiaryAsync(req, ct);
+            var response = result ?? new BeneficiaryResponse();
+
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "beneficiary-relationships"),
+                new("endpoint", nameof(BeneficiaryEndpoint)));
+
+            var count = response.Beneficiaries?.Total ?? 0;
+            EndpointTelemetry.RecordCountsProcessed.Record(count,
+                new("record_type", "beneficiaries"),
+                new("endpoint", nameof(BeneficiaryEndpoint)));
+
+            return response;
+        });
     }
 
 }
