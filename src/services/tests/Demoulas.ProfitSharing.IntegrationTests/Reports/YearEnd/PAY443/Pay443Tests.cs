@@ -2,7 +2,7 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Services.Reports;
+using Demoulas.ProfitSharing.Services.Services.Reports;
 using Moq;
 using Shouldly;
 

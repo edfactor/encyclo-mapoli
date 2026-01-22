@@ -1,7 +1,7 @@
 using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services;
+using Demoulas.ProfitSharing.Services.Services.Reports;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.TotalSvc;

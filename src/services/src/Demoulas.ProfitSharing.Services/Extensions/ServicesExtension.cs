@@ -11,28 +11,34 @@ using Demoulas.ProfitSharing.Common.Interfaces.CheckRun;
 using Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Common.Time;
-using Demoulas.ProfitSharing.Services.Administration;
 using Demoulas.ProfitSharing.Services.Audit;
-using Demoulas.ProfitSharing.Services.Beneficiaries;
-using Demoulas.ProfitSharing.Services.BeneficiaryInquiry;
+using Demoulas.ProfitSharing.Services.Caching;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
 using Demoulas.ProfitSharing.Services.Caching.HostedServices;
-using Demoulas.ProfitSharing.Services.Certificates;
-using Demoulas.ProfitSharing.Services.CheckRun;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
-using Demoulas.ProfitSharing.Services.ItDevOps;
-using Demoulas.ProfitSharing.Services.Lookup;
-using Demoulas.ProfitSharing.Services.MasterInquiry;
-using Demoulas.ProfitSharing.Services.MergeProfitDetails;
-using Demoulas.ProfitSharing.Services.Military;
-using Demoulas.ProfitSharing.Services.Navigations;
-using Demoulas.ProfitSharing.Services.PrintFormatting;
-using Demoulas.ProfitSharing.Services.ProfitMaster;
-using Demoulas.ProfitSharing.Services.ProfitShareEdit;
-using Demoulas.ProfitSharing.Services.Reports;
-using Demoulas.ProfitSharing.Services.Reports.Breakdown;
-using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using Demoulas.ProfitSharing.Services.Serialization;
+using Demoulas.ProfitSharing.Services.Services.Adjustments;
+using Demoulas.ProfitSharing.Services.Services.Adjustments.ProfitShareEdit;
+using Demoulas.ProfitSharing.Services.Services.Administration;
+using Demoulas.ProfitSharing.Services.Services.Beneficiaries;
+using Demoulas.ProfitSharing.Services.Services.CheckRun;
+using Demoulas.ProfitSharing.Services.Services.Distributions;
+using Demoulas.ProfitSharing.Services.Services.Distributions.MergeProfitDetails;
+using Demoulas.ProfitSharing.Services.Services.Distributions.ProfitMaster;
+using Demoulas.ProfitSharing.Services.Services.InquiriesAndAdjustments;
+using Demoulas.ProfitSharing.Services.Services.InquiriesAndAdjustments.BeneficiaryInquiry;
+using Demoulas.ProfitSharing.Services.Services.InquiriesAndAdjustments.MasterInquiry;
+using Demoulas.ProfitSharing.Services.Services.ItOperations.Certificates;
+using Demoulas.ProfitSharing.Services.Services.ItOperations.ItDevOps;
+using Demoulas.ProfitSharing.Services.Services.Lookups;
+using Demoulas.ProfitSharing.Services.Services.Military;
+using Demoulas.ProfitSharing.Services.Services.Reports;
+using Demoulas.ProfitSharing.Services.Services.Reports.Breakdown;
+using Demoulas.ProfitSharing.Services.Services.Reports.PrintFormatting;
+using Demoulas.ProfitSharing.Services.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
+using Demoulas.ProfitSharing.Services.Services.SystemInfo;
+using Demoulas.ProfitSharing.Services.Services.SystemInfo.Navigations;
+using Demoulas.ProfitSharing.Services.Services.YearEnd;
 using Demoulas.ProfitSharing.Services.Validation;
 using Demoulas.ProfitSharing.Services.Validators;
 using Demoulas.Util.Extensions;
@@ -41,7 +47,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using INavigationService = Demoulas.Common.Contracts.Interfaces.INavigationService;
-using NavigationService = Demoulas.ProfitSharing.Services.Navigations.ProfitSharingNavigationService;
+using NavigationService = Demoulas.ProfitSharing.Services.Services.SystemInfo.Navigations.ProfitSharingNavigationService;
 
 namespace Demoulas.ProfitSharing.Services.Extensions;
 
@@ -60,6 +66,9 @@ public static class ServicesExtension
 
             return maskingOptions;
         });
+
+        _ = builder.Services.AddOptions<DjdeDirectiveOptions>()
+            .Bind(builder.Configuration.GetSection(DjdeDirectiveOptions.SectionName));
 
         _ = builder.Services.AddScoped<IPayClassificationService, PayClassificationService>();
         _ = builder.Services.AddScoped<ICertificateService, CertificateService>();
@@ -88,7 +97,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IWagesService, WagesService>();
         _ = builder.Services.AddScoped<IYearEndService, YearEndService>();
         _ = builder.Services.AddScoped<IMilitaryService, MilitaryService>();
-        _ = builder.Services.AddScoped<IEmployeeLookupService, Lookup.EmployeeLookupService>();
+        _ = builder.Services.AddScoped<IEmployeeLookupService, EmployeeLookupService>();
 
         _ = builder.Services.AddScoped<IPayrollDuplicateSsnReportService, PayrollDuplicateSsnReportService>();
         _ = builder.Services.AddScoped<INegativeEtvaReportService, NegativeEtvaReportService>();
@@ -165,8 +174,8 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IBalanceEquationValidationService, BalanceEquationValidationService>();
 
         // Register lookup caches as singletons (they manage their own distributed cache access)
-        _ = builder.Services.AddSingleton<Services.Caching.StateTaxCache>();
-        _ = builder.Services.AddSingleton<Services.Caching.ProfitCodeCache>();
+        _ = builder.Services.AddSingleton<StateTaxCache>();
+        _ = builder.Services.AddSingleton<ProfitCodeCache>();
 
         builder.AddProjectCachingServices();
 

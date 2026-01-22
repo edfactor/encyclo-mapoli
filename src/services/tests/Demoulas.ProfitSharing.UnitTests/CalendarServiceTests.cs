@@ -8,6 +8,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Services.Services.Lookups;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Demoulas.Util.Extensions;
@@ -94,7 +95,7 @@ public class CalendarServiceTests : ApiTestBase<Program>
             });
 
         var distributedCache = new Mock<IDistributedCache>();
-        var calendarService = new Demoulas.ProfitSharing.Services.CalendarService(
+        var calendarService = new CalendarService(
             dataContextFactory.Object,
             accountingPeriodsService.Object,
             distributedCache.Object);
@@ -141,7 +142,7 @@ public class CalendarServiceCacheTests
             .ReturnsAsync(JsonSerializer.SerializeToUtf8Bytes(expected));
         var dataContextFactory = new Mock<IProfitSharingDataContextFactory>();
         var accountingPeriodsService = new Mock<IAccountingPeriodsService>();
-        var service = new Demoulas.ProfitSharing.Services.CalendarService(dataContextFactory.Object, accountingPeriodsService.Object, distributedCache.Object);
+        var service = new CalendarService(dataContextFactory.Object, accountingPeriodsService.Object, distributedCache.Object);
 
         // Act
         var result = await service.GetYearStartAndEndAccountingDatesAsync(year);
@@ -169,7 +170,7 @@ public class CalendarServiceCacheTests
         var accountingPeriodsService = new Mock<IAccountingPeriodsService>();
         dataContextFactory.Setup(f => f.UseWarehouseContext(It.IsAny<Func<IDemoulasCommonWarehouseContext, Task<CalendarResponseDto>>>()))
             .ReturnsAsync(expected);
-        var service = new Demoulas.ProfitSharing.Services.CalendarService(dataContextFactory.Object, accountingPeriodsService.Object, distributedCache.Object);
+        var service = new CalendarService(dataContextFactory.Object, accountingPeriodsService.Object, distributedCache.Object);
 
         // Act
         var result = await service.GetYearStartAndEndAccountingDatesAsync(year);

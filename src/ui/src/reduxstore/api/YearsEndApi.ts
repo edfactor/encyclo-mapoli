@@ -1260,7 +1260,8 @@ export const YearsEndApi = createApi({
         params: {
           profitYear: params.profitYear,
           badgeNumbers: params.badgeNumbers,
-          ssns: params.ssns
+          ssns: params.ssns,
+          isXerox: params.isXerox
         },
         responseHandler: (response) => response.blob()
       })

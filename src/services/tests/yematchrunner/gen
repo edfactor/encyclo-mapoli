@@ -1,10 +1,17 @@
 #/bin/bash
 # Used to generate the swagger ApiClient
 
-dotnet tool install --global NSwag.ConsoleCore 
+dotnet tool install --global NSwag.ConsoleCore
 
 nswag openapi2csclient /classname:ApiClient /namespace:YEMatch /input:https://localhost:7141/swagger/Release%201.0/swagger.json  /output:YEMatch/SmartActivities/ApiClient.cs
 
 # this makes the swagger endpoint names less wordy
 sed -i '' "s/DemoulasProfitSharingEndpointsEndpoints//g" YEMatch/SmartActivities/ApiClient.cs
+
+# nswag reflection leaves behind these poorly named list variables, we make them legal variables
+sed -i '' 's/list`1/list1/g' YEMatch/SmartActivities/ApiClient.cs
+
+# nswag leaves references classes in a unusable form, so we make these classes concrete
+sed -i '' 's/public abstract partial class/public class/g' YEMatch/SmartActivities/ApiClient.cs
+
 

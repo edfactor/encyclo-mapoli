@@ -1,6 +1,4 @@
-﻿using System;
 using System.ComponentModel;
-using System.Linq;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;

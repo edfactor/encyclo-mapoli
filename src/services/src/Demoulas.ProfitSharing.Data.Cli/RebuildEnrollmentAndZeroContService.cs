@@ -1,6 +1,6 @@
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services;
+using Demoulas.ProfitSharing.Services.Services.Distributions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 

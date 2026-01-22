@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
-using Demoulas.ProfitSharing.Services.MasterInquiry;
+using Demoulas.ProfitSharing.Services.Services.InquiriesAndAdjustments.MasterInquiry;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services;

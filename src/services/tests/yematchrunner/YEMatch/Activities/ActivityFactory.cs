@@ -42,7 +42,8 @@ public sealed class ActivityFactory : IActivityFactory
             readySshClientFactory.GetSshClient(),
             readySshClientFactory.GetSftpClient(),
             true, // Will be updated if SetNewScramble() is called
-            smartApiClientFactory.CreateClient());
+            smartApiClientFactory.CreateClient(),
+            readySshClientFactory.SchemaName);
 
         if (_readyActivities.Count != _smartActivities.Count)
         {

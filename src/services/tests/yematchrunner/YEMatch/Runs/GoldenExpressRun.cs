@@ -31,15 +31,13 @@ public class GoldenExpressRun : Runnable
         // YE Express runs though frozen to End for both READY and SMART
         // ideally as quickly as possible
         await Run(Specify(
-         P00_BuildDatabase, // init both dbs
+            P00_BuildDatabase, // init both dbs
             DropBadBenesReady, // in READY, get rid of the two Bene/Employees w/o Demographics rows
             ActivityName.SanityCheckEmployeeAndBenes,
-
             R08_ProfitShareReport,
             IntPay426,
             IntPay426N,
             IntPay426N9,
-
             R13A_PayProfitShiftPartTime, // PAYPROFIT-SHIFT
             R13B_PayProfitShiftWeekly, // PAYPROFIT-SHIFT
             R14_ZeroPyPdPayProfit, // ZERO-PY-PD-PAYPROFIT
@@ -47,7 +45,7 @@ public class GoldenExpressRun : Runnable
 
             // PAY426
             R18_ProfitShareReportFinalRun, // "PROF-SHARE sw[2]=1 CDATE=251227 YEAREND=Y" on READY
-                                           // will set Earnpoints, fiddle with zerocont, clear new employee, clear certdate
+            // will set Earnpoints, fiddle with zerocont, clear new employee, clear certdate
             IntTestPay426DataUpdates,
             S18_ProfitShareReportFinalRun, // Run YearEndService on SMART  - update EarnPoints
 
@@ -60,7 +58,7 @@ public class GoldenExpressRun : Runnable
             R22_ProfitShareEdit, // PAY447 - creates a data file
             IntPay447Test,
             UpdateNavigation, // Update the navigation table
-            R23_ProfitMasterUpdate, // updates ready with contributions 
+            R23_ProfitMasterUpdate, // updates ready with contributions
             IntProfitMasterUpdateTest, // Runs Contributions on Smart
 
             // Ensure that YE update went to plan
@@ -70,10 +68,8 @@ public class GoldenExpressRun : Runnable
             R24_ProfPayMasterUpdate, // Create PAY450 report on READY
             R24B_ProfPayMasterUpdatePartTwo, // Updates the YEARS, and enrollment on READY, NOP on SMART
             S24_ProfPayMasterUpdate, // <--- Writes out update enrollments to the OPEN PROFIT YEAR
-
             IntPay450, // Does the FrozenService produce the same report as READY?
-            TestEnrollmentComparison // Does READY's enrollments match SMART 2025 ?  
-
+            TestEnrollmentComparison // Does READY's enrollments match SMART 2025 ?
         ));
     }
 }
