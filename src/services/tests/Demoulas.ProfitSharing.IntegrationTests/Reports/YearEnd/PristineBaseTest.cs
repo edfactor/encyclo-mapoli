@@ -5,6 +5,7 @@ using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Time;
+using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.ProfitSharing.Services.Services.Adjustments;
@@ -38,10 +39,15 @@ public abstract class PristineBaseTest
     protected readonly MemoryDistributedCache DistributedCache;
     protected readonly IVestingScheduleService VestingScheduleService;
     protected readonly IPayProfitUpdateService PayProfitUpdateService;
-    protected readonly YearEndService YearEndService;
+    protected readonly IYearEndService YearEndService;
     protected readonly IForfeitureAdjustmentService ForfeitureAdjustmentService;
     protected readonly TimeProvider TimeProvider = TimeProvider.System;
 
+    /*
+     * Pristine simply means that this test expects to connect to a database with only Scramble data loaded.
+     * Could have been named ScrambleDataBaseTest.   The alternative is to have a database which mixes Scramble data
+     * and test data pulled from the oracle HCM test system.
+     */
 
     protected PristineBaseTest(ITestOutputHelper testOutputHelper)
     {

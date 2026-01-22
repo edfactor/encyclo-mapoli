@@ -106,7 +106,8 @@ public sealed class PristineDataContextFactory : IProfitSharingDataContextFactor
     private static ProfitSharingDbContext setUpWriteCtx(string connectionString, bool debug)
     {
         DbContextOptionsBuilder<ProfitSharingDbContext> optionsBuilderWriter = new DbContextOptionsBuilder<ProfitSharingDbContext>()
-            .UseOracle(connectionString, opts => opts.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19));
+            .UseOracle(connectionString, opts => opts.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19))
+            .UseUpperCaseNamingConvention();
         if (debug)
         {
             // Dumps sql
@@ -121,7 +122,8 @@ public sealed class PristineDataContextFactory : IProfitSharingDataContextFactor
     private static ProfitSharingReadOnlyDbContext setUpReadOnlyCtx(string connectionString, bool debug)
     {
         DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext> optionsBuilder = new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>()
-            .UseOracle(connectionString, opts => opts.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19));
+            .UseOracle(connectionString, opts => opts.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19))
+            .UseUpperCaseNamingConvention();
         if (debug)
         {
             optionsBuilder.EnableSensitiveDataLogging().LogTo(s => Debug.WriteLine(s));
@@ -135,7 +137,8 @@ public sealed class PristineDataContextFactory : IProfitSharingDataContextFactor
     private static DemoulasCommonWarehouseContext setUpWarehouseCtx(string connectionString, bool debug)
     {
         DbContextOptionsBuilder<DemoulasCommonWarehouseContext> optionsBuilder = new DbContextOptionsBuilder<DemoulasCommonWarehouseContext>()
-            .UseOracle(connectionString, opts => opts.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19));
+            .UseOracle(connectionString, opts => opts.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19))
+            .UseUpperCaseNamingConvention();
         if (debug)
         {
             optionsBuilder.EnableSensitiveDataLogging().LogTo(s => Debug.WriteLine(s));

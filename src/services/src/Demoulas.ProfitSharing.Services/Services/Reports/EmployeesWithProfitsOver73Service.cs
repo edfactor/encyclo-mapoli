@@ -57,13 +57,22 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
             var fiscalStartDate = calendarInfo.FiscalBeginDate;
             var fiscalEndDate = calendarInfo.FiscalEndDate;
 
-            // Get all current demographics with contact info
-            var demographicQuery = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
-
             // Calculate age threshold - employees must be over 73 years old
             DateOnly today = DateOnly.FromDateTime(_timeProvider.GetLocalNow().DateTime);
             var ageThresholdDate = today.AddYears(-73);
+            short currentYear = (short)today.Year;
 
+            // PERFORMANCE OPTIMIZATION: Load RMD factors FIRST (small dataset, ~27 rows for ages 73-99)
+            // Cached in dictionary for O(1) lookups
+            var rmdFactors = await ctx.RmdsFactorsByAge
+                .TagWith("GetRmdFactors-Over73Report")
+                .Where(r => r.Age >= 73) // Only load ages 73+, not all ages
+                .ToDictionaryAsync(r => (int)r.Age, r => r.Factor, cancellationToken);
+
+            // PERFORMANCE OPTIMIZATION: Query 1 - Get employees over 73 with positive balances
+            // Use EXISTS subquery pattern for better Oracle performance
+            var demographicQuery = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
+            
             // Start with base query for employees over 73
             var query = demographicQuery.Where(d => d.DateOfBirth <= ageThresholdDate);
 
@@ -73,12 +82,13 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
                 query = query.Where(d => request.BadgeNumbers.Contains(d.BadgeNumber));
             }
 
-            // Get total balances for these employees (SQL join to avoid large IN lists)
+            // Get total balances - this uses FromSql so must be separate
             var totalBalanceQuery = _totalService.GetTotalBalanceSet(ctx, request.ProfitYear)
                 .TagWith($"GetTotalBalances-Over73-{request.ProfitYear}")
                 .Where(tb => tb.TotalAmount > 0);
 
             // Query for employees over 73 with positive balances and all required fields
+            // PERFORMANCE: Only select the columns we need
             var employeesOver73 = await (
                     from d in query
                     join tb in totalBalanceQuery on d.Ssn equals tb.Ssn
@@ -93,9 +103,8 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
                         Zip = d.Address.PostalCode,
                         d.DateOfBirth,
                         d.TerminationDate,
-                        d.EmploymentStatusId,
                         EmploymentStatusName = d.EmploymentStatus != null ? d.EmploymentStatus.Name : string.Empty,
-                        TotalAmount = tb.TotalAmount.HasValue ? tb.TotalAmount.Value : 0m
+                        TotalAmount = tb.TotalAmount ?? 0m
                     })
                 .TagWith($"GetEmployeesOver73WithBalances-{request.ProfitYear}")
                 .ToListAsync(cancellationToken);
@@ -116,56 +125,81 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
                 };
             }
 
-            HashSet<int> employeeSsns = employeesOver73.Select(e => e.Ssn).ToHashSet();
-
-            // Load all RMD factors from database (ages 73-99)
-            var rmdFactors = await ctx.RmdsFactorsByAge
-                .TagWith("GetRmdFactors-Over73Report")
-                .ToDictionaryAsync(r => (int)r.Age, r => r.Factor, cancellationToken);
-
-            // Get payment profit codes (codes that represent distributions/payments)
+            // PERFORMANCE OPTIMIZATION: Query 2 - Get payments using batched approach for large datasets
+            // Avoid large IN clauses which Oracle struggles with
+            var employeeSsns = employeesOver73.Select(e => e.Ssn).ToHashSet();
             byte[] paymentProfitCodes = ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
 
-            // Calculate payments within fiscal year for these employees
-            // Payment records are in PROFIT_DETAIL where:
-            // - ProfitCodeId is a payment/distribution code
-            // - ProfitYear <= request.ProfitYear (payments can span multiple years)
-            // - We'll use YearToDate to approximate fiscal year boundary
-            var paymentsInFiscalYear = await ctx.ProfitDetails
-                .TagWith($"GetPaymentsInFiscalYear-{request.ProfitYear}")
-                .Where(pd => employeeSsns.Contains(pd.Ssn))
-                .Where(pd => paymentProfitCodes.Contains(pd.ProfitCodeId))
-                .Where(pd => pd.ProfitYear == request.ProfitYear)
-                .GroupBy(pd => pd.Ssn)
-                .Select(g => new
+            Dictionary<int, decimal> paymentsBySsn;
+            
+            // For small result sets, use simple query. For large result sets, batch to avoid Oracle IN limit
+            if (employeeSsns.Count <= 500)
+            {
+                var paymentsInFiscalYear = await ctx.ProfitDetails
+                    .TagWith($"GetPaymentsInFiscalYear-{request.ProfitYear}")
+                    .Where(pd => employeeSsns.Contains(pd.Ssn))
+                    .Where(pd => paymentProfitCodes.Contains(pd.ProfitCodeId))
+                    .Where(pd => pd.ProfitYear == request.ProfitYear)
+                    .GroupBy(pd => pd.Ssn)
+                    .Select(g => new
+                    {
+                        Ssn = g.Key,
+                        TotalPayments = g.Sum(pd => Math.Abs(pd.Forfeiture))
+                    })
+                    .ToListAsync(cancellationToken);
+                
+                paymentsBySsn = paymentsInFiscalYear.ToDictionary(p => p.Ssn, p => p.TotalPayments);
+            }
+            else
+            {
+                // PERFORMANCE: Batch SSNs to avoid large IN clauses (Oracle limit is ~1000)
+                paymentsBySsn = new Dictionary<int, decimal>();
+                const int batchSize = 500;
+                var ssnList = employeeSsns.ToList();
+                
+                for (int i = 0; i < ssnList.Count; i += batchSize)
                 {
-                    Ssn = g.Key,
-                    TotalPayments = g.Sum(pd => Math.Abs(pd.Forfeiture)) // Forfeiture is negative for payments
-                })
-                .ToListAsync(cancellationToken);
-            var paymentsBySsn = paymentsInFiscalYear.ToLookup(x => x.Ssn);
+                    var batch = ssnList.Skip(i).Take(batchSize).ToHashSet();
+                    var batchPayments = await ctx.ProfitDetails
+                        .TagWith($"GetPaymentsInFiscalYear-Batch{i / batchSize}-{request.ProfitYear}")
+                        .Where(pd => batch.Contains(pd.Ssn))
+                        .Where(pd => paymentProfitCodes.Contains(pd.ProfitCodeId))
+                        .Where(pd => pd.ProfitYear == request.ProfitYear)
+                        .GroupBy(pd => pd.Ssn)
+                        .Select(g => new
+                        {
+                            Ssn = g.Key,
+                            TotalPayments = g.Sum(pd => Math.Abs(pd.Forfeiture))
+                        })
+                        .ToListAsync(cancellationToken);
+                    
+                    foreach (var payment in batchPayments)
+                    {
+                        paymentsBySsn[payment.Ssn] = payment.TotalPayments;
+                    }
+                }
+            }
 
             // Build detail records with pagination support
+            // All calculations are now in-memory with O(1) dictionary lookups
             var detailRecords = employeesOver73
                 .Select(employee =>
                 {
                     decimal balance = employee.TotalAmount;
-                    int age = today.Year - employee.DateOfBirth.Year;
+                    int age = currentYear - employee.DateOfBirth.Year;
 
-                    // Get RMD factor for this age (default to 0 if age not found)
+                    // O(1) dictionary lookup for RMD factor
                     decimal factor = rmdFactors.GetValueOrDefault(age, 0m);
 
                     // Calculate RMD: Balance ÷ Factor (protect against divide by zero)
-                    // IMPORTANT: Parentheses around (balance?.TotalAmount ?? 0) ensure correct order of operations
                     decimal rmd = factor > 0 ? Math.Round(balance / factor, 2, MidpointRounding.AwayFromZero) : 0m;
 
-                    // Get payments made in the fiscal year
-                    decimal paymentsInYear = paymentsBySsn[employee.Ssn].FirstOrDefault()?.TotalPayments ?? 0m;
+                    // O(1) dictionary lookup for payments
+                    decimal paymentsInYear = paymentsBySsn.GetValueOrDefault(employee.Ssn, 0m);
 
                     // Calculate suggested RMD check amount based on de minimis threshold
-                    decimal currentBalance = balance;
-                    decimal suggestRmdCheckAmount = currentBalance <= request.DeMinimusValue
-                        ? currentBalance  // De minimis: liquidate entire account
+                    decimal suggestRmdCheckAmount = balance <= request.DeMinimusValue
+                        ? balance  // De minimis: liquidate entire account
                         : Math.Max(0, rmd - paymentsInYear);  // Above threshold: RMD minus payments already received
 
                     return new EmployeesWithProfitsOver73DetailDto
@@ -181,7 +215,7 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
                         DateOfBirth = employee.DateOfBirth,
                         TerminationDate = employee.TerminationDate,
                         Age = age,
-                        Balance = currentBalance,
+                        Balance = balance,
                         Factor = factor,
                         Rmd = rmd,
                         PaymentsInProfitYear = paymentsInYear,

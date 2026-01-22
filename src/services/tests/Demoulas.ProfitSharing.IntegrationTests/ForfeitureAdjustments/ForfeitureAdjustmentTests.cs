@@ -23,7 +23,7 @@ public class ForfeitureAdjustmentTests : PristineBaseTest
         // Zero because their ETVA = Current Amount and/or ETVA > Vested Amount
         // ExpectBadgeShouldHaveSuggested(700655, 0)
 
-        // problem badges pulled from READY, these members all have ETVA amounts 
+        // problem badges pulled from READY, these members all have ETVA amounts
         ExpectBadgeShouldHaveSuggested(703625, 3893.48m);
         // ExpectBadgeShouldHaveSuggested(702791, 12743.74m)
         // ExpectBadgeShouldHaveSuggested(704643, 2717.16m)
@@ -36,11 +36,8 @@ public class ForfeitureAdjustmentTests : PristineBaseTest
         var employee = await GetEmployeeByBadgeAsync(badge);
         employee.PayProfit.Etva.ShouldBe(10.10m);
 
-        var mockAppUser = new Mock<IAppUser>();
-        var mockAuditService = new Mock<IProfitSharingAuditService>();
-        ForfeitureAdjustmentService fas = new ForfeitureAdjustmentService(DbFactory, TotalService, DemographicReaderService, TimeProvider, mockAppUser.Object, mockAuditService.Object);
         SuggestedForfeitureAdjustmentRequest sfar = new() { Badge = badge };
-        var res = (await fas.GetSuggestedForfeitureAmount(sfar)).Value!;
+        var res = (await ForfeitureAdjustmentService.GetSuggestedForfeitureAmount(sfar)).Value!;
 
         res.SuggestedForfeitAmount.ShouldBe(.23m);
     }
@@ -50,11 +47,8 @@ public class ForfeitureAdjustmentTests : PristineBaseTest
         var employee = GetEmployeeByBadgeAsync(badge).GetAwaiter().GetResult();
         employee.PayProfit.Etva.ShouldNotBe(0m);
 
-        var mockAppUser = new Mock<IAppUser>();
-        var mockAuditService = new Mock<IProfitSharingAuditService>();
-        ForfeitureAdjustmentService fas = new ForfeitureAdjustmentService(DbFactory, TotalService, DemographicReaderService, TimeProvider, mockAppUser.Object, mockAuditService.Object);
         SuggestedForfeitureAdjustmentRequest sfar = new() { Badge = badge };
-        var res = fas.GetSuggestedForfeitureAmount(sfar).GetAwaiter().GetResult().Value!;
+        var res = ForfeitureAdjustmentService.GetSuggestedForfeitureAmount(sfar).GetAwaiter().GetResult().Value!;
 
         res.SuggestedForfeitAmount.ShouldBe(suggestedForfeitAmount);
     }

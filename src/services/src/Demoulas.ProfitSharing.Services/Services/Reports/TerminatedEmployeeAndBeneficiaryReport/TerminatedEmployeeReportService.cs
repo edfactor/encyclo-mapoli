@@ -311,6 +311,11 @@ public sealed class TerminatedEmployeeReportService
                     vestedRatio = 0;
                 }
 
+                if (vestedRatio == 1)
+                {
+                    vestedBalance = member.EndingBalance;
+                }
+
                 // Calculate age if birthdate available
                 short? age = member.Birthday?.Age();
 

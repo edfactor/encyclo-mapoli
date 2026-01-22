@@ -48,7 +48,7 @@ public class ProfitShareUpdateTests : PristineBaseTest
                 AdjustEarningsAmount = 0,
                 AdjustIncomingForfeitAmount = 0,
                 AdjustEarningsSecondaryAmount = 0
-            }, DemographicReaderService);
+            }, DemographicReaderService, YearEndService);
         sw.Stop();
         TestOutputHelper.WriteLine($"Query took {sw.Elapsed}");
 
@@ -68,7 +68,7 @@ public class ProfitShareUpdateTests : PristineBaseTest
         }
         else
         {
-            // This path compares individuals and provides a list of differences. 
+            // This path compares individuals and provides a list of differences.
 
             var employeeExpectedReportLines = expectedReport.Split("\n").Where(ex => extractBadge(ex) != (null, null)).Select(t => t.TrimEnd()).ToList();
             var employeeActualReportLines = profitShareUpdateService.ReportLines.Where(ex => extractBadge(ex) != (null, null)).Select(t => t.TrimEnd()).ToList();

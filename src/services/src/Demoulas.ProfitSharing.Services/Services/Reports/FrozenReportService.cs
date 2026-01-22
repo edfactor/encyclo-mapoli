@@ -790,7 +790,7 @@ public class FrozenReportService : IFrozenReportService
                                 : lyPp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                     ? EnrollmentConstants.OldVestingPlanHasContributions
                                     : EnrollmentConstants.NewVestingPlanHasContributions)
-                        : EnrollmentConstants.NewVestingPlanHasForfeitureRecords,
+                        : EnrollmentConstants.NotEnrolled,
                     BeforeProfitSharingAmount = lyBal != null ? lyBal.CurrentBalance : 0,
                     BeforeVestedProfitSharingAmount = lyBal != null ? lyBal.VestedBalance : 0,
                     BeforeYearsInPlan = lyBal != null ? lyBal.YearsInPlan : default(byte),
@@ -804,7 +804,7 @@ public class FrozenReportService : IFrozenReportService
                                 : pp.VestingScheduleId == VestingSchedule.Constants.OldPlan
                                     ? EnrollmentConstants.OldVestingPlanHasContributions
                                     : EnrollmentConstants.NewVestingPlanHasContributions)
-                        : EnrollmentConstants.NewVestingPlanHasForfeitureRecords,
+                        : EnrollmentConstants.NotEnrolled,
                     AfterProfitSharingAmount = bal.CurrentBalance,
                     AfterVestedProfitSharingAmount = bal.VestedBalance,
                     AfterYearsInPlan = bal.YearsInPlan
