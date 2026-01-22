@@ -1,13 +1,11 @@
 import { ColDef } from "ag-grid-community";
 import {
   createBadgeOrPSNColumn,
-  createColumnFrom,
   createCountColumn,
   createCurrencyColumn,
   createNameColumn,
   createSSNColumn
 } from "../../../utils/gridColumnFactory";
-import { ForfeituresCellRenderer } from "./ForfeituresCellRenderer";
 
 export interface ForfeitColumnsOptions {
   onValidationClick?: (fieldName: string) => void;
@@ -27,20 +25,10 @@ export const GetProfitShareForfeitColumns = (options: ForfeitColumnsOptions): Co
       field: "employeeName"
     }),
     createSSNColumn({}),
-    createColumnFrom(
-      createCurrencyColumn({
-        headerName: "Forfeitures",
-        field: "forfeitures"
-      }),
-      {
-        headerClass: "left-align",
-        cellRenderer: ForfeituresCellRenderer,
-        cellRendererParams: {
-          onValidationClick
-        }
-      }
-    ),
-
+    createCurrencyColumn({
+      headerName: "Forfeitures",
+      field: "forfeitures"
+    }),
     createCountColumn({
       headerName: "Cont/Forfeit Points",
       field: "contForfeitPoints"
