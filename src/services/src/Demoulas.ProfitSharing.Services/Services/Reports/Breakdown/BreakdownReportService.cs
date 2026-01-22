@@ -388,7 +388,12 @@ public sealed class BreakdownReportService : IBreakdownService
             var terminatedEmployees = await BuildAndExecuteTerminatedEmployeesQueryAsync(
                 ctx, demographics, request, calInfo, cancellationToken);
 
+            var terminatedSsns = terminatedEmployees.Select(e => e.Ssn).ToHashSet();
+            ThrowIfInvalidSsns(terminatedSsns);
+
             // Skip beneficiaries if store filter excludes store 800
+            // Beneficiaries are always bucketed to virtual store 800 (see line 438 below)
+            // If user filters to a specific store other than 800, exclude beneficiaries entirely
             List<ActiveMemberDto> beneficiaries;
             if (request.StoreNumber.HasValue && request.StoreNumber.Value != 800)
             {
@@ -414,6 +419,10 @@ public sealed class BreakdownReportService : IBreakdownService
                 // Query beneficiaries with all filtering done in the database
                 var beneficiaryData = await ctx.Beneficiaries
                     .TagWith("GetTerminatedNotVested-Beneficiaries")
+                    .Include(b => b.Contact)
+                        .ThenInclude(c => c!.ContactInfo)
+                    .Include(b => b.Contact)
+                        .ThenInclude(c => c!.Address)
                     .Where(b => !b.IsDeleted)
                     .Where(b => !employeeSsnsSubquery.Contains(b.Contact!.Ssn)) // NOT IN employees (subquery)
                     .Where(b => profitCodeSsnsSubquery.Contains(b.Contact!.Ssn) ||
@@ -467,6 +476,12 @@ public sealed class BreakdownReportService : IBreakdownService
                     BeneficiaryAllocation = 0,
                     CertificateSort = 0
                 }).ToList();
+
+                if (beneficiaries.Count > 0)
+                {
+                    var beneficiarySsns = beneficiaries.Select(b => b.Ssn).ToHashSet();
+                    ThrowIfInvalidSsns(beneficiarySsns);
+                }
             }
 
             // Combine employees and beneficiaries in memory
@@ -494,11 +509,8 @@ public sealed class BreakdownReportService : IBreakdownService
                 .Take(request.Take ?? 25)
                 .ToList();
 
-            // Validate SSNs
+            // Get financial snapshots for the paginated results
             var resultSsns = results.Select(r => r.Ssn).ToHashSet();
-            ThrowIfInvalidSsns(resultSsns);
-
-            // Get financial snapshots for the results
             var snapshots = await GetEmployeeFinancialSnapshotsAsync(
                 ctx, request.ProfitYear, resultSsns, cancellationToken);
             var snapshotByKey = snapshots.ToDictionary(s => (s.Ssn, s.BadgeNumber));
