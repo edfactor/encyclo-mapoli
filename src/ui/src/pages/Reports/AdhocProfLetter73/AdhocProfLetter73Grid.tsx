@@ -293,6 +293,8 @@ const AdhocProfLetter73Grid: React.FC<AdhocProfLetter73GridProps> = (props) => {
                 variant="h2"
                 sx={{ color: "#0258A5" }}>
                 Adhoc Prof Letter 73
+                {(apiData?.total ?? lastApiRef.current?.total) !== undefined &&
+                  ` (${apiData?.total ?? lastApiRef.current?.total})`}
               </Typography>
             </Grid>
             <Grid sx={{ display: "flex", gap: 1 }}>
