@@ -19,7 +19,7 @@ interface AuditSearchFilters {
 }
 
 const AuditSearch = () => {
-  const [triggerSearch, { data, isFetching }] = useLazySearchAuditQuery();
+  const [triggerSearch, { data, isFetching, reset: resetSearch }] = useLazySearchAuditQuery();
   const [triggerGetNavigationStatus, { data: navigationStatusData }] = useLazyGetNavigationStatusQuery();
   const [currentFilters, setCurrentFilters] = useState<AuditSearchFilters>({
     tableName: "",
@@ -90,6 +90,20 @@ const AuditSearch = () => {
     [currentFilters, executeSearch]
   );
 
+  const handleReset = useCallback(() => {
+    setCurrentFilters({
+      tableName: "",
+      operation: "",
+      userName: "",
+      startDate: null,
+      startTime: "00:00",
+      endDate: null,
+      endTime: "23:59"
+    });
+    setCurrentPageNumber(0);
+    resetSearch();
+  }, [resetSearch]);
+
   return (
     <PageErrorBoundary pageName="Audit Search">
       <Page label="Audit Search">
@@ -102,6 +116,7 @@ const AuditSearch = () => {
           <Grid width={"100%"}>
             <AuditSearchManager
               onSearch={handleSearch}
+              onReset={handleReset}
               isLoading={isFetching}
             />
           </Grid>
