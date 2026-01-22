@@ -43,6 +43,11 @@ public abstract class PristineBaseTest
     protected readonly IForfeitureAdjustmentService ForfeitureAdjustmentService;
     protected readonly TimeProvider TimeProvider = TimeProvider.System;
 
+    /*
+     * Pristine simply means that this test expects to connect to a database with only Scramble data loaded.
+     * Could have been named ScrambleDataBaseTest.   The alternative is to have a database which mixes Scramble data
+     * and test data pulled from the oracle HCM test system.
+     */
 
     protected PristineBaseTest(ITestOutputHelper testOutputHelper)
     {
@@ -59,7 +64,7 @@ public abstract class PristineBaseTest
         TestOutputHelper = testOutputHelper;
         VestingScheduleService = new VestingScheduleService(DbFactory, DistributedCache);
         PayProfitUpdateService = new PayProfitUpdateService(DbFactory, NullLoggerFactory.Instance, TotalService, CalendarService, VestingScheduleService);
-        YearEndService = new YearEndServiceOld(DbFactory, CalendarService, PayProfitUpdateService, TotalService, DemographicReaderService);
+        YearEndService = new YearEndService(DbFactory, CalendarService, PayProfitUpdateService, NullLogger<YearEndService>.Instance);
         var mockAppUser = new Mock<IAppUser>();
         var mockAuditService = new Mock<IProfitSharingAuditService>();
         ForfeitureAdjustmentService = new ForfeitureAdjustmentService(DbFactory, TotalService, DemographicReaderService, TimeProvider, mockAppUser.Object, mockAuditService.Object);

@@ -1,13 +1,25 @@
 using System.Data.Common;
-using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Services.Distributions;
+using Demoulas.ProfitSharing.Services.Services.YearEnd;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Oracle.ManagedDataAccess.Client;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
+
+/// <summary>
+/// Record for comparing year-end changes between READY and SMART systems.
+/// </summary>
+public record YearEndChange
+{
+    public required int IsNew { get; init; }
+    public required byte ZeroCont { get; init; }
+    public required decimal EarnPoints { get; init; }
+    public DateOnly? PsCertificateIssuedDate { get; init; }
+}
 
 /*
  * This integration test requires that READY's test/reference schema should be run to "Activity 18", for this test to pass.
@@ -16,12 +28,9 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 
 public class YearEndServiceTests : PristineBaseTest
 {
-    private readonly ILoggerFactory _loggerFactory;
 
     public YearEndServiceTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        // Set minimum level to Warning to avoid noisy logs during tests
-        _loggerFactory = LoggerFactory.Create(builder => builder.SetMinimumLevel(LogLevel.Warning));
     }
 
     [Fact]
@@ -34,14 +43,12 @@ public class YearEndServiceTests : PristineBaseTest
         // Get SMART results within transaction (will rollback to avoid modifying database)
         Dictionary<int, YearEndChange> smartRowsBySsn = await DbFactory.UseWritableContext(async ctx =>
         {
-            PayProfitUpdateService ppus = new(DbFactory, _loggerFactory, TotalService, CalendarService, VestingScheduleService);
-            YearEndServiceOld yearEndService = new(DbFactory, CalendarService, ppus, TotalService, DemographicReaderService);
             OracleConnection c = (ctx.Database.GetDbConnection() as OracleConnection)!;
             await c.OpenAsync(ct);
 
             // ------- Act
             DbTransaction transaction = await c.BeginTransactionAsync(ct);
-            await yearEndService.RunFinalYearEndUpdatesAsync(profitYear, false, ct);
+            await YearEndService.RunFinalYearEndUpdatesAsync(profitYear, false, ct);
 
             // Read results BEFORE rollback (so changes are visible but not committed)
             // IMPORTANT: Use the same connection/transaction to see uncommitted changes
