@@ -725,7 +725,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             from bc in ctx.BeneficiaryContacts
             join d in demographicQueryForAntiJoin on bc.Ssn equals d.Ssn into demoJoin
             from d in demoJoin.DefaultIfEmpty()
-            where d == null // Anti-join: only beneficiaries NOT in Demographics (COBOL PAYPROFIT equivalent)
+            where d == null && !bc.IsDeleted // Anti-join: only beneficiaries NOT in Demographics (COBOL PAYPROFIT equivalent)
             join bal in balances on bc.Ssn equals bal.Ssn into balJoin
             from bal in balJoin.DefaultIfEmpty() // LEFT JOIN: include beneficiaries even if they have no balance
             select new { Beneficiary = bc, Balance = bal }
