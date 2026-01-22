@@ -43,10 +43,11 @@ const schema = yup.object().shape({
 
 interface AuditSearchManagerProps {
   onSearch: (filters: AuditSearchFilters) => void;
+  onReset: () => void;
   isLoading: boolean;
 }
 
-const AuditSearchManager: React.FC<AuditSearchManagerProps> = ({ onSearch, isLoading }) => {
+const AuditSearchManager: React.FC<AuditSearchManagerProps> = ({ onSearch, onReset, isLoading }) => {
   const {
     control,
     handleSubmit,
@@ -80,15 +81,7 @@ const AuditSearchManager: React.FC<AuditSearchManagerProps> = ({ onSearch, isLoa
       endDate: null,
       endTime: "23:59"
     });
-    onSearch({
-      tableName: "",
-      operation: "",
-      userName: "",
-      startDate: null,
-      startTime: "00:00",
-      endDate: null,
-      endTime: "23:59"
-    });
+    onReset();
   };
 
   return (
