@@ -34,7 +34,8 @@
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7141",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "Serilog__MinimumLevel__Override__Demoulas.ProfitSharing.Data.HealthCheckResultLogger": "Fatal"
       }
     },
     "sqlSilent": {

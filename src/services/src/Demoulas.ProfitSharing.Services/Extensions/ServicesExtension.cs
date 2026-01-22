@@ -16,6 +16,7 @@ using Demoulas.ProfitSharing.Services.Caching;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
 using Demoulas.ProfitSharing.Services.Caching.HostedServices;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.Lookup;
 using Demoulas.ProfitSharing.Services.Serialization;
 using Demoulas.ProfitSharing.Services.Services.Adjustments;
 using Demoulas.ProfitSharing.Services.Services.Adjustments.ProfitShareEdit;
@@ -117,7 +118,7 @@ public static class ServicesExtension
 
         _ = builder.Services.AddScoped<IFrozenService, FrozenService>();
         _ = builder.Services.AddScoped<IStoreService, StoreService>();
-
+        
         _ = builder.Services.AddSingleton<IFakeSsnService, FakeSsnService>();
         _ = builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         _ = builder.Services.AddSingleton<ICalendarService, CalendarService>();
@@ -162,6 +163,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IDistributionFrequencyLookupService, DistributionFrequencyLookupService>();
         _ = builder.Services.AddScoped<IDistributionStatusLookupService, DistributionStatusLookupService>();
         _ = builder.Services.AddScoped<ITaxCodeLookupService, TaxCodeLookupService>();
+        _ = builder.Services.AddScoped<IStoreLookupService, StoreLookupService>();
         _ = builder.Services.AddScoped<IStateService, StateService>();
         _ = builder.Services.AddScoped<IMergeProfitDetailsService, MergeProfitDetailsService>();
         _ = builder.Services.AddScoped<IBeneficiaryDisbursementService, BeneficiaryDisbursementService>();

@@ -4,10 +4,22 @@ using Demoulas.ProfitSharing.Services.Services.YearEnd;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Oracle.ManagedDataAccess.Client;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
+
+/// <summary>
+/// Record for comparing year-end changes between READY and SMART systems.
+/// </summary>
+public record YearEndChange
+{
+    public required int IsNew { get; init; }
+    public required byte ZeroCont { get; init; }
+    public required decimal EarnPoints { get; init; }
+    public DateOnly? PsCertificateIssuedDate { get; init; }
+}
 
 /*
  * This integration test requires that READY's test/reference schema should be run to "Activity 18", for this test to pass.
@@ -16,12 +28,9 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 
 public class YearEndServiceTests : PristineBaseTest
 {
-    private readonly ILoggerFactory _loggerFactory;
 
     public YearEndServiceTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        // Set minimum level to Warning to avoid noisy logs during tests
-        _loggerFactory = LoggerFactory.Create(builder => builder.SetMinimumLevel(LogLevel.Warning));
     }
 
     [Fact]
@@ -34,14 +43,12 @@ public class YearEndServiceTests : PristineBaseTest
         // Get SMART results within transaction (will rollback to avoid modifying database)
         Dictionary<int, YearEndChange> smartRowsBySsn = await DbFactory.UseWritableContext(async ctx =>
         {
-            PayProfitUpdateService ppus = new(DbFactory, _loggerFactory, TotalService, CalendarService, VestingScheduleService);
-            YearEndService yearEndService = new(DbFactory, CalendarService, ppus, _loggerFactory.CreateLogger<YearEndService>());
             OracleConnection c = (ctx.Database.GetDbConnection() as OracleConnection)!;
             await c.OpenAsync(ct);
 
             // ------- Act
             DbTransaction transaction = await c.BeginTransactionAsync(ct);
-            await yearEndService.RunFinalYearEndUpdatesAsync(profitYear, false, ct);
+            await YearEndService.RunFinalYearEndUpdatesAsync(profitYear, false, ct);
 
             // Read results BEFORE rollback (so changes are visible but not committed)
             // IMPORTANT: Use the same connection/transaction to see uncommitted changes
@@ -57,16 +64,18 @@ public class YearEndServiceTests : PristineBaseTest
         // Get Ready's rows (expected) for PayProfit
         Dictionary<int, YearEndChange> readyRowsBySsn = await GetReadyPayProfit();
 
-        // ensure number of rows match 
+        // ensure number of rows match
         readyRowsBySsn.Count.ShouldBe(smartRowsBySsn.Count);
 
         // Now check each row
         int badRows = smartRowsBySsn.Count(kvp =>
         {
-            bool mismatch = !readyRowsBySsn.TryGetValue(kvp.Key, out YearEndChange? ready) || kvp.Value != ready;
+            var readyValue = readyRowsBySsn.GetValueOrDefault(kvp.Key)!;
+            var smartValue = kvp.Value;
+            bool mismatch = smartValue != readyValue;
             if (mismatch)
             {
-                TestOutputHelper.WriteLine($"Ssn {kvp.Key} r:{readyRowsBySsn.GetValueOrDefault(kvp.Key)} s:{kvp.Value}");
+                TestOutputHelper.WriteLine($"Ssn {kvp.Key} r:{readyValue} s:{smartValue}");
             }
 
             return mismatch;

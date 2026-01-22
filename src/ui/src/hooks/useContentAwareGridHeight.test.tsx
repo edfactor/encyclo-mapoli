@@ -263,4 +263,116 @@ describe("useContentAwareGridHeight", () => {
       expect(result.current).toBeLessThanOrEqual(500);
     });
   });
+
+  describe("expanded mode", () => {
+    it("should use larger viewport-based height when isExpanded is true", async () => {
+      Object.defineProperty(window, "innerHeight", {
+        writable: true,
+        configurable: true,
+        value: 1080
+      });
+
+      const { result } = renderHook(() =>
+        useContentAwareGridHeight({
+          rowCount: 50,
+          rowHeight: 41,
+          headerHeight: 41,
+          chromeHeight: 10,
+          isExpanded: true
+        })
+      );
+
+      await waitFor(() => {
+        // In expanded mode, height should be viewportHeight - 150 (reserved space) = 930
+        // Content: 41 + 50 * 41 + 10 = 2101 (exceeds available)
+        // Should use the expanded max height
+        expect(result.current).toBe(930);
+      });
+    });
+
+    it("should show content height in expanded mode when content fits", async () => {
+      Object.defineProperty(window, "innerHeight", {
+        writable: true,
+        configurable: true,
+        value: 1080
+      });
+
+      const { result } = renderHook(() =>
+        useContentAwareGridHeight({
+          rowCount: 10,
+          rowHeight: 41,
+          headerHeight: 41,
+          chromeHeight: 10,
+          isExpanded: true
+        })
+      );
+
+      await waitFor(() => {
+        // Content: 41 + 10 * 41 + 10 = 461
+        // Available in expanded: 1080 - 150 = 930
+        // Content fits, so use content height
+        expect(result.current).toBe(461);
+      });
+    });
+
+    it("should update expanded height on window resize", async () => {
+      Object.defineProperty(window, "innerHeight", {
+        writable: true,
+        configurable: true,
+        value: 1080
+      });
+
+      const { result } = renderHook(() =>
+        useContentAwareGridHeight({
+          rowCount: 100,
+          rowHeight: 41,
+          isExpanded: true
+        })
+      );
+
+      await waitFor(() => {
+        // Initial: 1080 - 150 = 930
+        expect(result.current).toBe(930);
+      });
+
+      // Resize window to simulate high resolution monitor
+      act(() => {
+        Object.defineProperty(window, "innerHeight", {
+          writable: true,
+          configurable: true,
+          value: 1440
+        });
+        window.dispatchEvent(new Event("resize"));
+      });
+
+      await waitFor(() => {
+        // New: 1440 - 150 = 1290
+        expect(result.current).toBe(1290);
+      });
+    });
+
+    it("should use larger max height for high resolution screens in expanded mode", async () => {
+      // Simulate a 4K monitor with 2160px height
+      Object.defineProperty(window, "innerHeight", {
+        writable: true,
+        configurable: true,
+        value: 2160
+      });
+
+      const { result } = renderHook(() =>
+        useContentAwareGridHeight({
+          rowCount: 200,
+          rowHeight: 41,
+          isExpanded: true
+        })
+      );
+
+      await waitFor(() => {
+        // Expanded max: 2160 - 150 = 2010
+        // Content: 41 + 200 * 41 + 10 = 8261 (exceeds)
+        // Should use the full available expanded height
+        expect(result.current).toBe(2010);
+      });
+    });
+  });
 });

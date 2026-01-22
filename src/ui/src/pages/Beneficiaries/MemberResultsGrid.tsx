@@ -12,6 +12,7 @@ interface MemberResultsGridProps {
   isLoading: boolean;
   pageNumber: number;
   pageSize: number;
+  sortParams: SortParams;
   onRowClick: (data: BeneficiaryDetail) => void;
   onPageNumberChange: (pageNumber: number) => void;
   onPageSizeChange: (pageSize: number) => void;
@@ -23,6 +24,7 @@ const MemberResultsGrid: React.FC<MemberResultsGridProps> = ({
   isLoading,
   pageNumber,
   pageSize,
+  sortParams,
   onRowClick,
   onPageNumberChange,
   onPageSizeChange,
@@ -42,7 +44,7 @@ const MemberResultsGrid: React.FC<MemberResultsGridProps> = ({
       pagination={{
         pageNumber,
         pageSize,
-        sortParams: { sortBy: "", isSortDescending: false },
+        sortParams,
         handlePageNumberChange: (value: number) => {
           onPageNumberChange(value);
         },

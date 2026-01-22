@@ -12,37 +12,6 @@ using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.Services.Services.YearEnd;
 
-public record YearEndChange
-{
-    public required int IsNew { get; init; }
-    public required byte ZeroCont { get; init; }
-    [MaskSensitive]
-    public required decimal EarnPoints { get; init; }
-    public required DateOnly? PsCertificateIssuedDate { get; init; }
-
-    public bool IsChanged(PayProfitDto employee)
-    {
-        return employee.EmployeeTypeId != IsNew
-               || employee.ZeroContributionReasonId != ZeroCont
-               || employee.PointsEarned != EarnPoints
-               || employee.PsCertificateIssuedDate != PsCertificateIssuedDate;
-    }
-}
-
-public sealed class PayProfitDto
-{
-    public required int ProfitYear { get; init; }
-    public required decimal CurrentHoursYear { get; init; }
-    public required decimal HoursExecutive { get; init; }
-    public Demographic Demographic { get; init; } = default!;
-    public required int EmployeeTypeId { get; set; }
-    public required byte? ZeroContributionReasonId { get; set; }
-    public required decimal? PointsEarned { get; set; }
-    public required DateOnly? PsCertificateIssuedDate { get; set; }
-    public required decimal IncomeExecutive { get; set; }
-    public required decimal CurrentIncomeYear { get; set; }
-}
-
 public sealed class YearEndService : IYearEndService
 {
     // Constants for SQL operations
@@ -186,6 +155,7 @@ public sealed class YearEndService : IYearEndService
         const byte zcrUnder21 = ZeroContributionReason.Constants.Under21WithOver1Khours; // 1
         const byte zcrTerminated = ZeroContributionReason.Constants.TerminatedEmployeeOver1000HoursWorkedGetsYearVested; // 2
         const byte zcr65Plus5Years = ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested; // 6
+        const byte zcr64Near5Years = ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay; // 7
 
         // Constants for EmployeeType
         const byte empTypeNotNew = EmployeeType.Constants.NotNewLastYear; // 0
@@ -195,12 +165,14 @@ public sealed class YearEndService : IYearEndService
         const char empStatusTerminated = EmploymentStatus.Constants.Terminated; // 't'
 
         // Build the SQL - uses CTEs for clarity and to avoid repeated subqueries
-        var pc0 = ProfitCode.Constants.IncomingContributions.Id;
-        var pc1 = ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id;
-        var pc2 = ProfitCode.Constants.OutgoingForfeitures.Id;
-        var pc3 = ProfitCode.Constants.OutgoingDirectPayments.Id;
-        var pc5 = ProfitCode.Constants.OutgoingXferBeneficiary.Id;
-        var pc9 = ProfitCode.Constants.Outgoing100PercentVestedPayment.Id;
+        byte pc0 = ProfitCode.Constants.IncomingContributions.Id;
+        byte pc1 = ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id;
+        byte pc2 = ProfitCode.Constants.OutgoingForfeitures.Id;
+        byte pc3 = ProfitCode.Constants.OutgoingDirectPayments.Id;
+        byte pc5 = ProfitCode.Constants.OutgoingXferBeneficiary.Id;
+        byte pc6 = ProfitCode.Constants.IncomingQdroBeneficiary.Id;
+        byte pc8 = ProfitCode.Constants.Incoming100PercentVestedEarnings.Id;
+        byte pc9 = ProfitCode.Constants.Outgoing100PercentVestedPayment.Id;
         var minHours = ReferenceData.MinimumHoursForContribution;
         string sql = $@"
 MERGE INTO pay_profit pp
@@ -210,18 +182,29 @@ USING (
     first_contrib AS (
         SELECT pd.ssn, MIN(pd.profit_year) AS first_year
         FROM profit_detail pd
-        WHERE pd.profit_code_id = ${pc0}
+        WHERE pd.profit_code_id = {pc0}
           AND pd.contribution > 0
-          AND pd.profit_year_iteration = ${ProfitCode.Constants.IncomingContributions.Id}
+          AND pd.profit_year_iteration = 0
         GROUP BY pd.ssn
     ),
     -- Get prior year total balance for each SSN
     prior_balance AS (
-        SELECT pd.ssn, SUM(
-            CASE WHEN pd.profit_code_id = ${pc0} THEN pd.contribution ELSE 0 END
-            + CASE WHEN pd.profit_code_id = ${pc0} THEN pd.earnings ELSE 0 END
-            - CASE WHEN pd.profit_code_id IN (${pc1},${pc2},${pc3},${pc5},${pc9}) THEN pd.forfeiture ELSE 0 END
-        ) AS total_balance
+        SELECT pd.ssn,
+            -- Contributions (pc0)
+            SUM(CASE WHEN pd.profit_code_id = {pc0} THEN pd.contribution ELSE 0 END)
+            -- Earnings (pc0)
+          + SUM(CASE WHEN pd.profit_code_id = {pc0} THEN pd.earnings ELSE 0 END)
+            -- EtvaForfeitures (pc0)
+          + SUM(CASE WHEN pd.profit_code_id = {pc0} THEN pd.forfeiture ELSE 0 END)
+            -- Distributions (pc1, pc3, pc5)
+          + SUM(CASE WHEN pd.profit_code_id IN ({pc1}, {pc3}, {pc5}) THEN pd.forfeiture * -1 ELSE 0 END)
+            -- Forfeitures (pc2)
+          + SUM(CASE WHEN pd.profit_code_id = {pc2} THEN pd.forfeiture * -1 ELSE 0 END)
+            -- VestedEarnings (pc6 contrib + pc8 earnings - pc9 forfeit)
+          + SUM(CASE WHEN pd.profit_code_id = {pc6} THEN pd.contribution ELSE 0 END)
+          + SUM(CASE WHEN pd.profit_code_id = {pc8} THEN pd.earnings ELSE 0 END)
+          + SUM(CASE WHEN pd.profit_code_id = {pc9} THEN pd.forfeiture * -1 ELSE 0 END)
+        AS total_balance
         FROM profit_detail pd
         WHERE pd.profit_year <= :priorYear
         GROUP BY pd.ssn
@@ -244,21 +227,23 @@ USING (
             d.termination_date,
             fc.first_year,
             NVL(pb.total_balance, 0) AS prior_balance,
+            -- COBOL PAY426.cbl line 1273: Add 1 to years if employee had money last year
+            CASE WHEN NVL(pb.total_balance, 0) > 0 THEN 1 ELSE 0 END AS balance_year_adj,
             -- Calculate age as of fiscal end date
             FLOOR(MONTHS_BETWEEN(:fiscalEndDate, d.date_of_birth) / 12) AS age,
             -- Is terminated before fiscal end?
             CASE WHEN d.employment_status_id = :empStatusTerminated AND d.termination_date < :fiscalEndDate THEN 1 ELSE 0 END AS is_terminated,
-            -- Has minimum hours (>= ${minHours})?
-            CASE WHEN pp.total_hours >= ${minHours} THEN 1 ELSE 0 END AS has_min_hours,
-            -- Is eligible for processing (age >= 18 AND hours >= ${minHours}) OR (age >= 64)
-            CASE WHEN (d.date_of_birth <= :minAge18BirthDate AND pp.total_hours >= ${minHours})
+            -- Has minimum hours (>= {minHours})?
+            CASE WHEN pp.total_hours >= {minHours} THEN 1 ELSE 0 END AS has_min_hours,
+            -- Is eligible for processing (age >= 18 AND hours >= {minHours}) OR (age >= 64)
+            CASE WHEN (d.date_of_birth <= :minAge18BirthDate AND pp.total_hours >= {minHours})
                       OR d.date_of_birth <= :minAge64BirthDate
                  THEN 1 ELSE 0 END AS is_eligible,
             -- Years since first contribution (plan-year based)
             CASE
                 WHEN fc.first_year IS NULL THEN 0
                 ELSE :profitYear - fc.first_year
-            END AS years_since_first
+            END AS years_since_first_base
         FROM pay_profit pp
         JOIN demographic d ON pp.demographic_id = d.id
         LEFT JOIN first_contrib fc ON d.ssn = fc.ssn
@@ -270,11 +255,15 @@ USING (
         c.demographic_id,
         c.profit_year,
         -- Calculate new EmployeeTypeId (IsNew)
+        -- ResetIsNewForPriorYearEmployeesAsync: ALL employees with prior contributions get IsNew=0
         CASE
+            -- First contribution in prior year -> not new (applies to ALL employees, even ineligible)
+            -- This matches ResetIsNewForPriorYearEmployeesAsync behavior
+            WHEN c.first_year IS NOT NULL AND c.first_year < :profitYear THEN :empTypeNotNew
+            -- Ineligible employees WITHOUT prior contributions: preserve existing IsNew
+            WHEN c.is_eligible = 0 OR (c.hire_date >= :fiscalEndDate AND :includeAllHireDates = 0) THEN c.current_employee_type
             -- Terminated employees are never new
             WHEN c.is_terminated = 1 THEN :empTypeNotNew
-            -- First contribution in prior year -> not new
-            WHEN c.first_year IS NOT NULL AND c.first_year < :profitYear THEN :empTypeNotNew
             -- New employee: no first contribution AND age >= 21
             WHEN c.first_year IS NULL AND c.age >= :minAgeForContribution THEN :empTypeNew
             ELSE :empTypeNotNew
@@ -289,19 +278,39 @@ USING (
             -- Terminated before fiscal end
             WHEN c.is_terminated = 1 THEN
                 CASE
-                    -- Age 65+ with 5+ years vesting
-                    WHEN c.age >= :retirementAge AND c.years_since_first >= :vestingYears THEN :zcr65Plus5Years
-                    -- Terminated with >= 1000 hours
+                    -- Age 64+ terminated employees: check vesting like active 64+ employees
+                    WHEN c.age >= :retirementAgeMinus1 THEN
+                        CASE
+                            -- Age 65+ with 5+ years vesting -> ZCR=6 (takes priority)
+                            WHEN c.age >= :retirementAge AND (c.years_since_first_base + c.balance_year_adj) >= :vestingYears THEN :zcr65Plus5Years
+                            -- Preserve existing ZCR if = 6 (already fully vested)
+                            WHEN NVL(c.current_zcr, 0) = :zcr65Plus5Years THEN :zcr65Plus5Years
+                            -- Age 65+ with exactly 4 years vesting
+                            WHEN c.age >= :retirementAge AND (c.years_since_first_base + c.balance_year_adj) = :vestingYearsMinus1 THEN :zcr64Near5Years
+                            -- Age 64 with 4+ years vesting
+                            WHEN c.age = :retirementAgeMinus1 AND (c.years_since_first_base + c.balance_year_adj) >= :vestingYearsMinus1 THEN :zcr64Near5Years
+                            -- Terminated with >= 1000 hours
+                            WHEN c.has_min_hours = 1 THEN :zcrTerminated
+                            ELSE :zcrNormal
+                        END
+                    -- Terminated under 64: just check hours
                     WHEN c.has_min_hours = 1 THEN :zcrTerminated
                     ELSE :zcrNormal
                 END
             -- Age 64+ employees (active)
             WHEN c.age >= :retirementAgeMinus1 THEN
                 CASE
-                    -- Preserve existing ZCR if >= 6
-                    WHEN NVL(c.current_zcr, 0) >= :zcr65Plus5Years THEN NVL(c.current_zcr, :zcrNormal)
-                    -- Age 65+ with 5+ years vesting
-                    WHEN c.age >= :retirementAge AND c.years_since_first >= :vestingYears THEN :zcr65Plus5Years
+                    -- Age 65+ with 5+ years vesting -> ZCR=6 (takes priority over preserving existing)
+                    WHEN c.age >= :retirementAge AND (c.years_since_first_base + c.balance_year_adj) >= :vestingYears THEN :zcr65Plus5Years
+                    -- Preserve existing ZCR if = 6 (already fully vested with 65+/5+ years)
+                    -- Note: Only preserve ZCR=6 exactly, not ZCR=7, because ZCR=7 employees may now qualify for ZCR=6
+                    WHEN NVL(c.current_zcr, 0) = :zcr65Plus5Years THEN :zcr65Plus5Years
+                    -- Age 65+ with exactly 4 years vesting (will vest next year)
+                    WHEN c.age >= :retirementAge AND (c.years_since_first_base + c.balance_year_adj) = :vestingYearsMinus1 THEN :zcr64Near5Years
+                    -- Age 64 with 4+ years vesting
+                    WHEN c.age = :retirementAgeMinus1 AND (c.years_since_first_base + c.balance_year_adj) >= :vestingYearsMinus1 THEN :zcr64Near5Years
+                    -- Reset ZCR 3-5 to normal (invalid for age 64+) - COBOL PAY426.cbl lines 1199-1203
+                    WHEN NVL(c.current_zcr, 0) > :zcrTerminated AND NVL(c.current_zcr, 0) < :zcr65Plus5Years THEN :zcrNormal
                     ELSE :zcrNormal
                 END
             -- Active employees under 64
@@ -361,6 +370,7 @@ WHERE pp.employee_type_id != src.new_employee_type_id
             await using OracleCommand cmd = connection.CreateCommand();
             cmd.CommandText = sql;
             cmd.CommandTimeout = YearEndMergeSqlTimeoutSeconds;
+            cmd.BindByName = true; // Required when same parameter is used multiple times in SQL
 
             // Bind all parameters to prevent SQL injection
             cmd.Parameters.Add(":profitYear", OracleDbType.Int16).Value = profitYear;
@@ -380,12 +390,14 @@ WHERE pp.employee_type_id != src.new_employee_type_id
             cmd.Parameters.Add(":zcrUnder21", OracleDbType.Byte).Value = zcrUnder21;
             cmd.Parameters.Add(":zcrTerminated", OracleDbType.Byte).Value = zcrTerminated;
             cmd.Parameters.Add(":zcr65Plus5Years", OracleDbType.Byte).Value = zcr65Plus5Years;
+            cmd.Parameters.Add(":zcr64Near5Years", OracleDbType.Byte).Value = zcr64Near5Years;
 
             // Business rule constants
             cmd.Parameters.Add(":minAgeForContribution", OracleDbType.Int16).Value = ReferenceData.MinimumAgeForContribution;
             cmd.Parameters.Add(":retirementAge", OracleDbType.Int16).Value = ReferenceData.RetirementAge;
             cmd.Parameters.Add(":retirementAgeMinus1", OracleDbType.Int16).Value = ReferenceData.RetirementAge - 1;
             cmd.Parameters.Add(":vestingYears", OracleDbType.Int16).Value = ReferenceData.VestingYears;
+            cmd.Parameters.Add(":vestingYearsMinus1", OracleDbType.Int16).Value = ReferenceData.VestingYears - 1;
 
             var sqlStopwatch = Stopwatch.StartNew();
             int rowsAffected = await cmd.ExecuteNonQueryAsync(ct);

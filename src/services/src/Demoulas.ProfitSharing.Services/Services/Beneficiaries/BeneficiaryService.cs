@@ -1,5 +1,6 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Beneficiaries;
+using Demoulas.ProfitSharing.Common.Contracts.Shared;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Time;
@@ -426,16 +427,19 @@ public class BeneficiaryService : IBeneficiaryService
         response.State = contact.Address.State ?? string.Empty;
         response.PostalCode = contact.Address.PostalCode ?? string.Empty;
         response.CountryIso = contact.Address.CountryIso ?? string.Empty;
-        response.FullName = contact.ContactInfo!.FullName ?? string.Empty;
-        response.FirstName = contact.ContactInfo!.FirstName;
-        response.LastName = contact.ContactInfo.LastName;
-        response.MiddleName = contact.ContactInfo.MiddleName;
-        response.PhoneNumber = contact.ContactInfo.PhoneNumber;
-        response.MobileNumber = contact.ContactInfo.MobileNumber;
-        response.EmailAddress = contact.ContactInfo.EmailAddress;
-        response.ModifiedAtUtc = contact.ModifiedAtUtc;
+        response.FullName = DtoCommonExtensions.ComputeFullNameWithInitial(
+            contact.ContactInfo!.LastName ?? string.Empty,
+            contact.ContactInfo.FirstName ?? string.Empty,
+            contact.ContactInfo.MiddleName);
+        response.FirstName = contact?.ContactInfo!.FirstName!;
+        response.LastName = contact?.ContactInfo.LastName!;
+        response.MiddleName = contact?.ContactInfo.MiddleName;
+        response.PhoneNumber = contact?.ContactInfo.PhoneNumber;
+        response.MobileNumber = contact?.ContactInfo.MobileNumber;
+        response.EmailAddress = contact?.ContactInfo.EmailAddress;
+        response.ModifiedAtUtc = contact?.ModifiedAtUtc;
 
-        return contact;
+        return contact!;
     }
 
     public async Task DeleteBeneficiaryAsync(int id, CancellationToken cancellationToken)
@@ -458,10 +462,9 @@ public class BeneficiaryService : IBeneficiaryService
                 beneficiaryToDelete.IsDeleted = true;
 
                 // Check if we should also soft delete the contact
-                var deleteContact = false;
                 if (beneficiaryToDelete.Contact != null)
                 {
-                    deleteContact = await CanIDeleteThisBeneficiaryContact(id, beneficiaryToDelete!.Contact, ctx, cancellationToken);
+                    bool deleteContact = await CanIDeleteThisBeneficiaryContact(id, beneficiaryToDelete!.Contact, ctx, cancellationToken);
 
                     if (deleteContact)
                     {

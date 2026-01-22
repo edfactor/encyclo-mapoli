@@ -36,6 +36,7 @@ public sealed class ScenarioFactory
     public List<AuditEvent> AuditEvents { get; set; } = [];
     public List<Bank> Banks { get; set; } = [];
     public List<BankAccount> BankAccounts { get; set; } = [];
+    public List<ExcludedId> ExcludedIds { get; set; } = [];
 
     // populate ProfitCode dictionary object from the Constants
     public List<ProfitCode> ProfitCodes { get; set; } = typeof(ProfitCode.Constants)
@@ -48,6 +49,13 @@ public sealed class ScenarioFactory
         .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
         .Where(f => f.FieldType == typeof(byte))
         .Select(f => new Department { Id = (byte)f.GetValue(null)!, Name = f.Name })
+        .ToList();
+
+    // populate PayClassifications from Constants
+    public List<PayClassification> PayClassifications { get; set; } = typeof(PayClassification.Constants)
+        .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
+        .Where(f => f.FieldType == typeof(string))
+        .Select(f => new PayClassification { Id = (string)f.GetValue(null)!, Name = f.Name })
         .ToList();
 
     // populate TerminationCodes from Constants
@@ -302,6 +310,10 @@ public sealed class ScenarioFactory
         _sdb.ProfitSharingDbContext.Setup(m => m.Departments).Returns(mockDepartments.Object);
         _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.Departments).Returns(mockDepartments.Object);
 
+        Mock<DbSet<PayClassification>> mockPayClassifications = PayClassifications.BuildMockDbSet();
+        _sdb.ProfitSharingDbContext.Setup(m => m.PayClassifications).Returns(mockPayClassifications.Object);
+        _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.PayClassifications).Returns(mockPayClassifications.Object);
+
         Mock<DbSet<FrozenState>> mockFrozenStates = FrozenStates.BuildMockDbSet();
         _sdb.ProfitSharingDbContext.Setup(m => m.FrozenStates).Returns(mockFrozenStates.Object);
         _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.FrozenStates).Returns(mockFrozenStates.Object);
@@ -332,6 +344,11 @@ public sealed class ScenarioFactory
         Mock<DbSet<BankAccount>> mockBankAccounts = BankAccounts.BuildMockDbSet();
         _sdb.ProfitSharingDbContext.Setup(m => m.BankAccounts).Returns(mockBankAccounts.Object);
         _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.BankAccounts).Returns(mockBankAccounts.Object);
+
+        // ExcludedIds (for pensioner exclusions and other excluded IDs)
+        Mock<DbSet<ExcludedId>> mockExcludedIds = ExcludedIds.BuildMockDbSet();
+        _sdb.ProfitSharingDbContext.Setup(m => m.ExcludedIds).Returns(mockExcludedIds.Object);
+        _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.ExcludedIds).Returns(mockExcludedIds.Object);
 
         return _sdb;
     }
