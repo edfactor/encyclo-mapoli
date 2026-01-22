@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Constants;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -342,6 +342,13 @@ public sealed class BreakdownReportService : IBreakdownService
        CancellationToken cancellationToken)
     {
         return GetMembersByStore(request, StatusFilter.Retired, Balance.HasBalanceActivity, applyQPAY066A1Filter: false, ssns: null, badgeNumbers: null, cancellationToken);
+    }
+
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetActiveMembersWithVestedBalanceByStore(
+       BreakdownByStoreRequest request,
+       CancellationToken cancellationToken)
+    {
+        return GetMembersByStore(request, StatusFilter.Active, Balance.HasVestedBalance, applyQPAY066A1Filter: false, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithVestedBalanceByStore(

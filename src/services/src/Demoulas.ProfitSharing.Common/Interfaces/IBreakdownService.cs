@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
@@ -11,6 +11,10 @@ public interface IBreakdownService
     Task<ReportResponseBase<MemberYearSummaryDto>> GetInactiveMembersByStore(
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken);
+
+    Task<ReportResponseBase<MemberYearSummaryDto>> GetActiveMembersWithVestedBalanceByStore(
+       BreakdownByStoreRequest request,
+       CancellationToken cancellationToken);
 
     Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithVestedBalanceByStore(
        BreakdownByStoreRequest request,
