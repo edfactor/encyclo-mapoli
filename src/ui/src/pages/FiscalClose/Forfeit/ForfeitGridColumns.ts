@@ -7,12 +7,7 @@ import {
   createSSNColumn
 } from "../../../utils/gridColumnFactory";
 
-export interface ForfeitColumnsOptions {
-  onValidationClick?: (fieldName: string) => void;
-}
-
-export const GetProfitShareForfeitColumns = (options: ForfeitColumnsOptions): ColDef[] => {
-  const { onValidationClick } = options;
+export const GetProfitShareForfeitColumns = (): ColDef[] => {
   return [
     createBadgeOrPSNColumn({
       headerName: "Badge/PSN",
