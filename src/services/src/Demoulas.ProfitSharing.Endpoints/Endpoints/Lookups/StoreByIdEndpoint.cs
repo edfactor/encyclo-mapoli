@@ -1,10 +1,9 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Lookups;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 
@@ -12,7 +11,7 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 /// Endpoint for retrieving a single store by its ID.
 /// Returns store information including display name, departments, and spirits store status.
 /// </summary>
-public sealed class StoreByIdEndpoint : ProfitSharingEndpoint<StoreByIdRequest, Results<Ok<StoreDetailResponse>, NotFound, ProblemHttpResult>>
+public sealed class StoreByIdEndpoint : ProfitSharingEndpoint<StoreByIdRequest, Results<Ok<StoreResponse>, NotFound, ProblemHttpResult>>
 {
     private readonly IStoreLookupService _storeLookupService;
 
@@ -31,7 +30,7 @@ public sealed class StoreByIdEndpoint : ProfitSharingEndpoint<StoreByIdRequest, 
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
-                    200, new StoreDetailResponse
+                    200, new StoreResponse
                     {
                         StoreId = 1,
                         DisplayName = "1 - FLETCHER",
@@ -49,18 +48,18 @@ public sealed class StoreByIdEndpoint : ProfitSharingEndpoint<StoreByIdRequest, 
         Group<LookupGroup>();
     }
 
-    protected override async Task<Results<Ok<StoreDetailResponse>, NotFound, ProblemHttpResult>> HandleRequestAsync(StoreByIdRequest req, CancellationToken ct)
+    protected override async Task<Results<Ok<StoreResponse>, NotFound, ProblemHttpResult>> HandleRequestAsync(StoreByIdRequest req, CancellationToken ct)
     {
         // Retrieve store from the lookup service
         var store = await _storeLookupService.GetStoreByIdAsync(req.StoreId, ct);
 
         if (store == null)
         {
-            return Result<StoreDetailResponse>.Failure(Error.StoreNotFound).ToHttpResult();
+            return Result<StoreResponse>.Failure(Error.StoreNotFound).ToHttpResult();
         }
 
         // Convert to detail response DTO
-        var response = new StoreDetailResponse
+        var response = new StoreResponse
         {
             StoreId = store.StoreId,
             DisplayName = store.DisplayName,
@@ -70,17 +69,7 @@ public sealed class StoreByIdEndpoint : ProfitSharingEndpoint<StoreByIdRequest, 
             HasSpirits = store.HasSpirits
         };
 
-        return Result<StoreDetailResponse>.Success(response).ToHttpResult();
+        return Result<StoreResponse>.Success(response).ToHttpResult();
     }
 }
 
-/// <summary>
-/// Request object for looking up a store by ID.
-/// </summary>
-public sealed record StoreByIdRequest
-{
-    /// <summary>
-    /// The unique identifier for the store.
-    /// </summary>
-    public int StoreId { get; set; }
-}

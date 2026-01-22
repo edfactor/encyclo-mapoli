@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Lookups;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
@@ -15,7 +15,7 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 /// Returns store information including store ID, display name, and associated departments.
 /// Supports filtering by store status (Active/Unopened) and type (Retail/All).
 /// </summary>
-public sealed class StoreListEndpoint : ProfitSharingResultResponseEndpoint<ListResponseDto<StoreListResponse>>
+public sealed class StoreListEndpoint : ProfitSharingResultResponseEndpoint<ListResponseDto<StoreResponse>>
 {
     private readonly IStoreLookupService _storeLookupService;
 
@@ -37,9 +37,9 @@ public sealed class StoreListEndpoint : ProfitSharingResultResponseEndpoint<List
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
-                    200, new ListResponseDto<StoreListResponse>
+                    200, new ListResponseDto<StoreResponse>
                     {
-                        Items = new List<StoreListResponse>
+                        Items = new List<StoreResponse>
                         {
                             new()
                             {
@@ -67,7 +67,7 @@ public sealed class StoreListEndpoint : ProfitSharingResultResponseEndpoint<List
         Group<LookupGroup>();
     }
 
-    protected override async Task<Results<Ok<ListResponseDto<StoreListResponse>>, NotFound, ProblemHttpResult>> HandleRequestAsync(CancellationToken ct)
+    protected override async Task<Results<Ok<ListResponseDto<StoreResponse>>, NotFound, ProblemHttpResult>> HandleRequestAsync(CancellationToken ct)
     {
         // Create default request (all stores, all types)
         var request = new StoreListRequest();
@@ -75,11 +75,11 @@ public sealed class StoreListEndpoint : ProfitSharingResultResponseEndpoint<List
         // Get stores using the lookup service
         var stores = await _storeLookupService.GetStoresAsync(request, ct);
 
-        var response = new ListResponseDto<StoreListResponse>
+        var response = new ListResponseDto<StoreResponse>
         {
             Items = stores
         };
 
-        return Result<ListResponseDto<StoreListResponse>>.Success(response).ToHttpResult();
+        return Result<ListResponseDto<StoreResponse>>.Success(response).ToHttpResult();
     }
 }

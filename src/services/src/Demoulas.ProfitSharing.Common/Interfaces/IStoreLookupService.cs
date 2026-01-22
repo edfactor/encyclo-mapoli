@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Lookups;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Lookups;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 
 namespace Demoulas.ProfitSharing.Common.Interfaces;
@@ -12,10 +12,10 @@ public interface IStoreLookupService
     /// <summary>
     /// Gets a list of stores with optional filtering by status and type.
     /// </summary>
-    Task<List<StoreListResponse>> GetStoresAsync(StoreListRequest request, CancellationToken cancellationToken);
+    Task<List<StoreResponse>> GetStoresAsync(StoreListRequest request, CancellationToken cancellationToken);
 
     /// <summary>
     /// Gets a single store by ID.
     /// </summary>
-    Task<StoreListResponse?> GetStoreByIdAsync(int storeId, CancellationToken cancellationToken);
+    Task<StoreResponse?> GetStoreByIdAsync(int storeId, CancellationToken cancellationToken);
 }

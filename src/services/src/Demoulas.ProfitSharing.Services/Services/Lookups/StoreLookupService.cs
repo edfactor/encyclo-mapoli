@@ -25,7 +25,7 @@ public sealed class StoreLookupService : IStoreLookupService
         _dataContextFactory = dataContextFactory;
     }
 
-    public Task<List<StoreListResponse>> GetStoresAsync(
+    public Task<List<StoreResponse>> GetStoresAsync(
         StoreListRequest request,
         CancellationToken cancellationToken)
     {
@@ -63,7 +63,7 @@ public sealed class StoreLookupService : IStoreLookupService
         });
     }
 
-    public Task<StoreListResponse?> GetStoreByIdAsync(
+    public Task<StoreResponse?> GetStoreByIdAsync(
         int storeId,
         CancellationToken cancellationToken)
     {
@@ -98,10 +98,10 @@ public sealed class StoreLookupService : IStoreLookupService
             : ctx.Stores.Where(s => false); // Empty query
     }
 
-    private static StoreListResponse MapToStoreListResponse(
+    private static StoreResponse MapToStoreListResponse(
         StoreInformation store)
     {
-        return new StoreListResponse
+        return new StoreResponse
         {
             StoreId = store.StoreId,
             DisplayName = $"{store.StoreId} - {store.StoreName}",
