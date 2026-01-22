@@ -1,10 +1,9 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Base;
-using Demoulas.ProfitSharing.Endpoints.Extensions;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Microsoft.Extensions.Logging;
 
@@ -53,7 +52,7 @@ public class BeneficiarySearchFilterEndpoint : ProfitSharingEndpoint<Beneficiary
                 new("endpoint", nameof(BeneficiarySearchFilterEndpoint)));
 
             return response;
-        }, "Ssn");
+        });
     }
 
 }
