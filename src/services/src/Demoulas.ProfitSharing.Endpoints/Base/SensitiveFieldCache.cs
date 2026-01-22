@@ -21,18 +21,18 @@ public static class SensitiveFieldCache
         return fields.Count == 0 ? [] : fields.ToArray();
     }
 
-    private static bool AddSensitiveFields(Type type, HashSet<string> fields, HashSet<Type> visited)
+    private static void AddSensitiveFields(Type type, HashSet<string> fields, HashSet<Type> visited)
     {
         type = NormalizeType(type);
 
         if (type == typeof(object))
         {
-            return false;
+            return;
         }
 
         if (!visited.Add(type))
         {
-            return false;
+            return;
         }
 
         if (IsResultsUnion(type))
@@ -42,32 +42,21 @@ public static class SensitiveFieldCache
                 AddSensitiveFields(genericType, fields, visited);
             }
 
-            return fields.Count > 0;
+            return;
         }
 
         if (TryGetEnumerableElementType(type, out var elementType))
         {
-            return AddSensitiveFields(elementType, fields, visited);
+            AddSensitiveFields(elementType, fields, visited);
+            return;
         }
 
-        if (type.IsPrimitive || type.IsEnum || type == typeof(string))
+        if (IsLeafType(type))
         {
-            return false;
+            return;
         }
 
-        bool hasSensitive = false;
-        if (type.GetCustomAttribute<MaskSensitiveAttribute>(inherit: true) is not null)
-        {
-            foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
-            {
-                if (property.GetIndexParameters().Length == 0)
-                {
-                    fields.Add(property.Name);
-                    hasSensitive = true;
-                }
-            }
-        }
-
+        var isTypeMasked = type.GetCustomAttribute<MaskSensitiveAttribute>(inherit: true) is not null;
         foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
             if (property.GetIndexParameters().Length != 0)
@@ -75,22 +64,22 @@ public static class SensitiveFieldCache
                 continue;
             }
 
-            if (property.GetCustomAttribute<MaskSensitiveAttribute>(inherit: true) is not null)
+            var propertyType = NormalizeType(property.PropertyType);
+            if (isTypeMasked)
             {
-                fields.Add(property.Name);
-                hasSensitive = true;
+                AddLeafOrRecurse(propertyType, property.Name, fields, visited);
                 continue;
             }
 
-            bool childSensitive = AddSensitiveFields(property.PropertyType, fields, visited);
-            if (childSensitive)
+            if (property.GetCustomAttribute<MaskSensitiveAttribute>(inherit: true) is not null)
             {
-                fields.Add(property.Name);
-                hasSensitive = true;
+                AddLeafOrRecurse(propertyType, property.Name, fields, visited);
+            }
+            else
+            {
+                AddSensitiveFields(propertyType, fields, visited);
             }
         }
-
-        return hasSensitive;
     }
 
     private static bool IsResultsUnion(Type type)
@@ -107,6 +96,30 @@ public static class SensitiveFieldCache
         }
 
         return type;
+    }
+
+    private static void AddLeafOrRecurse(Type propertyType, string propertyName, HashSet<string> fields, HashSet<Type> visited)
+    {
+        if (IsLeafType(propertyType))
+        {
+            fields.Add(propertyName);
+            return;
+        }
+
+        AddSensitiveFields(propertyType, fields, visited);
+    }
+
+    private static bool IsLeafType(Type type)
+    {
+        return type.IsPrimitive
+            || type.IsEnum
+            || type == typeof(string)
+            || type == typeof(decimal)
+            || type == typeof(DateOnly)
+            || type == typeof(DateTime)
+            || type == typeof(DateTimeOffset)
+            || type == typeof(TimeOnly)
+            || type == typeof(Guid);
     }
 
     private static bool TryGetEnumerableElementType(Type type, out Type elementType)

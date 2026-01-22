@@ -31,10 +31,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
     fieldName: string | null;
   }>({ isOpen: false, fieldName: null });
 
-  const columnDefs = useMemo(
-    () => GetProfitShareForfeitColumns(),
-    []
-  );
+  const columnDefs = useMemo(() => GetProfitShareForfeitColumns(), []);
 
   // Custom sort handler for compound sort on badgeOrPsn column
   const handleSortChange = useCallback(
