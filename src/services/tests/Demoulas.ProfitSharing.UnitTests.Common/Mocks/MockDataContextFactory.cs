@@ -385,6 +385,26 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         List<ParticipantTotal> etvaBalances = new ParticipantEtvaTotalFaker(profitDetails).Generate(profitDetails.Count);
         Constants.FakeEtvaTotals = etvaBalances.BuildMockDbSet();
 
+        // Initialize vesting ratios (ParticipantTotalRatio) - default all to 100% vested for testing
+        List<ParticipantTotalRatio> vestingRatios = demographics.Select(d => new ParticipantTotalRatio
+        {
+            Ssn = d.Ssn,
+            Ratio = 1.0m // Default 100% vested
+        }).ToList();
+        Constants.FakeVestingRatios = vestingRatios.BuildMockDbSet();
+
+        // Initialize transaction rollups (ProfitDetailRollup) - empty by default
+        List<ProfitDetailRollup> transactionRollups = demographics.Select(d => new ProfitDetailRollup
+        {
+            Ssn = d.Ssn,
+            TotalEarnings = 0m,
+            TotalContributions = 0m,
+            TotalForfeitures = 0m,
+            Distribution = 0m,
+            BeneficiaryAllocation = 0m
+        }).ToList();
+        Constants.FakeTransactionRollups = transactionRollups.BuildMockDbSet();
+
         var profitShareTotal = new ProfitShareTotalFaker().Generate();
         Constants.ProfitShareTotals = (new List<ProfitShareTotal>() { profitShareTotal }).BuildMockDbSet();
         participantTimer.Stop();

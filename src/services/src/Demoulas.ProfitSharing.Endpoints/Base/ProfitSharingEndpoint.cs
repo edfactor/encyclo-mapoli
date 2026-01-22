@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Api.Endpoints;
+using Demoulas.Common.Api.Endpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Base;
 
@@ -20,6 +20,8 @@ public abstract class ProfitSharingEndpoint<TRequest, TResponse> : DemoulasEndpo
     where TRequest : notnull
     where TResponse : notnull
 {
+    private static readonly Lazy<string[]> _sensitiveFields = new(BuildSensitiveFields);
+
     protected ProfitSharingEndpoint(short navigationId)
     {
         NavigationId = navigationId;
@@ -29,6 +31,27 @@ public abstract class ProfitSharingEndpoint<TRequest, TResponse> : DemoulasEndpo
     /// A short identifier representing the navigation/menu item for this endpoint.
     /// </summary>
     public short NavigationId { get; }
+
+    protected override string[] GetSensitiveFields(TRequest request) => _sensitiveFields.Value;
+
+    private static string[] BuildSensitiveFields()
+    {
+        return MergeSensitiveFields(typeof(TRequest), typeof(TResponse));
+    }
+
+    private static string[] MergeSensitiveFields(params Type[] types)
+    {
+        var fields = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var type in types)
+        {
+            foreach (string field in SensitiveFieldCache.GetSensitiveFields(type))
+            {
+                fields.Add(field);
+            }
+        }
+
+        return fields.Count == 0 ? [] : fields.ToArray();
+    }
 }
 
 /// <summary>
@@ -38,12 +61,35 @@ public abstract class ProfitSharingEndpoint<TRequest, TResponse> : DemoulasEndpo
 public abstract class ProfitSharingRequestEndpoint<TRequest> : DemoulasEndpoint<TRequest>, IHasNavigationId
     where TRequest : notnull
 {
+    private static readonly Lazy<string[]> _sensitiveFields = new(BuildSensitiveFields);
+
     protected ProfitSharingRequestEndpoint(short navigationId)
     {
         NavigationId = navigationId;
     }
 
     public short NavigationId { get; }
+
+    protected override string[] GetSensitiveFields(TRequest request) => _sensitiveFields.Value;
+
+    private static string[] BuildSensitiveFields()
+    {
+        return MergeSensitiveFields(typeof(TRequest));
+    }
+
+    private static string[] MergeSensitiveFields(params Type[] types)
+    {
+        var fields = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var type in types)
+        {
+            foreach (string field in SensitiveFieldCache.GetSensitiveFields(type))
+            {
+                fields.Add(field);
+            }
+        }
+
+        return fields.Count == 0 ? [] : fields.ToArray();
+    }
 }
 
 /// <summary>

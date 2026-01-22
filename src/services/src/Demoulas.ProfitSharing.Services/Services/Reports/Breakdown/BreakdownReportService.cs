@@ -110,28 +110,38 @@ public sealed class BreakdownReportService : IBreakdownService
     #endregion
 
     public Task<GrandTotalsByStoreResponseDto> GetGrandTotals(
-     YearRequest request,
+     GrandTotalsByStoreRequest request,
      CancellationToken cancellationToken)
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
 
-            // Aggregate per-store and per-vesting-bucket sums in a SINGLE database query
+            // Get active store IDs for the "Other" category
+            // Active stores are retail stores (1-140) that aren't in the specific buckets (700, 701, 800, 801, 802, 900)
+            var activeStoreIds = StoreTypes.RetailStores
+                .Where(s => s < 700 || s > 900) // Exclude profit sharing report stores
+                .Select(s => (short)s)
+                .ToHashSet();
+
+            // Aggregate per-store and per-vesting-bucket COUNTS in a SINGLE database query
             var baseQuery = await BuildEmployeesBaseQuery(ctx, request.ProfitYear, calInfo.FiscalEndDate);
 
-            // Single query that gets all aggregations needed
+            // Apply Under 21 filter if requested (PS-2442: Filter for under 21 participants in grand totals)
+            if (request.Under21Participants)
+            {
+                // Calculate age using the fiscal end date and filter for participants under 21
+                // Age is calculated server-side from DateOfBirth relative to the fiscal end date
+                DateOnly under21Date = calInfo.FiscalEndDate.AddYears(-21);
+
+                baseQuery = baseQuery.Where(e => e.DateOfBirth > under21Date);
+            }
+
+            // Single query that gets all aggregations needed - COUNT participants instead of SUM balances
             var aggregatedData = await baseQuery
                 .Select(m => new
                 {
                     m.StoreNumber,
-                    VestingRatio = (m.VestedPercent ?? 0m),
-                    EndBalance = (m.BeginningBalance ?? 0m)
-                                + m.Earnings
-                                + m.Contributions
-                                + m.Forfeitures
-                                + m.Distributions
-                                + (m.BeneficiaryAllocation ?? 0m),
                     m.Ssn,
                     // Compute bucket in SQL to enable single-query aggregation
                     VestingBucket = m.VestedPercent == 1m ? "100% Vested"
@@ -145,14 +155,14 @@ public sealed class BreakdownReportService : IBreakdownService
             var ssns = aggregatedData.Select(x => x.Ssn).Distinct().ToHashSet();
             ThrowIfInvalidSsns(ssns);
 
-            // Group in memory (data is already loaded and small after aggregation)
+            // Group in memory - COUNT participants instead of SUM balances
             var perStoreTotals = aggregatedData
                 .GroupBy(p => p.StoreNumber)
-                .ToDictionary(g => g.Key, g => g.Sum(x => x.EndBalance));
+                .ToDictionary(g => g.Key, g => g.Count());
 
             var perStoreBuckets = aggregatedData
                 .GroupBy(p => (p.StoreNumber, p.VestingBucket))
-                .ToDictionary(g => g.Key, g => g.Sum(x => x.EndBalance));
+                .ToDictionary(g => g.Key, g => g.Count());
 
             var storeKeys = new HashSet<short>(new short[] { 700, 701, 800, 801, 802, 900 });
             var categories = new[] { "Grand Total", "100% Vested", "Partially Vested", "Not Vested" };
@@ -165,26 +175,27 @@ public sealed class BreakdownReportService : IBreakdownService
                 {
                     Category = label,
                     Store700 = label == "Grand Total"
-                        ? (perStoreTotals.TryGetValue(700, out var s700) ? s700 : 0m)
-                        : (perStoreBuckets.TryGetValue((700, label), out var b700) ? b700 : 0m),
+                        ? (perStoreTotals.TryGetValue(700, out var s700) ? s700 : 0)
+                        : (perStoreBuckets.TryGetValue((700, label), out var b700) ? b700 : 0),
                     Store701 = label == "Grand Total"
-                        ? (perStoreTotals.TryGetValue(701, out var s701) ? s701 : 0m)
-                        : (perStoreBuckets.TryGetValue((701, label), out var b701) ? b701 : 0m),
+                        ? (perStoreTotals.TryGetValue(701, out var s701) ? s701 : 0)
+                        : (perStoreBuckets.TryGetValue((701, label), out var b701) ? b701 : 0),
                     Store800 = label == "Grand Total"
-                        ? (perStoreTotals.TryGetValue(800, out var s800) ? s800 : 0m)
-                        : (perStoreBuckets.TryGetValue((800, label), out var b800) ? b800 : 0m),
+                        ? (perStoreTotals.TryGetValue(800, out var s800) ? s800 : 0)
+                        : (perStoreBuckets.TryGetValue((800, label), out var b800) ? b800 : 0),
                     Store801 = label == "Grand Total"
-                        ? (perStoreTotals.TryGetValue(801, out var s801) ? s801 : 0m)
-                        : (perStoreBuckets.TryGetValue((801, label), out var b801) ? b801 : 0m),
+                        ? (perStoreTotals.TryGetValue(801, out var s801) ? s801 : 0)
+                        : (perStoreBuckets.TryGetValue((801, label), out var b801) ? b801 : 0),
                     Store802 = label == "Grand Total"
-                        ? (perStoreTotals.TryGetValue(802, out var s802) ? s802 : 0m)
-                        : (perStoreBuckets.TryGetValue((802, label), out var b802) ? b802 : 0m),
+                        ? (perStoreTotals.TryGetValue(802, out var s802) ? s802 : 0)
+                        : (perStoreBuckets.TryGetValue((802, label), out var b802) ? b802 : 0),
                     Store900 = label == "Grand Total"
-                        ? (perStoreTotals.TryGetValue(900, out var s900) ? s900 : 0m)
-                        : (perStoreBuckets.TryGetValue((900, label), out var b900) ? b900 : 0m),
+                        ? (perStoreTotals.TryGetValue(900, out var s900) ? s900 : 0)
+                        : (perStoreBuckets.TryGetValue((900, label), out var b900) ? b900 : 0),
+                    // Other category: use active store IDs (retail stores 1-140, excluding special buckets)
                     StoreOther = label == "Grand Total"
-                        ? perStoreTotals.Where(p => !storeKeys.Contains(p.Key)).Sum(p => p.Value)
-                        : perStoreBuckets.Where(p => !storeKeys.Contains(p.Key.StoreNumber) && p.Key.VestingBucket == label).Sum(p => p.Value)
+                        ? perStoreTotals.Where(p => activeStoreIds.Contains(p.Key)).Sum(p => p.Value)
+                        : perStoreBuckets.Where(p => activeStoreIds.Contains(p.Key.StoreNumber) && p.Key.VestingBucket == label).Sum(p => p.Value)
                 };
 
                 row = row with
@@ -365,11 +376,181 @@ public sealed class BreakdownReportService : IBreakdownService
         return GetMembersByStore(request, StatusFilter.Terminated, Balance.HasBalanceActivity, applyQPAY066A1Filter: false, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
+    /// <summary>
+    /// Retrieves terminated employees with current balance not vested plus qualifying beneficiaries.
+    /// Logic:
+    /// 1. Employees terminated during current fiscal year with vesting percentage &lt; 20%
+    /// 2. Beneficiaries who are NOT also employees (by SSN match)
+    /// 3. Beneficiaries must have a vested amount OR profit detail records with profit_code_id 5 or 6
+    /// </summary>
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithCurrentBalanceNotVestedByStore(
        BreakdownByStoreRequest request,
        CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilter.Terminated, Balance.HasCurrentBalanceNotVested, applyQPAY066A1Filter: false, ssns: null, badgeNumbers: null, cancellationToken);
+        return _dataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
+            var asOfDate = DateOnly.FromDateTime(_timeProvider.GetUtcNow().DateTime);
+
+            // Beneficiary profit codes: OutgoingXferBeneficiary (5) and IncomingQdroBeneficiary (6)
+            var beneficiaryProfitCodes = new[] { ProfitCode.Constants.OutgoingXferBeneficiary.Id, ProfitCode.Constants.IncomingQdroBeneficiary.Id };
+
+            // Build demographic query
+            var demographics = await _demographicReaderService.BuildDemographicQueryAsync(ctx);
+
+            // ═══════════════════════════════════════════════════════════════════════════
+            // OPTIMIZED: Use database-side subqueries instead of loading large sets
+            // ═══════════════════════════════════════════════════════════════════════════
+
+            // 1. Get terminated employees with vesting < 20%
+            var terminatedEmployees = await BuildAndExecuteTerminatedEmployeesQueryAsync(
+                ctx, demographics, request, calInfo, cancellationToken);
+
+            var terminatedSsns = terminatedEmployees.Select(e => e.Ssn).ToHashSet();
+            ThrowIfInvalidSsns(terminatedSsns);
+
+            // Skip beneficiaries if store filter excludes store 800
+            // Beneficiaries are always bucketed to virtual store 800 (see line 438 below)
+            // If user filters to a specific store other than 800, exclude beneficiaries entirely
+            List<ActiveMemberDto> beneficiaries;
+            if (request.StoreNumber.HasValue && request.StoreNumber.Value != 800)
+            {
+                beneficiaries = [];
+            }
+            else
+            {
+                // Create subqueries for database-side filtering (NOT materialized)
+                // Subquery: SSNs that are employees
+                var employeeSsnsSubquery = demographics.Select(d => d.Ssn);
+
+                // Subquery: SSNs with beneficiary profit codes 5 or 6
+                var profitCodeSsnsSubquery = ctx.ProfitDetails
+                    .Where(pd => pd.ProfitYear == request.ProfitYear && beneficiaryProfitCodes.Contains(pd.ProfitCodeId))
+                    .Select(pd => pd.Ssn);
+
+                // Subquery: SSNs with vested balance > 0
+                var vestingSsnsSubquery = _totalService
+                    .TotalVestingBalance(ctx, request.ProfitYear, asOfDate)
+                    .Where(vb => vb.VestedBalance > 0)
+                    .Select(vb => vb.Ssn);
+
+                // Query beneficiaries with all filtering done in the database
+                var beneficiaryData = await ctx.Beneficiaries
+                    .TagWith("GetTerminatedNotVested-Beneficiaries")
+                    .Include(b => b.Contact)
+                        .ThenInclude(c => c!.ContactInfo)
+                    .Include(b => b.Contact)
+                        .ThenInclude(c => c!.Address)
+                    .Where(b => !b.IsDeleted)
+                    .Where(b => !employeeSsnsSubquery.Contains(b.Contact!.Ssn)) // NOT IN employees (subquery)
+                    .Where(b => profitCodeSsnsSubquery.Contains(b.Contact!.Ssn) ||
+                                vestingSsnsSubquery.Contains(b.Contact!.Ssn)) // Has profit codes 5/6 OR vested balance
+                    .Select(b => new
+                    {
+                        b.BadgeNumber,
+                        ContactSsn = b.Contact!.Ssn,
+                        ContactDateOfBirth = b.Contact.DateOfBirth,
+                        ContactFullName = b.Contact.ContactInfo.FullName,
+                        ContactStreet = b.Contact.Address.Street,
+                        ContactCity = b.Contact.Address.City,
+                        ContactState = b.Contact.Address.State,
+                        ContactPostalCode = b.Contact.Address.PostalCode
+                    })
+                    .ToListAsync(cancellationToken);
+
+                // Convert beneficiaries to ActiveMemberDto in memory
+                beneficiaries = beneficiaryData.Select(b => new ActiveMemberDto
+                {
+                    BadgeNumber = b.BadgeNumber,
+                    StoreNumber = 800, // Beneficiaries go to store 800 bucket
+                    FullName = b.ContactFullName ?? string.Empty,
+                    Ssn = b.ContactSsn,
+                    DateOfBirth = b.ContactDateOfBirth,
+                    PayClassificationId = string.Empty,
+                    EmploymentStatusId = EmploymentStatus.Constants.Terminated,
+                    DepartmentId = 0,
+                    PayFrequencyId = 0,
+                    TerminationCodeId = null,
+                    DepartmentName = string.Empty,
+                    PayClassificationName = string.Empty,
+                    CurrentBalance = 0,
+                    VestedBalance = 0,
+                    VestedPercent = 0,
+                    EtvaBalance = 0,
+                    YearsInPlan = 0,
+                    HireDate = DateOnly.MinValue,
+                    TerminationDate = null,
+                    EnrollmentId = EnrollmentConstants.NotEnrolled,
+                    ProfitShareHours = 0,
+                    Street1 = b.ContactStreet,
+                    City = b.ContactCity,
+                    State = b.ContactState,
+                    PostalCode = b.ContactPostalCode,
+                    BeginningBalance = 0,
+                    Earnings = 0,
+                    Distributions = 0,
+                    Contributions = 0,
+                    Forfeitures = 0,
+                    BeneficiaryAllocation = 0,
+                    CertificateSort = 0
+                }).ToList();
+
+                if (beneficiaries.Count > 0)
+                {
+                    var beneficiarySsns = beneficiaries.Select(b => b.Ssn).ToHashSet();
+                    ThrowIfInvalidSsns(beneficiarySsns);
+                }
+            }
+
+            // Combine employees and beneficiaries in memory
+            var combined = terminatedEmployees.Concat(beneficiaries).ToList();
+
+            // Apply sorting and pagination in memory (matching GetPaginatedResults logic)
+            IEnumerable<ActiveMemberDto> ordered;
+            if (ReferenceData.CertificateSort.Equals(request.SortBy, StringComparison.InvariantCultureIgnoreCase))
+            {
+                ordered = combined
+                    .OrderBy(e => e.StoreNumber)
+                    .ThenBy(e => e.CertificateSort)
+                    .ThenBy(e => e.FullName);
+            }
+            else
+            {
+                ordered = combined
+                    .OrderBy(e => e.StoreNumber)
+                    .ThenBy(e => e.FullName);
+            }
+
+            var total = combined.Count;
+            var results = ordered
+                .Skip(request.Skip ?? 0)
+                .Take(request.Take ?? 25)
+                .ToList();
+
+            // Get financial snapshots for the paginated results
+            var resultSsns = results.Select(r => r.Ssn).ToHashSet();
+            var snapshots = await GetEmployeeFinancialSnapshotsAsync(
+                ctx, request.ProfitYear, resultSsns, cancellationToken);
+            var snapshotByKey = snapshots.ToDictionary(s => (s.Ssn, s.BadgeNumber));
+
+            // Build final response
+            var members = results
+                .Select(d => BuildMemberYearSummary(d, snapshotByKey.GetValueOrDefault((d.Ssn, d.BadgeNumber))))
+                .ToList();
+
+            return new ReportResponseBase<MemberYearSummaryDto>
+            {
+                ReportDate = DateTimeOffset.UtcNow,
+                StartDate = calInfo.FiscalBeginDate,
+                EndDate = calInfo.FiscalEndDate,
+                ReportName = $"Terminated Members with Current Balance Not Vested for {request.ProfitYear}",
+                Response = new PaginatedResponseDto<MemberYearSummaryDto>
+                {
+                    Results = members,
+                    Total = total
+                }
+            };
+        }, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithBeneficiaryByStore(
@@ -607,6 +788,109 @@ public sealed class BreakdownReportService : IBreakdownService
             Results = results,
             Total = total
         };
+    }
+
+    /// <summary>
+    /// Builds and executes a lightweight query for terminated employees with vesting &lt; 20%.
+    /// This is optimized for the specific filters needed by GetTerminatedMembersWithCurrentBalanceNotVestedByStore.
+    /// </summary>
+    private Task<List<ActiveMemberDto>> BuildAndExecuteTerminatedEmployeesQueryAsync(
+        ProfitSharingReadOnlyDbContext ctx,
+        IQueryable<Demographic> demographics,
+        BreakdownByStoreRequest request,
+        CalendarResponseDto calInfo,
+        CancellationToken cancellationToken)
+    {
+        var asOfDate = DateOnly.FromDateTime(_timeProvider.GetUtcNow().DateTime);
+
+        // Build targeted query for terminated employees with vesting < 20%
+        var balances = _totalService.TotalVestingBalance(ctx, request.ProfitYear, asOfDate);
+
+        var query =
+            from d in demographics.Include(x => x.Address)
+            join pp in ctx.PayProfits on d.Id equals pp.DemographicId
+            join b in balances on d.Ssn equals b.Ssn into balGrp
+            from bal in balGrp.DefaultIfEmpty()
+            where pp.ProfitYear == request.ProfitYear
+                  && d.EmploymentStatusId == EmploymentStatus.Constants.Terminated
+                  && d.TerminationDate.HasValue
+                  && d.TerminationDate.Value >= calInfo.FiscalBeginDate
+                  && d.TerminationDate.Value <= calInfo.FiscalEndDate
+                  && (bal == null ? 0 : bal.VestingPercent) < 0.20m
+            select new ActiveMemberDto
+            {
+                BadgeNumber = d.BadgeNumber,
+                StoreNumber = d.StoreNumber,
+                FullName = d.ContactInfo.FullName ?? string.Empty,
+                Ssn = d.Ssn,
+                DateOfBirth = d.DateOfBirth,
+                PayClassificationId = d.PayClassificationId,
+                EmploymentStatusId = d.EmploymentStatusId,
+                DepartmentId = d.DepartmentId,
+                PayFrequencyId = d.PayFrequencyId,
+                TerminationCodeId = d.TerminationCodeId,
+                DepartmentName = d.Department!.Name,
+                PayClassificationName = d.PayClassification!.Name,
+                CurrentBalance = bal == null ? 0 : bal.CurrentBalance,
+                VestedBalance = bal == null ? 0 : bal.VestedBalance,
+                VestedPercent = bal == null ? 0 : bal.VestingPercent,
+                EtvaBalance = 0,
+                YearsInPlan = bal == null ? 0 : bal.YearsInPlan,
+                HireDate = d.HireDate,
+                TerminationDate = d.TerminationDate,
+                EnrollmentId = pp.VestingScheduleId == 0
+                    ? EnrollmentConstants.NotEnrolled
+                    : pp.HasForfeited
+                        ? pp.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                            ? EnrollmentConstants.OldVestingPlanHasForfeitureRecords
+                            : EnrollmentConstants.NewVestingPlanHasForfeitureRecords
+                        : pp.VestingScheduleId == VestingSchedule.Constants.OldPlan
+                            ? EnrollmentConstants.OldVestingPlanHasContributions
+                            : EnrollmentConstants.NewVestingPlanHasContributions,
+                ProfitShareHours = pp.TotalHours,
+                Street1 = d.Address.Street,
+                City = d.Address.City,
+                State = d.Address.State,
+                PostalCode = d.Address.PostalCode,
+                BeginningBalance = 0,
+                Earnings = 0,
+                Distributions = 0,
+                Contributions = 0,
+                Forfeitures = 0,
+                BeneficiaryAllocation = 0,
+                CertificateSort = 0
+            };
+
+        // Apply optional store filter
+        if (request.StoreNumber.HasValue)
+        {
+            query = query.Where(q => q.StoreNumber == request.StoreNumber.Value);
+        }
+
+        // Apply optional badge filter
+        if (request.BadgeNumber > 0)
+        {
+            query = query.Where(e => e.BadgeNumber == request.BadgeNumber);
+        }
+
+        // Apply optional name filter
+        if (!string.IsNullOrWhiteSpace(request.EmployeeName))
+        {
+            var pattern = $"%{request.EmployeeName.ToUpperInvariant()}%";
+            query = query.Where(x => EF.Functions.Like(x.FullName.ToUpper(), pattern));
+        }
+
+        // Apply store management filter
+        if (request.StoreManagement.HasValue)
+        {
+            query = request.StoreManagement.Value
+                ? ApplyStoreManagementFilter(query)
+                : ApplyNonStoreManagementFilter(query);
+        }
+
+        return query
+            .TagWith("GetTerminatedNotVested-TerminatedEmployees")
+            .ToListAsync(cancellationToken);
     }
 
     private static void ValidateStoreNumber(BreakdownByStoreRequest request)

@@ -67,12 +67,12 @@ SELECT
         ELSE vr.DEMOGRAPHIC_ID
     END AS ID,
 
-    CASE
+    ROUND(CASE
         WHEN bal.TOTAL = 0 THEN 0
         ELSE
             ((bal.total + pdWrap.FORFEITURES - (pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT)) * vr.RATIO)
             + ((pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT) - pdWrap.FORFEITURES)
-    END AS VESTEDBALANCE,
+    END,2) AS VESTEDBALANCE,
 
     bal.TOTAL AS CURRENTBALANCE,
     yip.YEARS,

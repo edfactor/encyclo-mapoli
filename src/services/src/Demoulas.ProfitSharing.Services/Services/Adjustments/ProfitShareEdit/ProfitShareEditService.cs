@@ -53,8 +53,6 @@ public class ProfitShareEditService : IInternalProfitShareEditService
             IsExecutive = m.IsExecutive,
         }).ToList();
 
-
-
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(profitShareUpdateRequest.ProfitYear, cancellationToken);
 
         return new ProfitShareEditResponse
@@ -152,6 +150,20 @@ public class ProfitShareEditService : IInternalProfitShareEditService
             rec.EarningAmount = member.AllEarnings;
             AddRecord(records, rec);
             return;
+        }
+
+        //  ETVA Vested Earnings create 8 records
+
+        if (member.EtvaEarnings > 0 /* PY_PROF_ETVA */)
+        {
+            ProfitShareEditMemberRecord rec = new(member, /*8*/ProfitCode.Constants.Incoming100PercentVestedEarnings)
+            {
+                EarningAmount = member.EtvaEarnings, // force new line formatting
+                ZeroContStatus = ZeroContributionReason.Constants.Normal,
+                Remark = /*"100% Earnings"*/ CommentType.Constants.OneHundredPercentEarnings.Name,
+                CommentTypeId = CommentType.Constants.OneHundredPercentEarnings.Id
+            };
+            AddRecord(records, rec);
         }
 
         if (member.SecondaryEtvaEarnings /*PY_PROF_ETVA2*/ > 0)

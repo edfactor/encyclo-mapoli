@@ -26,6 +26,7 @@ public sealed record Error
     // Generic entity not found (dynamic description) - use only when a more specific constant does not exist
     public static Error EntityNotFound(string entityName) => new(104, $"{entityName} not found");
     public static Error NoPayProfitsDataAvailable => new(105, "No PayProfits data available in the system");
+    
 
     // Military contribution errors
     public static Error MilitaryContributionDuplicate => new(111, "A regular military contribution already exists for this year");
@@ -76,6 +77,7 @@ public sealed record Error
     public static Error MultiplePrimaryAccountsNotAllowed => new(136, "Only one primary account allowed per bank");
     public static Error NoPrimaryAccountExists => new(137, "No primary account exists for this bank");
     public static Error CannotDisablePrimaryAccount => new(138, "Cannot disable the primary account. Set another account as primary first");
+    public static Error StoreNotFound => new(139, "Store not found");
 
     // Unexpected error wrapper (message captured). Prefer logging full exception separately.
     public static Error Unexpected(string message) => new(900, message);

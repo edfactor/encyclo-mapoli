@@ -31,17 +31,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
     fieldName: string | null;
   }>({ isOpen: false, fieldName: null });
 
-  const handleValidationClick = useCallback((fieldName: string) => {
-    setDialogState({ isOpen: true, fieldName });
-  }, []);
-
-  const columnDefs = useMemo(
-    () =>
-      GetProfitShareForfeitColumns({
-        onValidationClick: handleValidationClick
-      }),
-    [handleValidationClick]
-  );
+  const columnDefs = useMemo(() => GetProfitShareForfeitColumns(), []);
 
   // Custom sort handler for compound sort on badgeOrPsn column
   const handleSortChange = useCallback(
