@@ -1,4 +1,4 @@
-﻿using CsvHelper.Configuration;
+using CsvHelper.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -44,9 +44,7 @@ public class BreakdownEndpoint : EndpointWithCsvBase<BreakdownByStoreRequest, Me
 
         try
         {
-            this.RecordRequestMetrics(HttpContext, _logger, breakdownByStoreRequest);
-
-            var result = await _breakdownService.GetActiveMembersByStore(breakdownByStoreRequest, ct);
+            var result = await _breakdownService.GetActiveMembersWithVestedBalanceByStore(breakdownByStoreRequest, ct);
 
             // Record year-end breakdown report metrics
             EndpointTelemetry.BusinessOperationsTotal.Add(1,
