@@ -1,5 +1,8 @@
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDynamicGridHeight } from "./useDynamicGridHeight";
+
+/** Reserved space for pagination, header chrome, and padding when in expanded mode */
+const EXPANDED_MODE_RESERVED_SPACE = 150;
 
 interface UseContentAwareGridHeightOptions {
   /** Number of rows currently in the grid */
@@ -16,6 +19,8 @@ interface UseContentAwareGridHeightOptions {
   minHeight?: number;
   /** Maximum height in pixels. Default: 900 */
   maxHeight?: number;
+  /** Whether the grid is in expanded/fullscreen mode. When true, uses viewport-based calculation without caps. */
+  isExpanded?: boolean;
 }
 
 /**
@@ -53,10 +58,31 @@ export const useContentAwareGridHeight = (options: UseContentAwareGridHeightOpti
     chromeHeight = 10,
     heightPercentage = 0.4,
     minHeight = 100,
-    maxHeight = 900
+    maxHeight = 900,
+    isExpanded = false
   } = options;
 
-  // Get the viewport-based maximum height
+  // For expanded mode, calculate viewport height directly without caps
+  const [expandedMaxHeight, setExpandedMaxHeight] = useState<number>(0);
+
+  const calculateExpandedHeight = useCallback(() => {
+    // In expanded mode, use viewport height minus reserved space for UI chrome
+    const viewportHeight = window.innerHeight;
+    return Math.max(viewportHeight - EXPANDED_MODE_RESERVED_SPACE, minHeight);
+  }, [minHeight]);
+
+  useEffect(() => {
+    if (isExpanded) {
+      const updateHeight = () => {
+        setExpandedMaxHeight(calculateExpandedHeight());
+      };
+      updateHeight();
+      window.addEventListener("resize", updateHeight);
+      return () => window.removeEventListener("resize", updateHeight);
+    }
+  }, [isExpanded, calculateExpandedHeight]);
+
+  // Get the viewport-based maximum height for non-expanded mode
   const viewportMaxHeight = useDynamicGridHeight({
     heightPercentage,
     minHeight,
@@ -68,17 +94,20 @@ export const useContentAwareGridHeight = (options: UseContentAwareGridHeightOpti
     // Calculate the height needed to show all rows
     const contentHeight = headerHeight + rowCount * rowHeight + chromeHeight;
 
-    // If content fits within viewport max, use content height (but respect minHeight)
-    // If content exceeds viewport max, use viewport max (enables scrolling)
-    if (contentHeight < viewportMaxHeight) {
-      // Content is smaller than viewport allocation - shrink to fit
+    // Determine the maximum available height based on expanded state
+    const availableMaxHeight = isExpanded ? expandedMaxHeight : viewportMaxHeight;
+
+    // If content fits within available max, use content height (but respect minHeight)
+    // If content exceeds available max, use available max (enables scrolling)
+    if (contentHeight < availableMaxHeight) {
+      // Content is smaller than available allocation - shrink to fit
       // But don't go below minimum height
       return Math.max(contentHeight, minHeight);
     }
 
-    // Content exceeds viewport allocation - use viewport max with scrolling
-    return viewportMaxHeight;
-  }, [rowCount, rowHeight, headerHeight, chromeHeight, viewportMaxHeight, minHeight]);
+    // Content exceeds available allocation - use available max with scrolling
+    return availableMaxHeight;
+  }, [rowCount, rowHeight, headerHeight, chromeHeight, viewportMaxHeight, expandedMaxHeight, isExpanded, minHeight]);
 
   // Return undefined for auto-height when there are no rows
   // This lets the grid show "No records found" message properly

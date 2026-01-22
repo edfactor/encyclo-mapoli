@@ -23,6 +23,8 @@ public static class Constants
     public static Mock<DbSet<ParticipantTotal>> FakeEtvaTotals { get; set; } = new Mock<DbSet<ParticipantTotal>>();
     public static Mock<DbSet<ProfitShareTotal>> ProfitShareTotals { get; set; } = new Mock<DbSet<ProfitShareTotal>>();
     public static Mock<DbSet<ParticipantTotalVestingBalance>> FakeParticipantTotalVestingBalances { get; set; } = new Mock<DbSet<ParticipantTotalVestingBalance>>();
+    public static Mock<DbSet<ParticipantTotalRatio>> FakeVestingRatios { get; set; } = new Mock<DbSet<ParticipantTotalRatio>>();
+    public static Mock<DbSet<ProfitDetailRollup>> FakeTransactionRollups { get; set; } = new Mock<DbSet<ProfitDetailRollup>>();
 
     internal static JsonSerializerOptions GetJsonSerializerOptions()
     {

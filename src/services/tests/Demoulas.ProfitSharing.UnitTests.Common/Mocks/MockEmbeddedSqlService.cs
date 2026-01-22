@@ -47,6 +47,14 @@ public static class MockEmbeddedSqlService
                 return query;
             });
 
+        // Mock GetVestingRatioAlt to return fake vesting ratios
+        mock.Setup(m => m.GetVestingRatioAlt(It.IsAny<IProfitSharingDbContext>(), It.IsAny<short>(), It.IsAny<DateOnly>()))
+            .Returns((IProfitSharingDbContext ctx, short profitYear, DateOnly asOfDate) => Constants.FakeVestingRatios.Object);
+
+        // Mock GetTransactionsBySsnForProfitYearForOracle to return fake transaction rollups
+        mock.Setup(m => m.GetTransactionsBySsnForProfitYearForOracle(It.IsAny<IProfitSharingDbContext>(), It.IsAny<short>()))
+            .Returns((IProfitSharingDbContext ctx, short profitYear) => Constants.FakeTransactionRollups.Object);
+
         return mock.Object;
     }
 }
