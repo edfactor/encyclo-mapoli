@@ -71,8 +71,10 @@ public sealed class CertificateService : ICertificateService
         //Add xerox header
         PrintFormatHelper.AppendXeroxHeader(sb, _djdeDirectiveOptions.CertificateHeader, request.IsXerox);
 
-        foreach (var member in members.Response.Results)
+        var memberResults = members.Response.Results.ToList();
+        for (var memberIndex = 0; memberIndex < memberResults.Count; memberIndex++)
         {
+            var member = memberResults[memberIndex];
             var estimatedPaymentAtAge = member.DateOfBirth.Age(calInfo.FiscalEndDate.ToDateTime(TimeOnly.MaxValue));
             if (estimatedPaymentAtAge < 67)
             {
@@ -89,7 +91,7 @@ public sealed class CertificateService : ICertificateService
             var pmtJoint = (member.BeginningBalance + member.Contributions + member.Forfeitures) / annuityRate.JointRate / 12;
 
             #region Formfeed
-            sb.Append("\f");
+            sb.Append("\f\r\n");
             #endregion
 
             WriteMemberInfo(sb, member, true);
@@ -108,7 +110,6 @@ public sealed class CertificateService : ICertificateService
             #endregion
 
             #region Balances
-            var begBal = member.BeginningBalance.ToString("$#,###,###.00 ;$#,###,###.00-").PadLeft(14);
             sb.AppendFormat(member.BeginningBalance.ToString("$#,###,###.00 ;$#,###,###.00-").PadLeft(14));
             sb.Append(spaces_3);
             sb.AppendFormat(member.Contributions.ToString("$#,###,###.00 ;$#,###,###.00-").PadLeft(14));
@@ -156,7 +157,7 @@ public sealed class CertificateService : ICertificateService
             #endregion
 
             #region Formfeed
-            sb.Append("\f");
+            sb.Append("\f\r\n");
             if (request.IsXerox)
             {
                 sb.Append("{\r\n");
@@ -182,7 +183,7 @@ public sealed class CertificateService : ICertificateService
             #region Store and Badge Line
             sb.Append(spaces_45);
             sb.Append(member.StoreNumber.ToString("000"));
-            sb.Append("-");
+            sb.Append('-');
             sb.Append(member.BadgeNumber.ToString("0000000"));
             sb.Append("\r\n");
             #endregion
@@ -206,10 +207,10 @@ public sealed class CertificateService : ICertificateService
             sb.Append(member.State ?? "");
             sb.Append(spaces_2);
             sb.Append((Convert.ToInt32(member.PostalCode ?? "0")).ToString("00000"));
-            sb.Append("\r");
+            sb.Append('\r');
             if (addLf)
             {
-                sb.Append("\n");
+                sb.Append('\n');
             }
             #endregion
         }

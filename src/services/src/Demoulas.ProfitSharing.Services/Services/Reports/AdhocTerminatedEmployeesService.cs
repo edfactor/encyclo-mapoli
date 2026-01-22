@@ -333,7 +333,7 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
                     letter.AppendLine();
                 }
             }
-            letter.Append("\f"); // Form feed to end the letter
+            letter.Append('\f'); // Form feed to end the letter
             #endregion
         }
 

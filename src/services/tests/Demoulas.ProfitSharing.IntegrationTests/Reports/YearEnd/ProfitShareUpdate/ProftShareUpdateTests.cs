@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -196,13 +196,13 @@ public class ProfitShareUpdateTests : PristineBaseTest
             int x = 4;
             if (x > 9 && i < lines.Count - 2 && !lines[i + 1].StartsWith('\f'))
             {
-                sb.Append("\n");
+                sb.Append('\n');
             }
 
-            sb.Append("\n");
+            sb.Append('\n');
         }
 
-        sb.Append("\n");
+        sb.Append('\n');
         return sb.ToString();
     }
 #pragma warning disable xUnit1013
