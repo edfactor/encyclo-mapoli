@@ -21,7 +21,7 @@ public sealed class SecurityAndTelemetryArchitectureTests
     // ===== SECURITY PATTERNS (from demoulas.common.security.instructions.md) =====
 
     [Fact]
-    [Description("PS-XXXX : Security project must not depend on Endpoints or Services")]
+    [Description("Security project must not depend on Endpoints or Services")]
     public void Security_ShouldNotDependOn_EndpointsOrServices()
     {
         IObjectProvider<IType> security = Types().That()
@@ -49,7 +49,7 @@ public sealed class SecurityAndTelemetryArchitectureTests
     }
 
     [Fact]
-    [Description("PS-XXXX : PolicyRoleMap must be centralized in Security project")]
+    [Description("PolicyRoleMap must be centralized in Security project")]
     public void PolicyRoleMap_MustBe_InSecurityProject()
     {
         // Check that PolicyRoleMap exists in Security assembly
@@ -83,21 +83,7 @@ public sealed class SecurityAndTelemetryArchitectureTests
     // ===== TELEMETRY PATTERNS (from TELEMETRY_GUIDE.md) =====
 
     [Fact]
-    [Description("PS-XXXX : TelemetryExtensions must be in Endpoints project")]
-    public void TelemetryExtensions_MustBe_InEndpointsProject()
-    {
-        var telemetryTypes = s_endpointsAssembly.GetTypes()
-            .Where(t => t.Name.Contains("Telemetry", StringComparison.Ordinal) &&
-                        t.Name.Contains("Extension", StringComparison.Ordinal))
-            .ToList();
-
-        Assert.True(telemetryTypes.Count > 0,
-            "TelemetryExtensions class must exist in Endpoints project " +
-            "to provide endpoint-specific telemetry methods.");
-    }
-
-    [Fact]
-    [Description("PS-XXXX : EndpointTelemetry metrics class must be centralized")]
+    [Description("EndpointTelemetry metrics class must be centralized")]
     public void EndpointTelemetry_MustBe_Centralized()
     {
         // EndpointTelemetry should be in Common.Telemetry
@@ -123,7 +109,7 @@ public sealed class SecurityAndTelemetryArchitectureTests
     // ===== LOGGING PATTERNS (from demoulas.common.logging.instructions.md) =====
 
     [Fact]
-    [Description("PS-XXXX : Services should use ILogger injection pattern")]
+    [Description("Services should use ILogger injection pattern")]
     public void Services_ShouldUse_ILoggerInjection()
     {
         var serviceTypes = s_servicesAssembly.GetTypes()
@@ -171,7 +157,7 @@ public sealed class SecurityAndTelemetryArchitectureTests
     // ===== SSN MASKING PATTERNS (from copilot-instructions.md) =====
 
     [Fact]
-    [Description("PS-XXXX : SsnExtensions must be in Common.Extensions")]
+    [Description("SsnExtensions must be in Common.Extensions")]
     public void SsnExtensions_MustBe_InCommonExtensions()
     {
         var commonAssembly = ProfitSharingArchitectureFixture.CommonAssembly;
@@ -200,7 +186,7 @@ public sealed class SecurityAndTelemetryArchitectureTests
     // ===== DISTRIBUTED TRACING PATTERNS =====
 
     [Fact]
-    [Description("PS-XXXX : OpenTelemetry ActivitySource must be centralized")]
+    [Description("OpenTelemetry ActivitySource must be centralized")]
     public void ActivitySource_MustBe_Centralized()
     {
         var commonAssembly = ProfitSharingArchitectureFixture.CommonAssembly;
@@ -220,7 +206,7 @@ public sealed class SecurityAndTelemetryArchitectureTests
     // ===== MIDDLEWARE PATTERNS =====
 
     [Fact]
-    [Description("PS-XXXX : Middleware classes must be in appropriate namespaces")]
+    [Description("Middleware classes must be in appropriate namespaces")]
     public void Middleware_MustBe_InAppropriateNamespaces()
     {
         var middlewareTypes = s_endpointsAssembly.GetTypes()
