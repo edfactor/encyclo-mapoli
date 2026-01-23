@@ -355,6 +355,13 @@ public sealed class BreakdownReportService : IBreakdownService
         return GetMembersByStore(request, StatusFilter.Retired, Balance.HasBalanceActivity, applyQPAY066A1Filter: false, ssns: null, badgeNumbers: null, cancellationToken);
     }
 
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetActiveMembersWithVestedBalanceByStore(
+       BreakdownByStoreRequest request,
+       CancellationToken cancellationToken)
+    {
+        return GetMembersByStore(request, StatusFilter.Active, Balance.HasVestedBalance, applyQPAY066A1Filter: false, ssns: null, badgeNumbers: null, cancellationToken);
+    }
+
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithVestedBalanceByStore(
        BreakdownByStoreRequest request,
        CancellationToken cancellationToken)
