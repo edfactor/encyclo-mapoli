@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -16,10 +16,6 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddProfitSharingTelemetry(this IServiceCollection services, IConfiguration configuration)
     {
-        // Configure telemetry settings
-        services.Configure<TelemetryConfiguration>(
-            configuration.GetSection(TelemetryConfiguration.SectionName));
-
         // Initialize endpoint telemetry metrics
         EndpointTelemetry.Initialize();
 

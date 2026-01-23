@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using Demoulas.ProfitSharing.Common.Metrics;
 
@@ -37,7 +37,7 @@ public static class EndpointTelemetry
     public static Counter<long> DatabaseOperationsTotal { get; private set; } = null!;
 
     private static bool _initialized;
-    private static readonly object _initLock = new();
+    private static readonly Lock _initLock = new();
 
     /// <summary>
     /// Initialize endpoint-specific metrics. Call once at startup.

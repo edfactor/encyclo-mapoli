@@ -339,7 +339,7 @@ public class EmployeesWithProfitsOver73Service : IEmployeesWithProfitsOver73Serv
             letter.AppendLine();
             letter.AppendLine();
             letter.AppendLine($"{space7}{emp.BadgeNumber}");
-            letter.Append("\f"); // Form feed to end the letter
+            letter.Append('\f'); // Form feed to end the letter
         }
 
         return letter.ToString();
