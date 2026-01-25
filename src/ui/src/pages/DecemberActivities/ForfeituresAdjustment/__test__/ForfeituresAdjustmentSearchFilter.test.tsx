@@ -164,8 +164,8 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
         { wrapper }
       );
 
-      const ssnInput = screen.getByPlaceholderText("SSN");
-      const badgeInput = screen.getByPlaceholderText("Badge");
+      const ssnInput = screen.getByPlaceholderText("#########");
+      const badgeInput = screen.getByPlaceholderText("Badge or PSN");
 
       await user.type(badgeInput, "12345");
 
@@ -185,8 +185,8 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
         { wrapper }
       );
 
-      const ssnInput = screen.getByPlaceholderText("SSN");
-      const badgeInput = screen.getByPlaceholderText("Badge");
+      const ssnInput = screen.getByPlaceholderText("#########");
+      const badgeInput = screen.getByPlaceholderText("Badge or PSN");
 
       // Type in SSN
       await user.type(ssnInput, "123456789");
@@ -249,7 +249,7 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
         { wrapper }
       );
 
-      const ssnInput = screen.getByPlaceholderText("SSN");
+      const ssnInput = screen.getByPlaceholderText("#########");
 
       // Verify we can interact with inputs
       await user.type(ssnInput, "1");
@@ -286,7 +286,7 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
 
       const inputs = screen.getAllByRole("textbox");
       const ssnInput = inputs.find((input) =>
-        (input as HTMLInputElement).placeholder?.includes("SSN")
+        (input as HTMLInputElement).placeholder?.includes("#")
       ) as HTMLInputElement;
 
       // Type value
@@ -311,7 +311,7 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
         { wrapper }
       );
 
-      const ssnInput = screen.getByPlaceholderText("SSN");
+      const ssnInput = screen.getByPlaceholderText("#########");
 
       await user.type(ssnInput, "123456789");
 
@@ -349,7 +349,7 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
         { wrapper }
       );
 
-      const ssnInput = screen.getByPlaceholderText("SSN");
+      const ssnInput = screen.getByPlaceholderText("#########");
 
       // Enter invalid SSN
       await user.type(ssnInput, "invalid");
@@ -389,7 +389,7 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
         { wrapper }
       );
 
-      const badgeInput = screen.getByPlaceholderText("Badge");
+      const badgeInput = screen.getByPlaceholderText("Badge or PSN");
 
       // Verify we can interact with badge input
       await user.type(badgeInput, "1");
