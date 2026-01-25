@@ -96,7 +96,7 @@ export const AddCommentTypeDialog = ({ open, onClose, onSuccess }: AddCommentTyp
           inputProps={{
             maxLength: 255,
             "aria-invalid": !!error,
-            "aria-describedby": getAriaDescribedBy(generateFieldId("commentTypeName"), error, true)
+            "aria-describedby": getAriaDescribedBy(generateFieldId("commentTypeName"), !!error, true)
           }}
         />
         <VisuallyHidden id="commentTypeName-hint">

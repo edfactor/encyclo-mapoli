@@ -122,7 +122,7 @@ export const AddTaxCodeDialog = ({ open, onClose, onSuccess }: AddTaxCodeDialogP
           inputProps={{
             maxLength: 1,
             "aria-invalid": !!error,
-            "aria-describedby": getAriaDescribedBy(generateFieldId("taxCodeId"), error, true)
+            "aria-describedby": getAriaDescribedBy(generateFieldId("taxCodeId"), !!error, true)
           }}
         />
         <VisuallyHidden id="taxCodeId-hint">Enter a single letter or number for the tax code ID</VisuallyHidden>
@@ -144,7 +144,7 @@ export const AddTaxCodeDialog = ({ open, onClose, onSuccess }: AddTaxCodeDialogP
           inputProps={{
             maxLength: 128,
             "aria-invalid": !!error,
-            "aria-describedby": getAriaDescribedBy(generateFieldId("taxCodeName"), error, true)
+            "aria-describedby": getAriaDescribedBy(generateFieldId("taxCodeName"), !!error, true)
           }}
         />
         <VisuallyHidden id="taxCodeName-hint">

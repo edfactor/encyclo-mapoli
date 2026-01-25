@@ -75,7 +75,7 @@ const AccountHistoryReportFilterSection: React.FC<AccountHistoryReportFilterSect
       const value = e.target.value;
       onChange(value);
       trigger("badgeNumber");
-      setBadgePlaceholder(getBadgeOrPSNPlaceholder(value.length));
+      setBadgePlaceholder(getBadgeOrPSNPlaceholder(value.length) as "Badge or PSN");
     },
     [trigger]
   );

@@ -43,9 +43,12 @@ export const INPUT_PLACEHOLDERS = {
   PROFIT_YEAR: "YYYY",
 
   // Address Fields
+  NAME: "Full Name",
   STREET: "123 Main Street",
+  STREET_ADDRESS: "123 Main Street",
   CITY: "City",
   STATE: "MA",
+  ZIP_CODE: "#####",
 
   // Other
   MEMO: "Enter memo or comments...",

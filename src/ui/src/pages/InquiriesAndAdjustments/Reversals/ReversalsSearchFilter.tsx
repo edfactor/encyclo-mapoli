@@ -111,12 +111,12 @@ const ReversalsSearchFilter: React.FC<ReversalsSearchFilterProps> = memo(
 
         if (badgeStr.length === 0) {
           setValue("memberType", "all");
-          setBadgePlaceholder(INPUT_PLACEHOLDERS.BADGE_OR_PSN);
+          setBadgePlaceholder(INPUT_PLACEHOLDERS.BADGE_OR_PSN as "Badge or PSN");
         } else if (badgeStr.length > MAX_EMPLOYEE_BADGE_LENGTH) {
           setValue("memberType", "beneficiaries");
-          setBadgePlaceholder(getBadgeOrPSNPlaceholder(badgeStr.length));
+          setBadgePlaceholder(getBadgeOrPSNPlaceholder(badgeStr.length) as "Badge or PSN");
         } else {
-          setBadgePlaceholder(getBadgeOrPSNPlaceholder(badgeStr.length));
+          setBadgePlaceholder(getBadgeOrPSNPlaceholder(badgeStr.length) as "Badge or PSN");
         }
       },
       [setValue]

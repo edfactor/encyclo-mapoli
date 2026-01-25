@@ -76,9 +76,9 @@ const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFil
         field.onChange(validatedValue);
         if (value) {
           setActiveField("badge");
-          setBadgePlaceholder(getBadgeOrPSNPlaceholder(value.length));
+          setBadgePlaceholder(getBadgeOrPSNPlaceholder(value.length) as "Badge or PSN");
         } else {
-          setBadgePlaceholder(INPUT_PLACEHOLDERS.BADGE_OR_PSN);
+          setBadgePlaceholder(INPUT_PLACEHOLDERS.BADGE_OR_PSN as "Badge or PSN");
         }
       }
     },

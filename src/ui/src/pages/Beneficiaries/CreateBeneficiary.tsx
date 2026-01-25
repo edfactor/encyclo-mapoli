@@ -162,8 +162,8 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
       field: ControllerRenderProps<CreateBeneficiaryForm, "postalCode">
     ) => {
       const formatted = formatZipCode(e.target.value);
-      e.target.value = formatted;
-      field.onChange(formatted);
+      e.target.value = formatted.display;
+      field.onChange(formatted.display);
     },
     []
   );

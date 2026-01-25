@@ -317,14 +317,14 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
         if (badgeStr.length === 0) {
           // Reset to all when cleared
           setValue("memberType", "all");
-          setBadgePlaceholder(INPUT_PLACEHOLDERS.BADGE_OR_PSN);
+          setBadgePlaceholder(INPUT_PLACEHOLDERS.BADGE_OR_PSN as "Badge or PSN");
         } else if (badgeStr.length > MAX_EMPLOYEE_BADGE_LENGTH) {
           // Only auto-switch to beneficiaries when badge is long enough
           setValue("memberType", "beneficiaries");
-          setBadgePlaceholder(getBadgeOrPSNPlaceholder(badgeStr.length));
+          setBadgePlaceholder(getBadgeOrPSNPlaceholder(badgeStr.length) as "Badge or PSN");
         } else {
           // Update placeholder for shorter badge numbers
-          setBadgePlaceholder(getBadgeOrPSNPlaceholder(badgeStr.length));
+          setBadgePlaceholder(getBadgeOrPSNPlaceholder(badgeStr.length) as "Badge or PSN");
         }
         // Don't change memberType for shorter badge numbers - let user choose
       },

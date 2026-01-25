@@ -276,7 +276,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                     error={!!errors.socialSecurity}
                     onChange={(e) => {
                       const formatted = formatSSNInput(e.target.value);
-                      const validatedValue = handleSsnInput(formatted.cleaned);
+                      const validatedValue = handleSsnInput(formatted.raw);
                       if (validatedValue !== null) {
                         const parsedValue = validatedValue === "" ? null : validatedValue;
                         field.onChange(parsedValue);

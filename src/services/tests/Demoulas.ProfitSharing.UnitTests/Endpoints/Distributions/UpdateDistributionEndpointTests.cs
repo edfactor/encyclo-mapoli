@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -27,7 +27,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
 
     private static void EnsureHighVestedBalanceForSsn(int ssn)
     {
-        var matches = Constants.FakeParticipantTotalVestingBalances.Object
+        List<ParticipantTotalVestingBalance> matches = Constants.FakeParticipantTotalVestingBalances.Object
             .AsEnumerable()
             .Where(x => x.Ssn == ssn)
             .ToList();
@@ -45,7 +45,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
             return;
         }
 
-        foreach (var match in matches)
+        foreach (ParticipantTotalVestingBalance match in matches)
         {
             match.VestedBalance = HighVestedBalance;
             match.CurrentBalance = Math.Max(match.CurrentBalance ?? 0m, HighVestedBalance);
@@ -59,11 +59,11 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
     /// </summary>
     private async Task<int> GetValidBadgeNumberAsync()
     {
-        var badgeNumber = 0;
+        int badgeNumber = 0;
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
             // Look for demographics with valid badge numbers (between 9,999 and 9,999,999)
-            var demographic = await ctx.Demographics
+            Demographic? demographic = await ctx.Demographics
                 .Where(d => d.BadgeNumber >= 9999 && d.BadgeNumber <= 9999999)
                 .OrderBy(d => d.BadgeNumber) // Ensure deterministic selection
                 .FirstOrDefaultAsync();
@@ -75,14 +75,14 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
             else
             {
                 // Fallback: use StockFactory to create a proper demographic with a valid badge number
-                var (newDemographic, payProfits) = StockFactory.CreateEmployee(2024);
+                (Demographic newDemographic, List<PayProfit> payProfits) = StockFactory.CreateEmployee(2024);
                 // Use a deterministic badge number within validation range
                 newDemographic.BadgeNumber = 555555; // Valid 6-digit badge number
                 newDemographic.Ssn = 123456789; // Ensure unique SSN
 
                 // Add the demographic and associated pay profits for vesting balance calculation
                 ctx.Demographics.Add(newDemographic);
-                foreach (var payProfit in payProfits)
+                foreach (PayProfit payProfit in payProfits)
                 {
                     payProfit.DemographicId = newDemographic.Id;
                     ctx.PayProfits.Add(payProfit);
@@ -101,16 +101,16 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
     /// </summary>
     private async Task<long> CreateTestDistributionAsync(int badgeNumber)
     {
-        var distributionId = 0L;
+        long distributionId = 0L;
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
-            var demographic = await ctx.Demographics
+            Demographic demographic = await ctx.Demographics
                 .Where(d => d.BadgeNumber == badgeNumber)
                 .FirstAsync();
 
             EnsureHighVestedBalanceForSsn(demographic.Ssn);
 
-            var distribution = new Distribution
+            Distribution distribution = new Distribution
             {
                 Ssn = demographic.Ssn, // Required field
                 PaymentSequence = 1, // Required field
@@ -142,10 +142,10 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
-        var validBadgeNumber = await GetValidBadgeNumberAsync();
-        var distributionId = await CreateTestDistributionAsync(validBadgeNumber);
+        int validBadgeNumber = await GetValidBadgeNumberAsync();
+        long distributionId = await CreateTestDistributionAsync(validBadgeNumber);
 
-        var request = new UpdateDistributionRequest
+        UpdateDistributionRequest request = new UpdateDistributionRequest
         {
             Id = distributionId,
             BadgeNumber = validBadgeNumber,
@@ -162,11 +162,11 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        TestResult<CreateOrUpdateDistributionResponse> response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
         // If we get a 400, log the error for debugging
         if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
         {
-            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            string errorContent = await response.Response.Content.ReadAsStringAsync();
             throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
         }
 
@@ -196,10 +196,10 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
-        var validBadgeNumber = await GetValidBadgeNumberAsync();
-        var distributionId = await CreateTestDistributionAsync(validBadgeNumber);
+        int validBadgeNumber = await GetValidBadgeNumberAsync();
+        long distributionId = await CreateTestDistributionAsync(validBadgeNumber);
 
-        var request = new UpdateDistributionRequest
+        UpdateDistributionRequest request = new UpdateDistributionRequest
         {
             Id = distributionId,
             BadgeNumber = validBadgeNumber,
@@ -215,11 +215,11 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        TestResult<CreateOrUpdateDistributionResponse> response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
         // If we get a 400, log the error for debugging
         if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
         {
-            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            string errorContent = await response.Response.Content.ReadAsStringAsync();
             throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
         }
 
@@ -242,10 +242,10 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
-        var validBadgeNumber = await GetValidBadgeNumberAsync();
-        var distributionId = await CreateTestDistributionAsync(validBadgeNumber);
+        int validBadgeNumber = await GetValidBadgeNumberAsync();
+        long distributionId = await CreateTestDistributionAsync(validBadgeNumber);
 
-        var request = new UpdateDistributionRequest
+        UpdateDistributionRequest request = new UpdateDistributionRequest
         {
             Id = distributionId,
             BadgeNumber = validBadgeNumber,
@@ -269,11 +269,11 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        TestResult<CreateOrUpdateDistributionResponse> response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
         // If we get a 400, log the error for debugging
         if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
         {
-            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            string errorContent = await response.Response.Content.ReadAsStringAsync();
             throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
         }
 
@@ -294,10 +294,10 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
-        var validBadgeNumber = await GetValidBadgeNumberAsync();
-        var distributionId = await CreateTestDistributionAsync(validBadgeNumber);
+        int validBadgeNumber = await GetValidBadgeNumberAsync();
+        long distributionId = await CreateTestDistributionAsync(validBadgeNumber);
 
-        var request = new UpdateDistributionRequest
+        UpdateDistributionRequest request = new UpdateDistributionRequest
         {
             Id = distributionId,
             BadgeNumber = validBadgeNumber,
@@ -317,7 +317,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        TestResult<CreateOrUpdateDistributionResponse> response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
 
         // Assert
         response.ShouldNotBeNull();
@@ -325,7 +325,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         // If we get a 400, log the error for debugging
         if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
         {
-            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            string errorContent = await response.Response.Content.ReadAsStringAsync();
             throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
         }
 
@@ -345,10 +345,10 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
-        var validBadgeNumber = await GetValidBadgeNumberAsync();
-        var distributionId = await CreateTestDistributionAsync(validBadgeNumber);
+        int validBadgeNumber = await GetValidBadgeNumberAsync();
+        long distributionId = await CreateTestDistributionAsync(validBadgeNumber);
 
-        var request = new UpdateDistributionRequest
+        UpdateDistributionRequest request = new UpdateDistributionRequest
         {
             Id = distributionId,
             BadgeNumber = validBadgeNumber,
@@ -366,7 +366,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        TestResult<CreateOrUpdateDistributionResponse> response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
 
         // Assert
         response.ShouldNotBeNull();
@@ -374,7 +374,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         // If we get a 400, log the error for debugging
         if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
         {
-            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            string errorContent = await response.Response.Content.ReadAsStringAsync();
             throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
         }
         response.Response.EnsureSuccessStatusCode();
@@ -394,10 +394,10 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
-        var validBadgeNumber = await GetValidBadgeNumberAsync();
-        var distributionId = await CreateTestDistributionAsync(validBadgeNumber);
+        int validBadgeNumber = await GetValidBadgeNumberAsync();
+        long distributionId = await CreateTestDistributionAsync(validBadgeNumber);
 
-        var request = new UpdateDistributionRequest
+        UpdateDistributionRequest request = new UpdateDistributionRequest
         {
             Id = distributionId,
             BadgeNumber = validBadgeNumber,
@@ -413,11 +413,11 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        TestResult<CreateOrUpdateDistributionResponse> response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
         // If we get a 400, log the error for debugging
         if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
         {
-            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            string errorContent = await response.Response.Content.ReadAsStringAsync();
             throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
         }
 
@@ -438,10 +438,10 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
-        var validBadgeNumber = await GetValidBadgeNumberAsync();
-        var distributionId = await CreateTestDistributionAsync(validBadgeNumber);
+        int validBadgeNumber = await GetValidBadgeNumberAsync();
+        long distributionId = await CreateTestDistributionAsync(validBadgeNumber);
 
-        var request = new UpdateDistributionRequest
+        UpdateDistributionRequest request = new UpdateDistributionRequest
         {
             Id = distributionId,
             BadgeNumber = validBadgeNumber,
@@ -457,11 +457,11 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        TestResult<CreateOrUpdateDistributionResponse> response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
         // If we get a 400, log the error for debugging
         if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
         {
-            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            string errorContent = await response.Response.Content.ReadAsStringAsync();
             throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
         }
 
@@ -478,9 +478,9 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
-        var validBadgeNumber = await GetValidBadgeNumberAsync();
+        int validBadgeNumber = await GetValidBadgeNumberAsync();
 
-        var request = new UpdateDistributionRequest
+        UpdateDistributionRequest request = new UpdateDistributionRequest
         {
             Id = 999999, // Non-existent ID
             BadgeNumber = validBadgeNumber,
@@ -496,11 +496,11 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        TestResult<CreateOrUpdateDistributionResponse> response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
         // If we get a 400, log the error for debugging
         if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
         {
-            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            string errorContent = await response.Response.Content.ReadAsStringAsync();
             throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
         }
 
@@ -515,10 +515,10 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
-        var validBadgeNumber = await GetValidBadgeNumberAsync();
-        var distributionId = await CreateTestDistributionAsync(validBadgeNumber);
+        int validBadgeNumber = await GetValidBadgeNumberAsync();
+        long distributionId = await CreateTestDistributionAsync(validBadgeNumber);
 
-        var request = new UpdateDistributionRequest
+        UpdateDistributionRequest request = new UpdateDistributionRequest
         {
             Id = distributionId,
             BadgeNumber = -1, // Invalid badge number
@@ -534,13 +534,13 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        TestResult<CreateOrUpdateDistributionResponse> response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
 
         // Assert
         response.ShouldNotBeNull();
         // The service validation should handle this appropriately
         // Exact behavior depends on service implementation
-        response.Response.StatusCode.ShouldBeOneOf(HttpStatusCode.BadRequest, HttpStatusCode.InternalServerError);
+        response.Response.StatusCode.ShouldBeOneOf(HttpStatusCode.BadRequest, HttpStatusCode.NotFound);
     }
 
     [Fact(DisplayName = "UpdateDistribution - Should require authorization")]
@@ -548,7 +548,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
     {
         // Arrange
         // Do not assign any token/role to simulate unauthorized access
-        var request = new UpdateDistributionRequest
+        UpdateDistributionRequest request = new UpdateDistributionRequest
         {
             Id = 1,
             BadgeNumber = 12345,
@@ -564,11 +564,11 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        TestResult<CreateOrUpdateDistributionResponse> response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
         // If we get a 400, log the error for debugging
         if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
         {
-            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            string errorContent = await response.Response.Content.ReadAsStringAsync();
             throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
         }
 
@@ -588,12 +588,12 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         // Arrange
         // First create a distribution with proper permissions
         ApiClient.CreateAndAssignTokenForClient(Role.ITDEVOPS);
-        var validBadgeNumber = await GetValidBadgeNumberAsync();
-        var distributionId = await CreateTestDistributionAsync(validBadgeNumber);
+        int validBadgeNumber = await GetValidBadgeNumberAsync();
+        long distributionId = await CreateTestDistributionAsync(validBadgeNumber);
 
         // Now switch to a role without distribution update permissions
         ApiClient.CreateAndAssignTokenForClient(Role.ITDEVOPS);
-        var request = new UpdateDistributionRequest
+        UpdateDistributionRequest request = new UpdateDistributionRequest
         {
             Id = distributionId,
             BadgeNumber = validBadgeNumber,
@@ -609,11 +609,11 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        TestResult<CreateOrUpdateDistributionResponse> response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
         // If we get a 400, log the error for debugging
         if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
         {
-            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            string errorContent = await response.Response.Content.ReadAsStringAsync();
             throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
         }
 
@@ -627,12 +627,12 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
     public void UpdateDistribution_EndpointConfiguration_ShouldBeConfiguredCorrectly()
     {
         // Arrange
-        var mockDistributionService = new Mock<IDistributionService>();
+        Mock<IDistributionService> mockDistributionService = new Mock<IDistributionService>();
 
         // Act & Assert
         // Verify the endpoint can be instantiated with its dependencies
-        var loggerMock = new Mock<ILogger<UpdateDistributionEndpoint>>();
-        var endpoint = new UpdateDistributionEndpoint(mockDistributionService.Object, loggerMock.Object);
+        Mock<ILogger<UpdateDistributionEndpoint>> loggerMock = new Mock<ILogger<UpdateDistributionEndpoint>>();
+        UpdateDistributionEndpoint endpoint = new UpdateDistributionEndpoint(mockDistributionService.Object, loggerMock.Object);
         endpoint.ShouldNotBeNull();
         mockDistributionService.ShouldNotBeNull();
 
@@ -647,7 +647,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
 
         // Create a request that might cause service-level validation issues
-        var request = new UpdateDistributionRequest
+        UpdateDistributionRequest request = new UpdateDistributionRequest
         {
             Id = -1, // Invalid ID
             BadgeNumber = -1, // Invalid badge number
@@ -663,7 +663,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        TestResult<CreateOrUpdateDistributionResponse> response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
 
         // Assert
         // The response should handle validation errors appropriately
@@ -679,7 +679,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
 
         // Create a request with some required fields missing or invalid
-        var request = new UpdateDistributionRequest
+        UpdateDistributionRequest request = new UpdateDistributionRequest
         {
             Id = 0, // Invalid ID
             BadgeNumber = 0, // Invalid badge number
@@ -695,7 +695,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        TestResult<CreateOrUpdateDistributionResponse> response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
 
         // Assert
         response.ShouldNotBeNull();
@@ -708,11 +708,11 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
-        var validBadgeNumber = await GetValidBadgeNumberAsync();
-        var distributionId1 = await CreateTestDistributionAsync(validBadgeNumber);
-        var distributionId2 = await CreateTestDistributionAsync(validBadgeNumber);
+        int validBadgeNumber = await GetValidBadgeNumberAsync();
+        long distributionId1 = await CreateTestDistributionAsync(validBadgeNumber);
+        long distributionId2 = await CreateTestDistributionAsync(validBadgeNumber);
 
-        var request1 = new UpdateDistributionRequest
+        UpdateDistributionRequest request1 = new UpdateDistributionRequest
         {
             Id = distributionId1,
             BadgeNumber = validBadgeNumber,
@@ -728,7 +728,7 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
             Memo = "Concurrent update test 1"
         };
 
-        var request2 = new UpdateDistributionRequest
+        UpdateDistributionRequest request2 = new UpdateDistributionRequest
         {
             Id = distributionId2,
             BadgeNumber = validBadgeNumber,
@@ -745,21 +745,21 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var task1 = ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request1);
-        var task2 = ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request2);
+        Task<TestResult<CreateOrUpdateDistributionResponse>> task1 = ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request1);
+        Task<TestResult<CreateOrUpdateDistributionResponse>> task2 = ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request2);
 
-        var responses = await Task.WhenAll(task1, task2);
+        TestResult<CreateOrUpdateDistributionResponse>[] responses = await Task.WhenAll(task1, task2);
 
         // Assert
         responses.ShouldNotBeNull();
         responses.Length.ShouldBe(2);
 
-        foreach (var response in responses)
+        foreach (TestResult<CreateOrUpdateDistributionResponse> response in responses)
         {
             // If we get a 400, log the error for debugging
             if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
             {
-                var errorContent = await response.Response.Content.ReadAsStringAsync();
+                string errorContent = await response.Response.Content.ReadAsStringAsync();
                 throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
             }
             response.ShouldNotBeNull();
@@ -782,9 +782,9 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.DISTRIBUTIONSCLERK);
-        var validBadgeNumber = await GetValidBadgeNumberAsync();
+        int validBadgeNumber = await GetValidBadgeNumberAsync();
 
-        var request = new UpdateDistributionRequest
+        UpdateDistributionRequest request = new UpdateDistributionRequest
         {
             Id = 0, // Zero ID (should be invalid)
             BadgeNumber = validBadgeNumber,
@@ -800,11 +800,11 @@ public class UpdateDistributionEndpointTests : ApiTestBase<Api.Program>
         };
 
         // Act
-        var response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
+        TestResult<CreateOrUpdateDistributionResponse> response = await ApiClient.PUTAsync<UpdateDistributionEndpoint, UpdateDistributionRequest, CreateOrUpdateDistributionResponse>(request);
         // If we get a 400, log the error for debugging
         if (response.Response.StatusCode == System.Net.HttpStatusCode.BadRequest)
         {
-            var errorContent = await response.Response.Content.ReadAsStringAsync();
+            string errorContent = await response.Response.Content.ReadAsStringAsync();
             throw new InvalidOperationException($"Test failed with 400 Bad Request. Response: {errorContent}");
         }
 

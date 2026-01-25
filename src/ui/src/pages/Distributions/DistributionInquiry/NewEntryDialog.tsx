@@ -63,7 +63,7 @@ const NewEntryDialog = ({ open, onClose }: NewEntryDialogProps) => {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value.replace(/\D/g, "").slice(0, 11);
       setBadgeNumber(value);
-      setBadgePlaceholder(getBadgeOrPSNPlaceholder(value.length));
+      setBadgePlaceholder(getBadgeOrPSNPlaceholder(value.length) as "Badge or PSN");
       if (errors.badgeNumber) {
         setErrors({ ...errors, badgeNumber: undefined });
       }

@@ -137,7 +137,7 @@ const QPAY066xAdHocSearchFilter: React.FC<QPAY066xAdHocSearchFilterProps> = ({
       }
       onChange(value);
       onBadgeNumberChange(value);
-      setBadgePlaceholder(getBadgeOrPSNPlaceholder(value.length));
+      setBadgePlaceholder(getBadgeOrPSNPlaceholder(value.length) as "Badge or PSN");
     },
     [onBadgeNumberChange]
   );
@@ -318,7 +318,7 @@ const QPAY066xAdHocSearchFilter: React.FC<QPAY066xAdHocSearchFilterProps> = ({
                     error={!!errors.badgeNumber}
                     aria-invalid={!!errors.badgeNumber}
                     aria-describedby={getAriaDescribedBy("badgeNumber", !!errors.badgeNumber, true)}
-                    onChange={(e) => {
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       handleBadgeChange(e, field.onChange);
                     }}
                   />

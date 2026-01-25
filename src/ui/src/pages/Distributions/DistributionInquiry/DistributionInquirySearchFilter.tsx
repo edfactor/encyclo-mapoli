@@ -163,7 +163,7 @@ const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterP
         setValue("memberType", memberType as "all" | "employees" | "beneficiaries");
 
         // Update dynamic placeholder based on length
-        setBadgePlaceholder(getBadgeOrPSNPlaceholder(badgeStr.length));
+        setBadgePlaceholder(getBadgeOrPSNPlaceholder(badgeStr.length) as "Badge or PSN");
       },
       [setValue]
     );
@@ -246,7 +246,7 @@ const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterP
                   inputProps={{
                     inputMode: "numeric" as const
                   }}
-                  onChange={(e) => handleSSNChange(e, field)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleSSNChange(e, field)}
                   sx={
                     isSocialSecurityDisabled
                       ? {
