@@ -1,5 +1,15 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Checkbox, FormControlLabel, FormLabel, Grid, MenuItem, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Checkbox,
+  Divider,
+  FormControlLabel,
+  FormLabel,
+  Grid,
+  MenuItem,
+  TextField,
+  Typography
+} from "@mui/material";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { useGetTaxCodesQuery } from "reduxstore/api/LookupsApi";
@@ -314,336 +324,313 @@ const AddDistributionForm = forwardRef<AddDistributionFormRef, AddDistributionFo
           spacing={3}>
           {/* Distribution Details Section */}
           <Grid size={{ xs: 12 }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5", marginBottom: "16px" }}>
-              Distribution Details
-            </Typography>
+            <Box sx={{ mb: 1 }}>
+              <Typography
+                variant="h2"
+                sx={{ color: "#0258A5", mb: 0.5 }}>
+                Distribution Details
+              </Typography>
+              <Divider />
+            </Box>
           </Grid>
 
-          {/* Payment Flag */}
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <FormLabel>Payment Flag *</FormLabel>
-            <Controller
-              name="paymentFlag"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  value={field.value || ""}
-                  select
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  error={!!errors.paymentFlag}
-                  helperText={errors.paymentFlag?.message}>
-                  <MenuItem value="C">C - Ok to pay</MenuItem>
-                  <MenuItem value="D">D - Deferred</MenuItem>
-                  <MenuItem value="H">H - Hold</MenuItem>
-                  <MenuItem value="O">O - Other</MenuItem>
-                  <MenuItem value="P">P - Processed</MenuItem>
-                  <MenuItem value="X">X - Cancelled</MenuItem>
-                  <MenuItem value="Y">Y - Yes</MenuItem>
-                  <MenuItem value="Z">Z - Zero</MenuItem>
-                </TextField>
-              )}
-            />
-          </Grid>
-
-          {/* Tax Code */}
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <FormLabel>Tax Code *</FormLabel>
-            <Controller
-              name="taxCode"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  value={field.value || ""}
-                  select
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  disabled={isLoadingTaxCodes}
-                  error={!!errors.taxCode}
-                  helperText={errors.taxCode?.message}>
-                  {taxCodesData?.map((taxCode) => (
-                    <MenuItem
-                      key={taxCode.id}
-                      value={taxCode.id}>
-                      {taxCode.id} - {taxCode.name}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              )}
-            />
-          </Grid>
-
-          {/* Reason Code */}
-          <Grid size={{ xs: 12, sm: 6, md: 1.5 }}>
-            <FormLabel>Reason Code *</FormLabel>
-            <Controller
-              name="reasonCode"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  value={field.value || ""}
-                  select
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  error={!!errors.reasonCode}
-                  helperText={errors.reasonCode?.message}>
-                  <MenuItem value="R">R - Rollover</MenuItem>
-                  <MenuItem value="H">H - Hardship</MenuItem>
-                  <MenuItem value="T">T - Termination</MenuItem>
-                  <MenuItem value="D">D - Death</MenuItem>
-                  <MenuItem value="O">O - Other</MenuItem>
-                </TextField>
-              )}
-            />
-          </Grid>
-
-          {/* Amount Requested */}
-          <Grid size={{ xs: 12, sm: 6, md: 1.5 }}>
-            <FormLabel>Amount Requested *</FormLabel>
-            <Controller
-              name="amountRequested"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  type="number"
-                  placeholder="0.00"
-                  error={!!errors.amountRequested}
-                  helperText={errors.amountRequested?.message}
-                  onBlur={() => {
-                    field.onBlur();
-                    calculateTaxes();
-                  }}
+          {/* Form Fields Grid - 4 columns */}
+          <Grid size={{ xs: 12 }}>
+            <Grid
+              container
+              spacing={1.5}>
+              {/* Row 1: Payment Flag, Tax Code, Reason Code, Amount Requested */}
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <FormLabel>Payment Flag *</FormLabel>
+                <Controller
+                  name="paymentFlag"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      value={field.value || ""}
+                      select
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      error={!!errors.paymentFlag}
+                      helperText={errors.paymentFlag?.message}>
+                      <MenuItem value="C">C - Ok to pay</MenuItem>
+                      <MenuItem value="D">D - Deferred</MenuItem>
+                      <MenuItem value="H">H - Hold</MenuItem>
+                      <MenuItem value="O">O - Other</MenuItem>
+                      <MenuItem value="P">P - Processed</MenuItem>
+                      <MenuItem value="X">X - Cancelled</MenuItem>
+                      <MenuItem value="Y">Y - Yes</MenuItem>
+                      <MenuItem value="Z">Z - Zero</MenuItem>
+                    </TextField>
+                  )}
                 />
-              )}
-            />
-          </Grid>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <FormLabel>Tax Code *</FormLabel>
+                <Controller
+                  name="taxCode"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      value={field.value || ""}
+                      select
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      disabled={isLoadingTaxCodes}
+                      error={!!errors.taxCode}
+                      helperText={errors.taxCode?.message}>
+                      {taxCodesData?.map((taxCode) => (
+                        <MenuItem
+                          key={taxCode.id}
+                          value={taxCode.id}>
+                          {taxCode.id} - {taxCode.name}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  )}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <FormLabel>Reason Code *</FormLabel>
+                <Controller
+                  name="reasonCode"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      value={field.value || ""}
+                      select
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      error={!!errors.reasonCode}
+                      helperText={errors.reasonCode?.message}>
+                      <MenuItem value="R">R - Rollover</MenuItem>
+                      <MenuItem value="H">H - Hardship</MenuItem>
+                      <MenuItem value="T">T - Termination</MenuItem>
+                      <MenuItem value="D">D - Death</MenuItem>
+                      <MenuItem value="O">O - Other</MenuItem>
+                    </TextField>
+                  )}
+                />
+              </Grid>
 
-          {/* Line break to move tax fields to next row */}
-          <Grid size={{ xs: 12 }} />
-
-          {/* Fed Tax Override */}
-          <Grid
-            size={{ xs: 12, sm: 6, md: 1 }}
-            sx={{ display: "flex", alignItems: "center" }}>
-            <Controller
-              name="fedTaxOverride"
-              control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={field.value}
-                      onChange={field.onChange}
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <FormLabel>Amount Requested *</FormLabel>
+                <Controller
+                  name="amountRequested"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      type="text"
+                      inputMode="decimal"
+                      placeholder="0.00"
+                      error={!!errors.amountRequested}
+                      helperText={errors.amountRequested?.message}
+                      onBlur={() => {
+                        field.onBlur();
+                        calculateTaxes();
+                      }}
                     />
-                  }
-                  label="Fed Tax Override"
+                  )}
                 />
-              )}
-            />
-          </Grid>
-
-          {/* Fed Tax PCT */}
-          <Grid size={{ xs: 12, sm: 6, md: 1 }}>
-            <FormLabel>Fed Tax PCT</FormLabel>
-            <Controller
-              name="fedTaxPct"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  disabled
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      backgroundColor: "#f5f5f5"
-                    }
-                  }}
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Controller
+                  name="fedTaxOverride"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={field.value}
+                          onChange={field.onChange}
+                        />
+                      }
+                      label="Fed Tax Override"
+                      sx={{ mt: 3 }}
+                    />
+                  )}
                 />
-              )}
-            />
-          </Grid>
-
-          {/* Fed Tax */}
-          <Grid size={{ xs: 12, sm: 6, md: 1 }}>
-            <FormLabel>Fed Tax</FormLabel>
-            <Controller
-              name="fedTax"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  disabled={!fedTaxOverride}
-                  sx={
-                    !fedTaxOverride
-                      ? {
-                          "& .MuiOutlinedInput-root": {
-                            backgroundColor: "#f5f5f5"
-                          }
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <FormLabel>Fed Tax PCT</FormLabel>
+                <Controller
+                  name="fedTaxPct"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      disabled
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          backgroundColor: "#f5f5f5"
                         }
-                      : undefined
-                  }
-                />
-              )}
-            />
-          </Grid>
-
-          {/* State Tax Override */}
-          <Grid
-            size={{ xs: 12, sm: 6, md: 1 }}
-            sx={{ display: "flex", alignItems: "center" }}>
-            <Controller
-              name="stateTaxOverride"
-              control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={field.value}
-                      onChange={field.onChange}
+                      }}
                     />
-                  }
-                  label="State Tax Override"
+                  )}
                 />
-              )}
-            />
-          </Grid>
-
-          {/* State Tax PCT */}
-          <Grid size={{ xs: 12, sm: 6, md: 1 }}>
-            <FormLabel>State Tax PCT</FormLabel>
-            <Controller
-              name="stateTaxPct"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  disabled
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      backgroundColor: "#f5f5f5"
-                    }
-                  }}
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <FormLabel>Fed Tax</FormLabel>
+                <Controller
+                  name="fedTax"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      disabled={!fedTaxOverride}
+                      sx={
+                        !fedTaxOverride
+                          ? {
+                              "& .MuiOutlinedInput-root": {
+                                backgroundColor: "#f5f5f5"
+                              }
+                            }
+                          : undefined
+                      }
+                    />
+                  )}
                 />
-              )}
-            />
-          </Grid>
+              </Grid>
 
-          {/* State Tax */}
-          <Grid size={{ xs: 12, sm: 6, md: 1 }}>
-            <FormLabel>State Tax</FormLabel>
-            <Controller
-              name="stateTax"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  disabled={!stateTaxOverride}
-                  sx={
-                    !stateTaxOverride
-                      ? {
-                          "& .MuiOutlinedInput-root": {
-                            backgroundColor: "#f5f5f5"
-                          }
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Controller
+                  name="stateTaxOverride"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={field.value}
+                          onChange={field.onChange}
+                        />
+                      }
+                      label="State Tax Override"
+                      sx={{ mt: 3 }}
+                    />
+                  )}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <FormLabel>State Tax PCT</FormLabel>
+                <Controller
+                  name="stateTaxPct"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      disabled
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          backgroundColor: "#f5f5f5"
                         }
-                      : undefined
-                  }
-                />
-              )}
-            />
-          </Grid>
-
-          {/* Line break to move Sequence Number, Memo, and Employee Deceased to next row */}
-          <Grid size={{ xs: 12 }} />
-
-          {/* Sequence Number */}
-          <Grid size={{ xs: 12, sm: 6, md: 1.5 }}>
-            <FormLabel>Sequence Number</FormLabel>
-            <Controller
-              name="sequenceNumber"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  disabled
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      backgroundColor: "#f5f5f5"
-                    }
-                  }}
-                />
-              )}
-            />
-          </Grid>
-
-          {/* Memo */}
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <FormLabel>Memo</FormLabel>
-            <Controller
-              name="memo"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  multiline
-                  rows={2}
-                  error={!!errors.memo}
-                  helperText={errors.memo?.message}
-                />
-              )}
-            />
-          </Grid>
-
-          {/* Spacer to align Employee Deceased with Amount Requested */}
-          <Grid size={{ xs: 12, sm: 6, md: 3.5 }} />
-
-          {/* Employee Deceased */}
-          <Grid
-            size={{ xs: 12, sm: 6, md: 1.5 }}
-            sx={{ display: "flex", alignItems: "flex-start", paddingTop: "8px" }}>
-            <Controller
-              name="employeeDeceased"
-              control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={field.value}
-                      onChange={field.onChange}
+                      }}
                     />
-                  }
-                  label="Employee Deceased"
+                  )}
                 />
-              )}
-            />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <FormLabel>State Tax</FormLabel>
+                <Controller
+                  name="stateTax"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      disabled={!stateTaxOverride}
+                      sx={
+                        !stateTaxOverride
+                          ? {
+                              "& .MuiOutlinedInput-root": {
+                                backgroundColor: "#f5f5f5"
+                              }
+                            }
+                          : undefined
+                      }
+                    />
+                  )}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }} />
+
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <FormLabel>Sequence Number</FormLabel>
+                <Controller
+                  name="sequenceNumber"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      disabled
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          backgroundColor: "#f5f5f5"
+                        }
+                      }}
+                    />
+                  )}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                <FormLabel>Memo</FormLabel>
+                <Controller
+                  name="memo"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      error={!!errors.memo}
+                      helperText={errors.memo?.message}
+                    />
+                  )}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Controller
+                  name="employeeDeceased"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={field.value}
+                          onChange={field.onChange}
+                        />
+                      }
+                      label="Employee Deceased"
+                      sx={{ mt: 3 }}
+                    />
+                  )}
+                />
+              </Grid>
+            </Grid>
           </Grid>
 
           {/* 3rd Party Details Section - Only show when Reason Code is "R - Rollover" */}
@@ -655,6 +642,7 @@ const AddDistributionForm = forwardRef<AddDistributionFormRef, AddDistributionFo
                   sx={{ color: "#0258A5", marginTop: "24px", marginBottom: "16px" }}>
                   3rd Party Details
                 </Typography>
+                <Divider />
               </Grid>
 
               {/* Name */}
@@ -872,6 +860,7 @@ const AddDistributionForm = forwardRef<AddDistributionFormRef, AddDistributionFo
                           onChange={field.onChange}
                         />
                       }
+                      labelPlacement="start"
                       label="Roth IRA"
                     />
                   )}

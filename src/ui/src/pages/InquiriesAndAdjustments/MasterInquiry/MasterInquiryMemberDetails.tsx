@@ -1,4 +1,4 @@
-import { Grid, Typography } from "@mui/material";
+import { Box, Divider, Grid, Typography } from "@mui/material";
 import React, { memo, useMemo } from "react";
 import { formatNumberWithComma, numberToCurrency } from "smart-ui-library";
 import LabelValueSection from "../../../components/LabelValueSection";
@@ -72,10 +72,17 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
       const cityStateZip =
         [formattedCity, formattedState].filter(Boolean).join(", ") + (formattedZip ? ` ${formattedZip}` : "");
 
+      const fullAddress = (
+        <>
+          {address}
+          <br />
+          {cityStateZip}
+        </>
+      );
+
       return [
         { label: "Name", value: fullName },
-        { label: "Address", value: `${address}` },
-        { label: "", value: cityStateZip },
+        { label: "Address", value: fullAddress },
         { label: "Phone #", value: formatPhoneNumber(phoneNumber) },
         { label: "Gender", value: gender || "N/A" },
         { label: "DOB", value: dateOfBirth ? `${mmDDYYFormat(dateOfBirth)} (${age})` : "N/A" },
@@ -168,6 +175,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
         { label: `${yearLabel} Balance`, value: currentPSAmount == null ? "N/A" : numberToCurrency(currentPSAmount) },
         {
           label: `${yearLabel} Vested Balance`,
+          labelColor: "#0258A5",
           value: formattedCurrentVested
         },
         ...(isEmployee
@@ -217,11 +225,14 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
           paddingX="24px"
           width={"100%"}>
           <Grid size={{ xs: 12 }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5", marginY: "8px" }}>
-              Member Details
-            </Typography>
+            <Box sx={{ mb: 1 }}>
+              <Typography
+                variant="h2"
+                sx={{ color: "#0258A5", mb: 0.5 }}>
+                Member Details
+              </Typography>
+              <Divider />
+            </Box>
           </Grid>
 
           <Grid size={{ xs: 12 }}>
