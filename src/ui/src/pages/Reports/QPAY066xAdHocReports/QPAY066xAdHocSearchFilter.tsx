@@ -12,13 +12,16 @@ import {
   SelectChangeEvent,
   TextField
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
+import { VisuallyHidden } from "../../../utils/accessibilityHelpers";
+import { generateFieldId, getAriaDescribedBy } from "../../../utils/accessibilityUtils";
 import { getLastYearDateRange } from "../../../utils/dateRangeUtils";
+import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
 import { dateStringValidator, endDateStringAfterStartDateValidator } from "../../../utils/FormValidators";
+import { ARIA_DESCRIPTIONS, getBadgeOrPSNPlaceholder, INPUT_PLACEHOLDERS } from "../../../utils/inputFormatters";
 
 interface QPAY066xAdHocSearchFilterProps {
   presets: QPAY066xAdHocReportPreset[];
@@ -110,6 +113,7 @@ const QPAY066xAdHocSearchFilter: React.FC<QPAY066xAdHocSearchFilterProps> = ({
   isLoading = false
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [badgePlaceholder, setBadgePlaceholder] = useState(INPUT_PLACEHOLDERS.BADGE_OR_PSN);
   const requiresDateRange = currentPreset?.requiresDateRange || false;
 
   // Get last year date range for default values
@@ -120,6 +124,23 @@ const QPAY066xAdHocSearchFilter: React.FC<QPAY066xAdHocSearchFilterProps> = ({
       setIsSubmitting(false);
     }
   }, [isLoading]);
+
+  const handleBadgeChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: string) => void) => {
+      const value = e.target.value;
+      // Only allow numeric input, max 11 digits
+      if (value !== "" && !/^\d*$/.test(value)) {
+        return;
+      }
+      if (value.length > 11) {
+        return;
+      }
+      onChange(value);
+      onBadgeNumberChange(value);
+      setBadgePlaceholder(getBadgeOrPSNPlaceholder(value.length));
+    },
+    [onBadgeNumberChange]
+  );
 
   const {
     control,
@@ -249,20 +270,30 @@ const QPAY066xAdHocSearchFilter: React.FC<QPAY066xAdHocSearchFilterProps> = ({
               control={control}
               render={({ field }) => (
                 <>
-                  <FormLabel>Store Number</FormLabel>
+                  <FormLabel htmlFor={generateFieldId("storeNumber")}>Store Number</FormLabel>
                   <TextField
                     {...field}
+                    id={generateFieldId("storeNumber")}
                     value={field.value ?? ""}
                     fullWidth
                     size="small"
+                    placeholder="Store #"
+                    inputMode="numeric"
                     error={!!errors.storeNumber}
-                    helperText={errors.storeNumber?.message}
+                    aria-invalid={!!errors.storeNumber}
+                    aria-describedby={getAriaDescribedBy("storeNumber", !!errors.storeNumber, false)}
                     onChange={(e) => {
                       const value = e.target.value ? Number(e.target.value) : null;
                       field.onChange(value);
                       onStoreNumberChange(e.target.value);
                     }}
                   />
+                  <div
+                    id={generateFieldId("storeNumber-error")}
+                    aria-live="polite"
+                    aria-atomic="true">
+                    {errors.storeNumber && <FormHelperText error>{errors.storeNumber.message}</FormHelperText>}
+                  </div>
                 </>
               )}
             />
@@ -273,31 +304,39 @@ const QPAY066xAdHocSearchFilter: React.FC<QPAY066xAdHocSearchFilterProps> = ({
               control={control}
               render={({ field }) => (
                 <>
-                  <FormLabel>Badge</FormLabel>
+                  <FormLabel htmlFor={generateFieldId("badgeNumber")}>Badge</FormLabel>
                   <TextField
                     {...field}
+                    id={generateFieldId("badgeNumber")}
                     value={field.value}
                     fullWidth
                     size="small"
                     type="text"
+                    placeholder={badgePlaceholder}
+                    inputMode="numeric"
                     disabled={isBadgeNumberDisabled}
                     error={!!errors.badgeNumber}
-                    helperText={
-                      errors.badgeNumber?.message || getExclusionHelperText("badgeNumber", isBadgeNumberDisabled)
-                    }
+                    aria-invalid={!!errors.badgeNumber}
+                    aria-describedby={getAriaDescribedBy("badgeNumber", !!errors.badgeNumber, true)}
                     onChange={(e) => {
-                      const value = e.target.value;
-                      // Only allow numeric input, max 11 digits
-                      if (value !== "" && !/^\d*$/.test(value)) {
-                        return;
-                      }
-                      if (value.length > 11) {
-                        return;
-                      }
-                      field.onChange(value);
-                      onBadgeNumberChange(value);
+                      handleBadgeChange(e, field.onChange);
                     }}
                   />
+                  <VisuallyHidden id={generateFieldId("badgeNumber-hint")}>
+                    {ARIA_DESCRIPTIONS.BADGE_DYNAMIC}
+                  </VisuallyHidden>
+                  <div
+                    id={generateFieldId("badgeNumber-error")}
+                    aria-live="polite"
+                    aria-atomic="true">
+                    {errors.badgeNumber ? (
+                      <FormHelperText error>{errors.badgeNumber.message}</FormHelperText>
+                    ) : (
+                      getExclusionHelperText("badgeNumber", isBadgeNumberDisabled) && (
+                        <FormHelperText>{getExclusionHelperText("badgeNumber", isBadgeNumberDisabled)}</FormHelperText>
+                      )
+                    )}
+                  </div>
                 </>
               )}
             />

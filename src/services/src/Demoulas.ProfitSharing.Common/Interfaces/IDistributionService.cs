@@ -9,8 +9,8 @@ namespace Demoulas.ProfitSharing.Common.Interfaces;
 
 public interface IDistributionService
 {
-    Task<PaginatedResponseDto<DistributionSearchResponse>> SearchAsync(DistributionSearchRequest request, CancellationToken cancellationToken);
-    Task<CreateOrUpdateDistributionResponse> CreateDistributionAsync(CreateDistributionRequest request, CancellationToken cancellationToken);
+    Task<Result<PaginatedResponseDto<DistributionSearchResponse>>> SearchAsync(DistributionSearchRequest request, CancellationToken cancellationToken);
+    Task<Result<CreateOrUpdateDistributionResponse>> CreateDistributionAsync(CreateDistributionRequest request, CancellationToken cancellationToken);
     Task<Result<CreateOrUpdateDistributionResponse>> UpdateDistributionAsync(UpdateDistributionRequest request, CancellationToken cancellationToken);
     Task<Result<bool>> DeleteDistributionAsync(int distributionId, CancellationToken cancellationToken);
     Task<Result<DistributionRunReportSummaryResponse[]>> GetDistributionRunReportSummaryAsync(CancellationToken cancellationToken);

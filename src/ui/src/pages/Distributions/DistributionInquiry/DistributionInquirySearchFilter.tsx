@@ -13,7 +13,7 @@ import {
   TextField
 } from "@mui/material";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
+import { Controller, ControllerRenderProps, Resolver, useForm, useWatch } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useGetTaxCodesQuery } from "reduxstore/api/LookupsApi";
 import { SearchAndReset } from "smart-ui-library";
@@ -25,7 +25,15 @@ import {
   clearPendingDisbursements
 } from "../../../reduxstore/slices/distributionSlice";
 import { DistributionSearchFormData } from "../../../types";
+import { VisuallyHidden } from "../../../utils/accessibilityHelpers";
+import { generateFieldId, getAriaDescribedBy } from "../../../utils/accessibilityUtils";
 import { badgeNumberOrPSNValidator, mustBeNumberValidator, ssnValidator } from "../../../utils/FormValidators";
+import {
+  ARIA_DESCRIPTIONS,
+  formatSSNInput,
+  getBadgeOrPSNPlaceholder,
+  INPUT_PLACEHOLDERS
+} from "../../../utils/inputFormatters";
 import { getDistributionIdLabel } from "../../../utils/lookups";
 
 interface DistributionInquirySearchFilterProps {
@@ -60,6 +68,7 @@ const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterP
   ({ onSearch, onReset, isLoading }) => {
     const dispatch = useDispatch();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [badgePlaceholder, setBadgePlaceholder] = useState(INPUT_PLACEHOLDERS.BADGE_OR_PSN);
     const { data: taxCodesData, isLoading: isLoadingTaxCodes } = useGetTaxCodesQuery({
       availableForDistribution: true
     });
@@ -87,6 +96,19 @@ const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterP
         maxCheckAmount: ""
       }
     });
+
+    // Memoized SSN formatting handler for performance
+    const handleSSNChange = useCallback(
+      (
+        e: React.ChangeEvent<HTMLInputElement>,
+        field: ControllerRenderProps<DistributionSearchFormData, "socialSecurity">
+      ) => {
+        const { display, raw } = formatSSNInput(e.target.value);
+        e.target.value = display;
+        field.onChange(raw || null);
+      },
+      []
+    );
 
     useEffect(() => {
       if (!isLoading) {
@@ -139,6 +161,9 @@ const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterP
         }
 
         setValue("memberType", memberType as "all" | "employees" | "beneficiaries");
+
+        // Update dynamic placeholder based on length
+        setBadgePlaceholder(getBadgeOrPSNPlaceholder(badgeStr.length));
       },
       [setValue]
     );
@@ -197,32 +222,31 @@ const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterP
           spacing={3}>
           {/* First Row: SSN, Badge, Member Type */}
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <FormLabel>Social Security Number</FormLabel>
+            <FormLabel htmlFor={generateFieldId("socialSecurity")}>Social Security Number</FormLabel>
             <Controller
               name="socialSecurity"
               control={control}
               render={({ field }) => (
                 <TextField
-                  name={field.name}
-                  ref={field.ref}
-                  onBlur={field.onBlur}
+                  {...field}
+                  id={generateFieldId("socialSecurity")}
                   fullWidth
                   size="small"
                   variant="outlined"
-                  placeholder="9 digits"
+                  placeholder={INPUT_PLACEHOLDERS.SSN}
                   value={field.value ?? ""}
                   error={!!errors.socialSecurity}
                   disabled={isSocialSecurityDisabled}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value !== "" && !/^\d*$/.test(value)) {
-                      return;
-                    }
-                    if (value.length > 9) {
-                      return;
-                    }
-                    field.onChange(value === "" ? null : value);
+                  aria-invalid={!!errors.socialSecurity}
+                  aria-describedby={getAriaDescribedBy(
+                    "socialSecurity",
+                    !!errors.socialSecurity,
+                    !isSocialSecurityDisabled
+                  )}
+                  inputProps={{
+                    inputMode: "numeric" as const
                   }}
+                  onChange={(e) => handleSSNChange(e, field)}
                   sx={
                     isSocialSecurityDisabled
                       ? {
@@ -235,7 +259,17 @@ const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterP
                 />
               )}
             />
-            {errors.socialSecurity && <FormHelperText error>{errors.socialSecurity?.message}</FormHelperText>}
+            {!isSocialSecurityDisabled && (
+              <VisuallyHidden id="socialSecurity-hint">{ARIA_DESCRIPTIONS.SSN_FORMAT}</VisuallyHidden>
+            )}
+            {errors.socialSecurity && (
+              <div
+                id="socialSecurity-error"
+                aria-live="polite"
+                aria-atomic="true">
+                <FormHelperText error>{errors.socialSecurity?.message}</FormHelperText>
+              </div>
+            )}
             {!errors.socialSecurity && getExclusionHelperText("socialSecurity", isSocialSecurityDisabled) && (
               <FormHelperText sx={{ color: "info.main", fontSize: "0.75rem", marginTop: "4px" }}>
                 {getExclusionHelperText("socialSecurity", isSocialSecurityDisabled)}
@@ -244,22 +278,26 @@ const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterP
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <FormLabel>Badge/PSN Number</FormLabel>
+            <FormLabel htmlFor={generateFieldId("badgeNumber")}>Badge/PSN Number</FormLabel>
             <Controller
               name="badgeNumber"
               control={control}
               render={({ field }) => (
                 <TextField
-                  name={field.name}
-                  ref={field.ref}
-                  onBlur={field.onBlur}
+                  {...field}
+                  id={generateFieldId("badgeNumber")}
                   fullWidth
                   size="small"
                   variant="outlined"
-                  placeholder="5-11 digits"
+                  placeholder={badgePlaceholder}
                   value={field.value ?? ""}
                   error={!!errors.badgeNumber}
                   disabled={isBadgeNumberDisabled}
+                  aria-invalid={!!errors.badgeNumber}
+                  aria-describedby={getAriaDescribedBy("badgeNumber", !!errors.badgeNumber, !isBadgeNumberDisabled)}
+                  inputProps={{
+                    inputMode: "numeric" as const
+                  }}
                   onChange={(e) => {
                     const value = e.target.value;
                     if (value !== "" && !/^\d*$/.test(value)) {
@@ -283,7 +321,17 @@ const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterP
                 />
               )}
             />
-            {errors.badgeNumber && <FormHelperText error>{errors.badgeNumber?.message}</FormHelperText>}
+            {!isBadgeNumberDisabled && (
+              <VisuallyHidden id="badgeNumber-hint">{ARIA_DESCRIPTIONS.BADGE_DYNAMIC}</VisuallyHidden>
+            )}
+            {errors.badgeNumber && (
+              <div
+                id="badgeNumber-error"
+                aria-live="polite"
+                aria-atomic="true">
+                <FormHelperText error>{errors.badgeNumber?.message}</FormHelperText>
+              </div>
+            )}
             {!errors.badgeNumber && getExclusionHelperText("badgeNumber", isBadgeNumberDisabled) && (
               <FormHelperText sx={{ color: "info.main", fontSize: "0.75rem", marginTop: "4px" }}>
                 {getExclusionHelperText("badgeNumber", isBadgeNumberDisabled)}
@@ -437,20 +485,23 @@ const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterP
 
           {/* Third Row: Min Gross Amount, Max Gross Amount, Min Check Amount, Max Check Amount */}
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <FormLabel>Min Gross Amount</FormLabel>
+            <FormLabel htmlFor={generateFieldId("minGrossAmount")}>Min Gross Amount</FormLabel>
             <Controller
               name="minGrossAmount"
               control={control}
               render={({ field }) => (
                 <TextField
                   {...field}
+                  id={generateFieldId("minGrossAmount")}
                   value={field.value ?? ""}
                   fullWidth
                   size="small"
                   variant="outlined"
                   type="number"
-                  placeholder="0.00"
+                  placeholder={INPUT_PLACEHOLDERS.CURRENCY}
                   error={!!errors.minGrossAmount}
+                  aria-invalid={!!errors.minGrossAmount}
+                  aria-describedby={getAriaDescribedBy("minGrossAmount", !!errors.minGrossAmount)}
                   helperText={errors.minGrossAmount?.message}
                 />
               )}
@@ -458,20 +509,23 @@ const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterP
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <FormLabel>Max Gross Amount</FormLabel>
+            <FormLabel htmlFor={generateFieldId("maxGrossAmount")}>Max Gross Amount</FormLabel>
             <Controller
               name="maxGrossAmount"
               control={control}
               render={({ field }) => (
                 <TextField
                   {...field}
+                  id={generateFieldId("maxGrossAmount")}
                   value={field.value ?? ""}
                   fullWidth
                   size="small"
                   variant="outlined"
                   type="number"
-                  placeholder="0.00"
+                  placeholder={INPUT_PLACEHOLDERS.CURRENCY}
                   error={!!errors.maxGrossAmount}
+                  aria-invalid={!!errors.maxGrossAmount}
+                  aria-describedby={getAriaDescribedBy("maxGrossAmount", !!errors.maxGrossAmount)}
                   helperText={errors.maxGrossAmount?.message}
                 />
               )}
@@ -479,20 +533,23 @@ const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterP
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <FormLabel>Min Check Amount</FormLabel>
+            <FormLabel htmlFor={generateFieldId("minCheckAmount")}>Min Check Amount</FormLabel>
             <Controller
               name="minCheckAmount"
               control={control}
               render={({ field }) => (
                 <TextField
                   {...field}
+                  id={generateFieldId("minCheckAmount")}
                   value={field.value ?? ""}
                   fullWidth
                   size="small"
                   variant="outlined"
                   type="number"
-                  placeholder="0.00"
+                  placeholder={INPUT_PLACEHOLDERS.CURRENCY}
                   error={!!errors.minCheckAmount}
+                  aria-invalid={!!errors.minCheckAmount}
+                  aria-describedby={getAriaDescribedBy("minCheckAmount", !!errors.minCheckAmount)}
                   helperText={errors.minCheckAmount?.message}
                 />
               )}
@@ -500,20 +557,23 @@ const DistributionInquirySearchFilter: React.FC<DistributionInquirySearchFilterP
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <FormLabel>Max Check Amount</FormLabel>
+            <FormLabel htmlFor={generateFieldId("maxCheckAmount")}>Max Check Amount</FormLabel>
             <Controller
               name="maxCheckAmount"
               control={control}
               render={({ field }) => (
                 <TextField
                   {...field}
+                  id={generateFieldId("maxCheckAmount")}
                   value={field.value ?? ""}
                   fullWidth
                   size="small"
                   variant="outlined"
                   type="number"
-                  placeholder="0.00"
+                  placeholder={INPUT_PLACEHOLDERS.CURRENCY}
                   error={!!errors.maxCheckAmount}
+                  aria-invalid={!!errors.maxCheckAmount}
+                  aria-describedby={getAriaDescribedBy("maxCheckAmount", !!errors.maxCheckAmount)}
                   helperText={errors.maxCheckAmount?.message}
                 />
               )}

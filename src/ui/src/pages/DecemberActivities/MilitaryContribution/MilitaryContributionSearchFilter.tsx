@@ -1,16 +1,19 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormLabel, Grid, TextField, Typography } from "@mui/material";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
-import { useEffect, useState } from "react";
-import { Controller, Resolver, useForm } from "react-hook-form";
+import { useCallback, useEffect, useState } from "react";
+import { Controller, ControllerRenderProps, Resolver, useForm } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import { VisuallyHidden } from "../../../utils/accessibilityHelpers";
+import { generateFieldId, getAriaDescribedBy } from "../../../utils/accessibilityUtils";
+import { badgeNumberStringValidator, handleBadgeNumberStringInput, ssnValidator } from "../../../utils/FormValidators";
 import {
-  badgeNumberStringValidator,
-  handleBadgeNumberStringInput,
-  handleSsnInput,
-  ssnValidator
-} from "../../../utils/FormValidators";
+  ARIA_DESCRIPTIONS,
+  formatSSNInput,
+  getBadgeOrPSNPlaceholder,
+  INPUT_PLACEHOLDERS
+} from "../../../utils/inputFormatters";
 import useMilitaryContribution from "./hooks/useMilitaryContribution";
 
 interface SearchFormData {
@@ -30,8 +33,40 @@ const validationSchema = yup
 
 const MilitaryContributionSearchFilter: React.FC = () => {
   const [activeField, setActiveField] = useState<"socialSecurity" | "badgeNumber" | null>(null);
+  const [badgePlaceholder, setBadgePlaceholder] = useState(INPUT_PLACEHOLDERS.BADGE_OR_PSN);
   const defaultProfitYear = useDecemberFlowProfitYear();
   const { isSearching, executeSearch, resetSearch } = useMilitaryContribution();
+
+  // Live SSN formatting handler
+  const handleSSNChange = useCallback(
+    (
+      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+      field: ControllerRenderProps<SearchFormData, "socialSecurity">
+    ) => {
+      const { display, raw } = formatSSNInput(e.target.value);
+      e.target.value = display;
+      field.onChange(raw === "" ? undefined : raw);
+      if (raw) setActiveField("socialSecurity");
+    },
+    []
+  );
+
+  // Badge change handler with dynamic placeholder
+  const handleBadgeChange = useCallback(
+    (value: string, field: ControllerRenderProps<SearchFormData, "badgeNumber">) => {
+      const validatedValue = handleBadgeNumberStringInput(value);
+      if (validatedValue !== null) {
+        field.onChange(validatedValue);
+        if (value) {
+          setActiveField("badgeNumber");
+          setBadgePlaceholder(getBadgeOrPSNPlaceholder(value.length));
+        } else {
+          setBadgePlaceholder(INPUT_PLACEHOLDERS.BADGE_OR_PSN);
+        }
+      }
+    },
+    []
+  );
 
   const {
     control,
@@ -96,54 +131,80 @@ const MilitaryContributionSearchFilter: React.FC = () => {
         paddingX="24px"
         gap="24px">
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <FormLabel>SSN {requiredLabel}</FormLabel>
+          <FormLabel htmlFor={generateFieldId("socialSecurity")}>SSN {requiredLabel}</FormLabel>
           <Controller
             name="socialSecurity"
             control={control}
             render={({ field }) => (
-              <TextField
-                {...field}
-                value={field.value ?? ""}
-                fullWidth
-                variant="outlined"
-                placeholder="Enter SSN"
-                disabled={activeField === "badgeNumber"}
-                error={!!errors.socialSecurity}
-                helperText={errors.socialSecurity?.message}
-                onChange={(e) => {
-                  const validatedValue = handleSsnInput(e.target.value);
-                  if (validatedValue !== null) {
-                    field.onChange(validatedValue);
-                    if (validatedValue) setActiveField("socialSecurity");
-                  }
-                }}
-              />
+              <>
+                <TextField
+                  {...field}
+                  id={generateFieldId("socialSecurity")}
+                  value={field.value ?? ""}
+                  fullWidth
+                  variant="outlined"
+                  placeholder={INPUT_PLACEHOLDERS.SSN}
+                  disabled={activeField === "badgeNumber"}
+                  inputProps={{ inputMode: "numeric" }}
+                  aria-invalid={!!errors.socialSecurity || undefined}
+                  aria-describedby={getAriaDescribedBy("socialSecurity", !!errors.socialSecurity, true)}
+                  onChange={(e) => {
+                    handleSSNChange(e, field as ControllerRenderProps<SearchFormData, "socialSecurity">);
+                  }}
+                />
+                <VisuallyHidden id="socialSecurity-hint">{ARIA_DESCRIPTIONS.SSN_FORMAT}</VisuallyHidden>
+                {errors.socialSecurity && (
+                  <div
+                    id="socialSecurity-error"
+                    aria-live="polite"
+                    aria-atomic="true">
+                    <Typography
+                      variant="caption"
+                      color="error">
+                      {errors.socialSecurity.message}
+                    </Typography>
+                  </div>
+                )}
+              </>
             )}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <FormLabel>Badge Number {requiredLabel}</FormLabel>
+          <FormLabel htmlFor={generateFieldId("badgeNumber")}>Badge Number {requiredLabel}</FormLabel>
           <Controller
             name="badgeNumber"
             control={control}
             render={({ field }) => (
-              <TextField
-                {...field}
-                value={field.value ?? ""}
-                fullWidth
-                variant="outlined"
-                placeholder="Enter Badge Number"
-                disabled={activeField === "socialSecurity"}
-                error={!!errors.badgeNumber}
-                helperText={errors.badgeNumber?.message}
-                onChange={(e) => {
-                  const validatedValue = handleBadgeNumberStringInput(e.target.value);
-                  if (validatedValue !== null) {
-                    field.onChange(validatedValue);
-                    if (e.target.value) setActiveField("badgeNumber");
-                  }
-                }}
-              />
+              <>
+                <TextField
+                  {...field}
+                  id={generateFieldId("badgeNumber")}
+                  value={field.value ?? ""}
+                  fullWidth
+                  variant="outlined"
+                  placeholder={badgePlaceholder}
+                  disabled={activeField === "socialSecurity"}
+                  inputProps={{ inputMode: "numeric" }}
+                  aria-invalid={!!errors.badgeNumber || undefined}
+                  aria-describedby={getAriaDescribedBy("badgeNumber", !!errors.badgeNumber, true)}
+                  onChange={(e) => {
+                    handleBadgeChange(e.target.value, field as ControllerRenderProps<SearchFormData, "badgeNumber">);
+                  }}
+                />
+                <VisuallyHidden id="badgeNumber-hint">{ARIA_DESCRIPTIONS.BADGE_FORMAT}</VisuallyHidden>
+                {errors.badgeNumber && (
+                  <div
+                    id="badgeNumber-error"
+                    aria-live="polite"
+                    aria-atomic="true">
+                    <Typography
+                      variant="caption"
+                      color="error">
+                      {errors.badgeNumber.message}
+                    </Typography>
+                  </div>
+                )}
+              </>
             )}
           />
         </Grid>

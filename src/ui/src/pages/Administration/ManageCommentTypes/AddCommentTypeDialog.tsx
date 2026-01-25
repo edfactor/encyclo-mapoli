@@ -12,6 +12,8 @@ import { useState } from "react";
 
 import { useCreateCommentTypeMutation } from "../../../reduxstore/api/administrationApi";
 import { CreateCommentTypeRequest } from "../../../types";
+import { VisuallyHidden } from "../../../utils/accessibilityHelpers";
+import { generateFieldId, getAriaDescribedBy } from "../../../utils/accessibilityUtils";
 
 interface AddCommentTypeDialogProps {
   open: boolean;
@@ -80,6 +82,8 @@ export const AddCommentTypeDialog = ({ open, onClose, onSuccess }: AddCommentTyp
           margin="dense"
           label="Name"
           fullWidth
+          id={generateFieldId("commentTypeName")}
+          placeholder="Enter descriptive name (max 255 characters)"
           value={name}
           onChange={(e) => {
             setName(e.target.value);
@@ -89,8 +93,15 @@ export const AddCommentTypeDialog = ({ open, onClose, onSuccess }: AddCommentTyp
           error={!!error}
           helperText={error}
           required
-          inputProps={{ maxLength: 255 }}
+          inputProps={{
+            maxLength: 255,
+            "aria-invalid": !!error,
+            "aria-describedby": getAriaDescribedBy(generateFieldId("commentTypeName"), error, true)
+          }}
         />
+        <VisuallyHidden id="commentTypeName-hint">
+          Enter a descriptive name for the comment type, up to 255 characters
+        </VisuallyHidden>
         <FormControlLabel
           control={
             <Checkbox

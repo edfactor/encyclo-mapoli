@@ -12,6 +12,9 @@ import {
   profitYearValidator,
   ssnValidator
 } from "../../../utils/FormValidators";
+import { VisuallyHidden } from "../../../utils/accessibilityHelpers";
+import { generateFieldId, getAriaDescribedBy } from "../../../utils/accessibilityUtils";
+import { ARIA_DESCRIPTIONS, formatSSNInput, INPUT_PLACEHOLDERS } from "../../../utils/inputFormatters";
 
 interface ExecutiveHoursAndDollarsSearch {
   profitYear: number;
@@ -38,11 +41,11 @@ const validationSchema = yup
   .test("at-least-one-required", "At least one field must be provided", (values) =>
     Boolean(
       values.profitYear ||
-        values.socialSecurity ||
-        values.badgeNumber ||
-        values.fullNameContains ||
-        values.hasExecutiveHoursAndDollars !== false ||
-        values.isMonthlyPayroll !== false
+      values.socialSecurity ||
+      values.badgeNumber ||
+      values.fullNameContains ||
+      values.hasExecutiveHoursAndDollars !== false ||
+      values.isMonthlyPayroll !== false
     )
   );
 
@@ -254,33 +257,48 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
             </Grid>
           )}
           <Grid size={{ xs: 12, sm: 6, md: isModal ? 4 : 1.5 }}>
-            <FormLabel>SSN {requiredLabel}</FormLabel>
+            <FormLabel htmlFor={generateFieldId("socialSecurity")}>SSN {requiredLabel}</FormLabel>
             <Controller
               name="socialSecurity"
               control={control}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  disabled={activeField === "badgeNumber" || activeField === "fullNameContains"}
-                  value={field.value ?? ""}
-                  error={!!errors.socialSecurity}
-                  onChange={(e) => {
-                    const validatedValue = handleSsnInput(e.target.value);
-                    if (validatedValue !== null) {
-                      const parsedValue = validatedValue === "" ? null : validatedValue;
-                      field.onChange(parsedValue);
-                      toggleSearchFieldEntered(validatedValue !== "", "socialSecurity");
+                <>
+                  <TextField
+                    {...field}
+                    fullWidth
+                    size="small"
+                    variant="outlined"
+                    id={generateFieldId("socialSecurity")}
+                    placeholder={INPUT_PLACEHOLDERS.SSN}
+                    inputMode="numeric"
+                    disabled={activeField === "badgeNumber" || activeField === "fullNameContains"}
+                    value={field.value ?? ""}
+                    error={!!errors.socialSecurity}
+                    onChange={(e) => {
+                      const formatted = formatSSNInput(e.target.value);
+                      const validatedValue = handleSsnInput(formatted.cleaned);
+                      if (validatedValue !== null) {
+                        const parsedValue = validatedValue === "" ? null : validatedValue;
+                        field.onChange(parsedValue);
+                        toggleSearchFieldEntered(validatedValue !== "", "socialSecurity");
+                      }
+                    }}
+                    inputProps={{
+                      "aria-invalid": !!errors.socialSecurity,
+                      "aria-describedby": getAriaDescribedBy(
+                        generateFieldId("socialSecurity"),
+                        !!errors.socialSecurity,
+                        true
+                      )
+                    }}
+                    sx={
+                      activeField === "badgeNumber" || activeField === "fullNameContains"
+                        ? { "& .MuiOutlinedInput-root": { backgroundColor: "#f5f5f5" } }
+                        : undefined
                     }
-                  }}
-                  sx={
-                    activeField === "badgeNumber" || activeField === "fullNameContains"
-                      ? { "& .MuiOutlinedInput-root": { backgroundColor: "#f5f5f5" } }
-                      : undefined
-                  }
-                />
+                  />
+                  <VisuallyHidden id="socialSecurity-hint">{ARIA_DESCRIPTIONS.SSN_FORMAT}</VisuallyHidden>
+                </>
               )}
             />
             {errors.socialSecurity && <FormHelperText error>{errors.socialSecurity.message}</FormHelperText>}
@@ -291,31 +309,46 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
             )}
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: isModal ? 4 : 1.5 }}>
-            <FormLabel>Name {requiredLabel}</FormLabel>
+            <FormLabel htmlFor={generateFieldId("fullNameContains")}>Name {requiredLabel}</FormLabel>
             <Controller
               name="fullNameContains"
               control={control}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  variant="outlined"
-                  disabled={activeField === "socialSecurity" || activeField === "badgeNumber"}
-                  error={!!errors.fullNameContains}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    if (e.target.value !== "") {
-                      toggleSearchFieldEntered(true, "fullNameContains");
-                    } else {
-                      toggleSearchFieldEntered(false, "fullNameContains");
+                <>
+                  <TextField
+                    {...field}
+                    fullWidth
+                    variant="outlined"
+                    id={generateFieldId("fullNameContains")}
+                    placeholder="Last, First or First Last"
+                    disabled={activeField === "socialSecurity" || activeField === "badgeNumber"}
+                    error={!!errors.fullNameContains}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      if (e.target.value !== "") {
+                        toggleSearchFieldEntered(true, "fullNameContains");
+                      } else {
+                        toggleSearchFieldEntered(false, "fullNameContains");
+                      }
+                    }}
+                    inputProps={{
+                      "aria-invalid": !!errors.fullNameContains,
+                      "aria-describedby": getAriaDescribedBy(
+                        generateFieldId("fullNameContains"),
+                        !!errors.fullNameContains,
+                        true
+                      )
+                    }}
+                    sx={
+                      activeField === "socialSecurity" || activeField === "badgeNumber"
+                        ? { "& .MuiOutlinedInput-root": { backgroundColor: "#f5f5f5" } }
+                        : undefined
                     }
-                  }}
-                  sx={
-                    activeField === "socialSecurity" || activeField === "badgeNumber"
-                      ? { "& .MuiOutlinedInput-root": { backgroundColor: "#f5f5f5" } }
-                      : undefined
-                  }
-                />
+                  />
+                  <VisuallyHidden id="fullNameContains-hint">
+                    Enter employee name in Last, First or First Last format
+                  </VisuallyHidden>
+                </>
               )}
             />
             {errors.fullNameContains && <FormHelperText error>{errors.fullNameContains.message}</FormHelperText>}
@@ -326,31 +359,41 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
             )}
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: isModal ? 4 : 1.5 }}>
-            <FormLabel>Badge {requiredLabel}</FormLabel>
+            <FormLabel htmlFor={generateFieldId("badgeNumber")}>Badge {requiredLabel}</FormLabel>
             <Controller
               name="badgeNumber"
               control={control}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  variant="outlined"
-                  value={field.value ?? ""}
-                  error={!!errors.badgeNumber}
-                  disabled={activeField === "socialSecurity" || activeField === "fullNameContains"}
-                  onChange={(e) => {
-                    const validatedValue = handleBadgeNumberStringInput(e.target.value);
-                    if (validatedValue !== null) {
-                      field.onChange(validatedValue);
-                      toggleSearchFieldEntered(validatedValue !== "", "badgeNumber");
+                <>
+                  <TextField
+                    {...field}
+                    fullWidth
+                    variant="outlined"
+                    id={generateFieldId("badgeNumber")}
+                    placeholder={INPUT_PLACEHOLDERS.BADGE_OR_PSN}
+                    inputMode="numeric"
+                    value={field.value ?? ""}
+                    error={!!errors.badgeNumber}
+                    disabled={activeField === "socialSecurity" || activeField === "fullNameContains"}
+                    onChange={(e) => {
+                      const validatedValue = handleBadgeNumberStringInput(e.target.value);
+                      if (validatedValue !== null) {
+                        field.onChange(validatedValue);
+                        toggleSearchFieldEntered(validatedValue !== "", "badgeNumber");
+                      }
+                    }}
+                    inputProps={{
+                      "aria-invalid": !!errors.badgeNumber,
+                      "aria-describedby": getAriaDescribedBy(generateFieldId("badgeNumber"), !!errors.badgeNumber, true)
+                    }}
+                    sx={
+                      activeField === "socialSecurity" || activeField === "fullNameContains"
+                        ? { "& .MuiOutlinedInput-root": { backgroundColor: "#f5f5f5" } }
+                        : undefined
                     }
-                  }}
-                  sx={
-                    activeField === "socialSecurity" || activeField === "fullNameContains"
-                      ? { "& .MuiOutlinedInput-root": { backgroundColor: "#f5f5f5" } }
-                      : undefined
-                  }
-                />
+                  />
+                  <VisuallyHidden id="badgeNumber-hint">{ARIA_DESCRIPTIONS.BADGE_DYNAMIC}</VisuallyHidden>
+                </>
               )}
             />
             {errors.badgeNumber && <FormHelperText error>{errors.badgeNumber.message}</FormHelperText>}

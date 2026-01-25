@@ -336,3 +336,37 @@ code {
   font-weight: 600 !important;
   letter-spacing: 0.01063rem;
 }
+
+/* Accessibility: Enhanced focus indicators (WCAG 2.2 AA - 3:1 contrast minimum) */
+/* High-impact elements: buttons, inputs, links, search fields */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+.MuiButton-root:focus-visible,
+.MuiIconButton-root:focus-visible,
+.MuiTextField-root input:focus-visible {
+  outline: 2px solid #0258a5;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Remove default outline to prevent double outlines */
+button:focus,
+input:focus,
+textarea:focus,
+select:focus,
+a:focus {
+  outline: none;
+}
+
+/* Ensure focus-visible works for keyboard navigation only */
+button:focus:not(:focus-visible),
+input:focus:not(:focus-visible),
+textarea:focus:not(:focus-visible),
+select:focus:not(:focus-visible),
+a:focus:not(:focus-visible) {
+  outline: none;
+}

@@ -1,11 +1,14 @@
 import { AccountHistoryReportTotals } from "@/types/reports/AccountHistoryReportTypes";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, Grid, TextField } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { useFakeTimeAwareYear } from "../../../hooks/useFakeTimeAwareDate";
+import { VisuallyHidden } from "../../../utils/accessibilityHelpers";
+import { generateFieldId, getAriaDescribedBy } from "../../../utils/accessibilityUtils";
+import { ARIA_DESCRIPTIONS, getBadgeOrPSNPlaceholder, INPUT_PLACEHOLDERS } from "../../../utils/inputFormatters";
 
 export interface AccountHistoryReportFilterParams {
   badgeNumber: string;
@@ -39,6 +42,7 @@ const AccountHistoryReportFilterSection: React.FC<AccountHistoryReportFilterSect
   isLoading = false
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [badgePlaceholder, setBadgePlaceholder] = useState(INPUT_PLACEHOLDERS.BADGE_OR_PSN);
   const currentYear = useFakeTimeAwareYear();
   // Default start date goes back 5 years from current year
   const defaultStartDate = new Date(currentYear - 5, 0, 1);
@@ -65,6 +69,16 @@ const AccountHistoryReportFilterSection: React.FC<AccountHistoryReportFilterSect
       setIsSubmitting(false);
     }
   }, [isLoading]);
+
+  const handleBadgeChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: string) => void) => {
+      const value = e.target.value;
+      onChange(value);
+      trigger("badgeNumber");
+      setBadgePlaceholder(getBadgeOrPSNPlaceholder(value.length));
+    },
+    [trigger]
+  );
 
   const validateAndSubmit = handleSubmit((data) => {
     if (!isSubmitting) {
@@ -110,27 +124,45 @@ const AccountHistoryReportFilterSection: React.FC<AccountHistoryReportFilterSect
         paddingX="24px"
         gap="24px">
         <Grid size={{ xs: 12, sm: 4, md: 2 }}>
-          <FormLabel required={true}>Badge Number</FormLabel>
+          <FormLabel
+            htmlFor={generateFieldId("badgeNumber")}
+            required={true}>
+            Badge Number
+          </FormLabel>
           <Controller
             name="badgeNumber"
             control={control}
             render={({ field }) => (
-              <TextField
-                {...field}
-                type="text"
-                fullWidth
-                size="small"
-                variant="outlined"
-                error={!!errors.badgeNumber}
-                helperText={errors.badgeNumber?.message}
-                inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  field.onChange(e.target.value);
-                  trigger("badgeNumber");
-                }}
-              />
+              <>
+                <TextField
+                  {...field}
+                  id={generateFieldId("badgeNumber")}
+                  type="text"
+                  fullWidth
+                  size="small"
+                  variant="outlined"
+                  placeholder={badgePlaceholder}
+                  inputMode="numeric"
+                  error={!!errors.badgeNumber}
+                  aria-invalid={!!errors.badgeNumber}
+                  aria-describedby={getAriaDescribedBy("badgeNumber", !!errors.badgeNumber, true)}
+                  inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleBadgeChange(e, field.onChange);
+                  }}
+                />
+                <VisuallyHidden id={generateFieldId("badgeNumber-hint")}>
+                  {ARIA_DESCRIPTIONS.BADGE_DYNAMIC}
+                </VisuallyHidden>
+              </>
             )}
           />
+          <div
+            id={generateFieldId("badgeNumber-error")}
+            aria-live="polite"
+            aria-atomic="true">
+            {errors.badgeNumber && <FormHelperText error>{errors.badgeNumber.message}</FormHelperText>}
+          </div>
         </Grid>
         <Grid size={{ xs: 12, sm: 4, md: 2 }}>
           <Controller

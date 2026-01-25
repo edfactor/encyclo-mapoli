@@ -36,9 +36,9 @@ public sealed class DistributionService : IDistributionService
         _timeProvider = timeProvider;
     }
 
-    public async Task<PaginatedResponseDto<DistributionSearchResponse>> SearchAsync(DistributionSearchRequest request, CancellationToken cancellationToken)
+    public Task<Result<PaginatedResponseDto<DistributionSearchResponse>>> SearchAsync(DistributionSearchRequest request, CancellationToken cancellationToken)
     {
-        var data = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var demographic = await _demographicReaderService.BuildDemographicQueryAsync(ctx, false);
             var query = from dist in ctx.Distributions
@@ -85,7 +85,7 @@ public sealed class DistributionService : IDistributionService
 
                 if (!ssnExists)
                 {
-                    throw new InvalidOperationException("SSN not found.");
+                    return Result<PaginatedResponseDto<DistributionSearchResponse>>.Failure(Error.SsnNotFound);
                 }
 
                 query = query.Where(d => d.Ssn == searchSsn);
@@ -98,7 +98,7 @@ public sealed class DistributionService : IDistributionService
                     var ssn = await ctx.Beneficiaries.Where(x => !x.IsDeleted && x.BadgeNumber == request.BadgeNumber.Value && x.PsnSuffix == request.PsnSuffix.Value).Select(x => x.Contact!.Ssn).FirstOrDefaultAsync(cancellationToken);
                     if (ssn == default)
                     {
-                        throw new InvalidOperationException("Badge number and PSN suffix combination not found.");
+                        return Result<PaginatedResponseDto<DistributionSearchResponse>>.Failure(Error.BadgeNumberNotFound);
                     }
                     query = query.Where(d => d.Ssn == ssn);
                 }
@@ -107,7 +107,7 @@ public sealed class DistributionService : IDistributionService
                     var ssn = await demographic.Where(x => x.BadgeNumber == request.BadgeNumber.Value).Select(x => x.Ssn).FirstOrDefaultAsync(cancellationToken);
                     if (ssn == default)
                     {
-                        throw new InvalidOperationException("Badge number not found.");
+                        return Result<PaginatedResponseDto<DistributionSearchResponse>>.Failure(Error.BadgeNumberNotFound);
                     }
                     query = query.Where(d => d.Ssn == ssn);
                 }
@@ -194,54 +194,48 @@ public sealed class DistributionService : IDistributionService
                 IsSortDescending = request.IsSortDescending
             };
 
-            return await query.ToPaginationResultsAsync(paginationRequest, cancellationToken);
-        }, cancellationToken);
+            var data = await query.ToPaginationResultsAsync(paginationRequest, cancellationToken);
 
-        var result = new PaginatedResponseDto<DistributionSearchResponse>(request)
-        {
-            Total = data.Total,
-            Results = data.Results.Select(d => new DistributionSearchResponse
+            var result = new PaginatedResponseDto<DistributionSearchResponse>(request)
             {
-                Id = d.Id,
-                PaymentSequence = d.PaymentSequence,
-                Ssn = d.Ssn.MaskSsn(),
-                BadgeNumber = d.BadgeNumber,
-                FullName = d.FullName,
-                FrequencyId = d.FrequencyId,
-                FrequencyName = d.FrequencyName,
-                StatusId = d.StatusId,
-                StatusName = d.StatusName,
-                TaxCodeId = d.TaxCodeId,
-                TaxCodeName = d.TaxCodeName,
-                GrossAmount = d.GrossAmount,
-                FederalTax = d.FederalTax,
-                StateTax = d.StateTax,
-                CheckAmount = d.CheckAmount,
-                IsExecutive = d.IsExecutive,
-                IsEmployee = d.BadgeNumber.HasValue,
-                DemographicId = d.DemographicId,
-                BeneficiaryId = d.BeneficiaryId
-            }).ToList()
-        };
+                Total = data.Total,
+                Results = data.Results.Select(d => new DistributionSearchResponse
+                {
+                    Id = d.Id,
+                    PaymentSequence = d.PaymentSequence,
+                    Ssn = d.Ssn.MaskSsn(),
+                    BadgeNumber = d.BadgeNumber,
+                    FullName = d.FullName,
+                    FrequencyId = d.FrequencyId,
+                    FrequencyName = d.FrequencyName,
+                    StatusId = d.StatusId,
+                    StatusName = d.StatusName,
+                    TaxCodeId = d.TaxCodeId,
+                    TaxCodeName = d.TaxCodeName,
+                    GrossAmount = d.GrossAmount,
+                    FederalTax = d.FederalTax,
+                    StateTax = d.StateTax,
+                    CheckAmount = d.CheckAmount,
+                    IsExecutive = d.IsExecutive,
+                    IsEmployee = d.BadgeNumber.HasValue,
+                    DemographicId = d.DemographicId,
+                    BeneficiaryId = d.BeneficiaryId
+                }).ToList()
+            };
 
-        return result;
+            return Result<PaginatedResponseDto<DistributionSearchResponse>>.Success(result);
+        }, cancellationToken);
     }
 
-    public Task<CreateOrUpdateDistributionResponse> CreateDistributionAsync(CreateDistributionRequest request, CancellationToken cancellationToken)
+    public Task<Result<CreateOrUpdateDistributionResponse>> CreateDistributionAsync(CreateDistributionRequest request, CancellationToken cancellationToken)
     {
-        var validationResult = ValidateDistributionRequest(request);
-        if (!validationResult.IsSuccess)
-        {
-            throw new InvalidOperationException(string.Join("; ", validationResult.Error?.ValidationErrors.SelectMany(e => e.Value) ?? []));
-        }
-
         return _dataContextFactory.UseWritableContext(async ctx =>
         {
             var demographic = await _demographicReaderService.BuildDemographicQueryAsync(ctx, false);
             var dem = await demographic.Where(d => d.BadgeNumber == request.BadgeNumber).FirstOrDefaultAsync(cancellationToken);
             if (dem == null)
             {
-                throw new InvalidOperationException("Badge number not found.");
+                return Result<CreateOrUpdateDistributionResponse>.Failure(Error.BadgeNumberNotFound);
             }
 
             var balance = await _totalService.GetVestingBalanceForSingleMemberAsync(Common.Contracts.Request.SearchBy.Ssn, dem.Ssn, (short)DateTime.Today.Year, cancellationToken);
@@ -252,7 +246,11 @@ public sealed class DistributionService : IDistributionService
 
             if (request.GrossAmount > (balance?.VestedBalance ?? 0))
             {
-                throw new InvalidOperationException($"Gross amount {request.GrossAmount:C} exceeds vested balance {(balance?.VestedBalance ?? 0):C}.");
+                var validationErrors = new Dictionary<string, string[]>
+                {
+                    [nameof(request.GrossAmount)] = [$"Gross amount {request.GrossAmount:C} exceeds vested balance {(balance?.VestedBalance ?? 0):C}."]
+                };
+                return Result<CreateOrUpdateDistributionResponse>.ValidationFailure(validationErrors);
             }
 
             if (request.FrequencyId == DistributionFrequency.Constants.RolloverDirect)
@@ -314,7 +312,7 @@ public sealed class DistributionService : IDistributionService
             await ctx.Distributions.AddAsync(distribution, cancellationToken);
             await ctx.SaveChangesAsync(cancellationToken);
 
-            return new CreateOrUpdateDistributionResponse
+            return Result<CreateOrUpdateDistributionResponse>.Success(new CreateOrUpdateDistributionResponse
             {
                 Id = distribution.Id,
                 BadgeNumber = request.BadgeNumber, // Include BadgeNumber from the original request
@@ -357,19 +355,13 @@ public sealed class DistributionService : IDistributionService
                         CountryIso = distribution.ThirdPartyPayee?.Address?.CountryIso ?? "US",
                     }
                 }
-            };
+            });
         }, cancellationToken);
     }
 
-    public async Task<Result<CreateOrUpdateDistributionResponse>> UpdateDistributionAsync(UpdateDistributionRequest request, CancellationToken cancellationToken)
+    public Task<Result<CreateOrUpdateDistributionResponse>> UpdateDistributionAsync(UpdateDistributionRequest request, CancellationToken cancellationToken)
     {
-        var validationResult = ValidateDistributionRequest(request);
-        if (!validationResult.IsSuccess)
-        {
-            return Result<CreateOrUpdateDistributionResponse>.Failure(validationResult.Error!);
-        }
-
-        return await _dataContextFactory.UseWritableContext(async ctx =>
+        return _dataContextFactory.UseWritableContext(async ctx =>
         {
             var distribution = await ctx.Distributions
                 .Include(d => d.ThirdPartyPayee)
@@ -768,36 +760,6 @@ public sealed class DistributionService : IDistributionService
             var paginatedResults = await query.ToPaginationResultsAsync(request, cancellationToken);
             return Result<PaginatedResponseDto<DisbursementReportDetailResponse>>.Success(paginatedResults);
         }, cancellationToken);
-    }
-
-    private static Result<bool> ValidateDistributionRequest(CreateDistributionRequest request)
-    {
-        var validationErrors = new Dictionary<string, string[]>();
-
-        if (request.BadgeNumber < 1)
-        {
-            validationErrors[nameof(request.BadgeNumber)] = ["BadgeNumber must be greater than 0."];
-        }
-        if (request.GrossAmount <= 0)
-        {
-            validationErrors[nameof(request.GrossAmount)] = ["Gross amount must be greater than zero."];
-        }
-        if (request.FederalTaxPercentage < 0 || request.FederalTaxPercentage > 100)
-        {
-            validationErrors[nameof(request.FederalTaxPercentage)] = ["Federal tax percentage must be between 0 and 100."];
-        }
-        if (request.StateTaxPercentage < 0 || request.StateTaxPercentage > 100)
-        {
-            validationErrors[nameof(request.StateTaxPercentage)] = ["State tax percentage must be between 0 and 100."];
-        }
-        if (request.ThirdPartyPayee != default && request.FrequencyId != DistributionFrequency.Constants.RolloverDirect)
-        {
-            validationErrors[nameof(request.ThirdPartyPayee)] = ["Third party payee can only be set for Rollover Direct frequency."];
-        }
-
-        return validationErrors.Count > 0
-            ? Result<bool>.ValidationFailure(validationErrors)
-            : Result<bool>.Success(true);
     }
 
     private IQueryable<Distribution> GetDistributionExtract(IProfitSharingDbContext ctx, char[] distributionFrequencies)

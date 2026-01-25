@@ -12,9 +12,17 @@ import {
   Stack,
   TextField
 } from "@mui/material";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../constants";
+import { VisuallyHidden } from "../../../utils/accessibilityHelpers";
+import { generateFieldId, getAriaDescribedBy } from "../../../utils/accessibilityUtils";
+import {
+  ARIA_DESCRIPTIONS,
+  formatSSNInput,
+  getBadgeOrPSNPlaceholder,
+  INPUT_PLACEHOLDERS
+} from "../../../utils/inputFormatters";
 import { encodePathParameter, isSafePath } from "../../../utils/pathValidation";
 
 interface NewEntryDialogProps {
@@ -28,6 +36,7 @@ const NewEntryDialog = ({ open, onClose }: NewEntryDialogProps) => {
   const [ssn, setSSN] = useState("");
   const [memberType, setMemberType] = useState<number | "">(1);
   const [errors, setErrors] = useState<{ badgeNumber?: string; ssn?: string; memberType?: string }>({});
+  const [badgePlaceholder, setBadgePlaceholder] = useState(INPUT_PLACEHOLDERS.BADGE_OR_PSN);
 
   const handleClose = () => {
     // Reset form
@@ -35,20 +44,45 @@ const NewEntryDialog = ({ open, onClose }: NewEntryDialogProps) => {
     setSSN("");
     setMemberType("");
     setErrors({});
+    setBadgePlaceholder(INPUT_PLACEHOLDERS.BADGE_OR_PSN);
     onClose();
   };
+
+  const handleSSNChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const formatted = formatSSNInput(e.target.value);
+      setSSN(formatted.display);
+      if (errors.ssn) {
+        setErrors({ ...errors, ssn: undefined });
+      }
+    },
+    [errors]
+  );
+
+  const handleBadgeChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value.replace(/\D/g, "").slice(0, 11);
+      setBadgeNumber(value);
+      setBadgePlaceholder(getBadgeOrPSNPlaceholder(value.length));
+      if (errors.badgeNumber) {
+        setErrors({ ...errors, badgeNumber: undefined });
+      }
+    },
+    [errors]
+  );
 
   const validateForm = (): boolean => {
     const newErrors: { badgeNumber?: string; ssn?: string; memberType?: string } = {};
 
     const hasBadgeNumber = badgeNumber.trim() !== "";
-    const hasSSN = ssn.trim() !== "";
+    const cleanSSN = ssn.replace(/-/g, "");
+    const hasSSN = cleanSSN !== "";
 
     if (!hasBadgeNumber && !hasSSN) {
       newErrors.badgeNumber = "Badge number or SSN is required";
     } else if (hasBadgeNumber && !/^\d+$/.test(badgeNumber.trim())) {
       newErrors.badgeNumber = "Badge number must be numeric";
-    } else if (hasSSN && !/^\d{9}$/.test(ssn.replace(/-/g, ""))) {
+    } else if (hasSSN && !/^\d{9}$/.test(cleanSSN)) {
       newErrors.ssn = "SSN must be 9 digits";
     }
 
@@ -102,36 +136,34 @@ const NewEntryDialog = ({ open, onClose }: NewEntryDialogProps) => {
           <TextField
             autoFocus
             fullWidth
+            id={generateFieldId("badgeNumber")}
             label="Badge Number or PSN"
             value={badgeNumber}
-            onChange={(e) => {
-              const value = e.target.value.replace(/\D/g, "").slice(0, 11);
-              setBadgeNumber(value);
-              if (errors.badgeNumber) {
-                setErrors({ ...errors, badgeNumber: undefined });
-              }
-            }}
+            placeholder={badgePlaceholder}
+            inputMode="numeric"
+            onChange={handleBadgeChange}
             onKeyPress={handleKeyPress}
             error={!!errors.badgeNumber}
+            aria-invalid={!!errors.badgeNumber}
+            aria-describedby={getAriaDescribedBy("badgeNumber", !!errors.badgeNumber, true)}
             helperText={errors.badgeNumber}
-            placeholder="Enter employee badge number or PSN"
           />
+          <VisuallyHidden id={generateFieldId("badgeNumber-hint")}>{ARIA_DESCRIPTIONS.BADGE_DYNAMIC}</VisuallyHidden>
           <TextField
             fullWidth
+            id={generateFieldId("ssn")}
             label="SSN"
             value={ssn}
-            onChange={(e) => {
-              const value = e.target.value.replace(/\D/g, "").slice(0, 9);
-              setSSN(value);
-              if (errors.ssn) {
-                setErrors({ ...errors, ssn: undefined });
-              }
-            }}
+            placeholder={INPUT_PLACEHOLDERS.SSN}
+            inputMode="numeric"
+            onChange={handleSSNChange}
             onKeyPress={handleKeyPress}
             error={!!errors.ssn}
+            aria-invalid={!!errors.ssn}
+            aria-describedby={getAriaDescribedBy("ssn", !!errors.ssn, true)}
             helperText={errors.ssn}
-            placeholder="Enter 9-digit SSN"
           />
+          <VisuallyHidden id={generateFieldId("ssn-hint")}>{ARIA_DESCRIPTIONS.SSN_FORMAT}</VisuallyHidden>
           <FormControl
             fullWidth
             error={!!errors.memberType}
