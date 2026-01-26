@@ -801,12 +801,9 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
             throw new InvalidOperationException("_profitSharingReadOnlyDbContext is null. Mock initialization failed.");
         }
 
-        var lockTaken = false;
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
-            await _contextLock.WaitAsync(cancellationToken);
-            lockTaken = true;
             return await func.Invoke(_profitSharingReadOnlyDbContext.Object);
         }
         catch (TargetInvocationException ex)
@@ -819,13 +816,6 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
                     throw ex.InnerException;
             }
         }
-        finally
-        {
-            if (lockTaken)
-            {
-                _contextLock.Release();
-            }
-        }
     }
 
     public async Task UseReadOnlyContext(Func<ProfitSharingReadOnlyDbContext, Task> func, CancellationToken cancellationToken = new CancellationToken())
@@ -835,12 +825,9 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
             throw new InvalidOperationException("_profitSharingReadOnlyDbContext is null. Mock initialization failed.");
         }
 
-        var lockTaken = false;
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
-            await _contextLock.WaitAsync(cancellationToken);
-            lockTaken = true;
             await func.Invoke(_profitSharingReadOnlyDbContext.Object);
         }
         catch (TargetInvocationException ex)
@@ -851,13 +838,6 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
                     throw;
                 default:
                     throw ex.InnerException;
-            }
-        }
-        finally
-        {
-            if (lockTaken)
-            {
-                _contextLock.Release();
             }
         }
     }
