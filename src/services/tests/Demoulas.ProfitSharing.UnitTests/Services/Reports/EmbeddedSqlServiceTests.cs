@@ -2,7 +2,6 @@ using System.ComponentModel;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Services.Services.Reports;
 using Shouldly;
-using Xunit;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services.Reports;
 
@@ -35,7 +34,7 @@ public sealed class EmbeddedSqlServiceTests
             .Replace("\n", string.Empty)
             .Replace("\t", string.Empty);
 
-        normalized.ShouldContain("CASEWHENm.ZERO_CONTRIBUTION_REASON_IDIN(6,7)ANDm.IS_EMPLOYEE=1AND(m.termination_dateISNULLORm.termination_date>TO_DATE('");
+        normalized.ShouldContain("CASEWHENm.ZERO_CONTRIBUTION_REASON_ID=6ANDm.IS_EMPLOYEE=1AND(m.termination_dateISNULLORm.termination_date>TO_DATE('");
         normalized.ShouldContain("m.IS_EMPLOYEE=1AND(m.termination_dateISNULLORm.termination_date>TO_DATE('");
     }
 }
