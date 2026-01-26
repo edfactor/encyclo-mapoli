@@ -143,6 +143,13 @@
 			"isBackground": false,
 			"problemMatcher": [],
 			"group": "test"
+		},
+		{
+			"label": "verify-ui-tests",
+			"type": "shell",
+			"command": "Set-Location -Path 'src/ui'; npm run test:windows",
+			"isBackground": false,
+			"group": "test"
 		}
 	]
 }

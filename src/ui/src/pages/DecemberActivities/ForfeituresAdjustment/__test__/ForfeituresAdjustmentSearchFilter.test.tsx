@@ -143,8 +143,8 @@ describe("ForfeituresAdjustmentSearchFilter", () => {
         { wrapper }
       );
 
-      const ssnInput = screen.getByPlaceholderText("SSN");
-      const badgeInput = screen.getByPlaceholderText("Badge");
+      const ssnInput = screen.getByPlaceholderText("#########");
+      const badgeInput = screen.getByPlaceholderText("Badge or PSN");
 
       await user.type(ssnInput, "123456789");
 
