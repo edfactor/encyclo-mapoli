@@ -306,7 +306,10 @@ public class Pay426NTests : PristineBaseTest
             totalChecked++;
 
             short difference = (short)(smart.YearsInPlan - ready.YearsInPlan);
-            if (difference == 0 || ready.YearsInPlan > ReferenceData.VestingYears)
+            // PS-2524: Use PendingVestingYears for comparison (5 years threshold)
+#pragma warning disable CS0618 // Obsolete VestingYears
+            if (difference == 0 || ready.YearsInPlan > ReferenceData.PendingVestingYears)
+#pragma warning restore CS0618
             {
                 // Lets not quibble when we agree or if the member has been in the plan for more than 5 years (executives are not bumped automatically)
                 continue;

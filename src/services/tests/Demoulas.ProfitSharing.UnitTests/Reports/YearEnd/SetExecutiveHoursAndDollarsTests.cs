@@ -117,62 +117,74 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
     [Fact]
     public Task update_one_employee()
     {
-        return MockDbContextFactory.UseWritableContext(async ctx =>
-        {
-            // Arrange
-            short profitYear = await GetMaxProfitYearAsync(CancellationToken.None);
-
-            // Grab an employee
-            var payProfit = await ctx.PayProfits
-                .Include(p => p.Demographic)
-                .Where(p => p.ProfitYear == profitYear)
-                .FirstAsync(CancellationToken.None);
-
-            // pull out badge number, create altered hours and dollars 
-            var badgeNumber = payProfit.Demographic!.BadgeNumber;
-            var newHoursExecutive = payProfit.HoursExecutive + 41;
-            var newIncomeExecutive = payProfit.IncomeExecutive + 43;
-
-            // Make the request to change the employee
-            SetExecutiveHoursAndDollarsRequest request = new SetExecutiveHoursAndDollarsRequest
-            {
-                ProfitYear = profitYear,
-                ExecutiveHoursAndDollars =
-                [
-                    new() { BadgeNumber = badgeNumber, ExecutiveDollars = newIncomeExecutive, ExecutiveHours = newHoursExecutive }
-                ]
-            };
-            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-
-            // Act
-            var response =
-                await ApiClient
-                    .PUTAsync<SetExecutiveHoursAndDollarsEndpoint, SetExecutiveHoursAndDollarsRequest, HttpResponseMessage>(request);
-
-            // Assert
-            response.Response.StatusCode.ShouldBeEquivalentTo(HttpStatusCode.NoContent);
-
-            // Verify that the underlying employee was altered properly.
-            payProfit = await ctx.PayProfits
-                .Include(p => p.Demographic != null)
-                .Where(p => p.ProfitYear == profitYear && p.DemographicId == payProfit.DemographicId)
-                .FirstAsync(CancellationToken.None);
-
-            // verify updated hours and income
-            Assert.Equal(newHoursExecutive, payProfit.HoursExecutive);
-            Assert.Equal(newIncomeExecutive, payProfit.IncomeExecutive);
-        });
+        return UpdateOneEmployeeCoreAsync();
     }
 
     [Fact]
     public Task ensure_bad_badge_stops_updating_of_others()
     {
-        return MockDbContextFactory.UseWritableContext(async ctx =>
-        {
-            // Arrange
-            short profitYear = await GetMaxProfitYearAsync(CancellationToken.None);
+        return EnsureBadBadgeStopsUpdatingOfOthersCoreAsync();
+    }
 
-            // Gather employee
+    private async Task UpdateOneEmployeeCoreAsync()
+    {
+        // Arrange
+        short profitYear = await GetMaxProfitYearAsync(CancellationToken.None);
+
+        var initial = await MockDbContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            var payProfit = await ctx.PayProfits
+                .Include(p => p.Demographic)
+                .Where(p => p.ProfitYear == profitYear)
+                .FirstAsync(CancellationToken.None);
+
+            return new
+            {
+                payProfit.Demographic!.BadgeNumber,
+                payProfit.DemographicId,
+                payProfit.HoursExecutive,
+                payProfit.IncomeExecutive
+            };
+        }, CancellationToken.None);
+
+        var newHoursExecutive = initial.HoursExecutive + 41;
+        var newIncomeExecutive = initial.IncomeExecutive + 43;
+
+        var request = new SetExecutiveHoursAndDollarsRequest
+        {
+            ProfitYear = profitYear,
+            ExecutiveHoursAndDollars =
+            [
+                new() { BadgeNumber = initial.BadgeNumber, ExecutiveDollars = newIncomeExecutive, ExecutiveHours = newHoursExecutive }
+            ]
+        };
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+
+        // Act
+        var response = await ApiClient
+            .PUTAsync<SetExecutiveHoursAndDollarsEndpoint, SetExecutiveHoursAndDollarsRequest, HttpResponseMessage>(request);
+
+        // Assert
+        response.Response.StatusCode.ShouldBeEquivalentTo(HttpStatusCode.NoContent);
+
+        var updated = await MockDbContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            return await ctx.PayProfits
+                .Where(p => p.ProfitYear == profitYear && p.DemographicId == initial.DemographicId)
+                .FirstAsync(CancellationToken.None);
+        }, CancellationToken.None);
+
+        Assert.Equal(newHoursExecutive, updated.HoursExecutive);
+        Assert.Equal(newIncomeExecutive, updated.IncomeExecutive);
+    }
+
+    private async Task EnsureBadBadgeStopsUpdatingOfOthersCoreAsync()
+    {
+        // Arrange
+        short profitYear = await GetMaxProfitYearAsync(CancellationToken.None);
+
+        var initial = await MockDbContextFactory.UseReadOnlyContext(async ctx =>
+        {
             var demographicsWithPayProfits = await ctx.Demographics
                 .Join(ctx.PayProfits,
                     d => d.Id,
@@ -181,47 +193,52 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
                 .Where(joined => joined.PayProfit.ProfitYear == profitYear)
                 .FirstAsync(CancellationToken.None);
 
-            // note badge number, keep track of current hours/dollars and attempt to change them
-            var badgeNumber = demographicsWithPayProfits.Demographic.BadgeNumber;
-            var origExecutiveHoursExecutive = demographicsWithPayProfits.PayProfit.HoursExecutive;
-            var origIncomeExecutive = demographicsWithPayProfits.PayProfit.IncomeExecutive;
-            var newHoursExecutive = demographicsWithPayProfits.PayProfit.HoursExecutive + 41;
-            var newIncomeExecutive = demographicsWithPayProfits.PayProfit.IncomeExecutive + 43;
-
-            // Request with Bad Employee also included
-            var request = new SetExecutiveHoursAndDollarsRequest
+            return new
             {
-                ProfitYear = profitYear,
-                ExecutiveHoursAndDollars =
-                [
-                    new() { BadgeNumber = badgeNumber, ExecutiveDollars = newIncomeExecutive, ExecutiveHours = newHoursExecutive },
-                    new() { BadgeNumber = int.MaxValue, ExecutiveDollars = 44, ExecutiveHours = 55 }
-                ]
+                demographicsWithPayProfits.Demographic.BadgeNumber,
+                demographicsWithPayProfits.Demographic.Id,
+                demographicsWithPayProfits.PayProfit.HoursExecutive,
+                demographicsWithPayProfits.PayProfit.IncomeExecutive
             };
-            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        }, CancellationToken.None);
 
-            // Act
-            var response = await ApiClient.PUTAsync<SetExecutiveHoursAndDollarsEndpoint, SetExecutiveHoursAndDollarsRequest, HttpResponseMessage>(request);
+        var newHoursExecutive = initial.HoursExecutive + 41;
+        var newIncomeExecutive = initial.IncomeExecutive + 43;
 
-            // Assert
-            Assert.False(response.Response.IsSuccessStatusCode);
+        var request = new SetExecutiveHoursAndDollarsRequest
+        {
+            ProfitYear = profitYear,
+            ExecutiveHoursAndDollars =
+            [
+                new() { BadgeNumber = initial.BadgeNumber, ExecutiveDollars = newIncomeExecutive, ExecutiveHours = newHoursExecutive },
+                new() { BadgeNumber = int.MaxValue, ExecutiveDollars = 44, ExecutiveHours = 55 }
+            ]
+        };
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
-            var pd = await response.Response.Content.ReadFromJsonAsync<ProblemDetails>();
-            pd.ShouldNotBeNull();
-            pd!.Detail?.ShouldContain("One or more badge numbers were not found.");
+        // Act
+        var response = await ApiClient.PUTAsync<SetExecutiveHoursAndDollarsEndpoint, SetExecutiveHoursAndDollarsRequest, HttpResponseMessage>(request);
 
-            // verify no change to existing employee.
-            var demographicsWithPayProfitsReloaded = await ctx.Demographics
-                .Where(d => d.BadgeNumber == badgeNumber)
+        // Assert
+        Assert.False(response.Response.IsSuccessStatusCode);
+
+        var pd = await response.Response.Content.ReadFromJsonAsync<ProblemDetails>();
+        pd.ShouldNotBeNull();
+        pd!.Detail?.ShouldContain("One or more badge numbers were not found.");
+
+        var reloaded = await MockDbContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            return await ctx.Demographics
+                .Where(d => d.BadgeNumber == initial.BadgeNumber)
                 .Join(ctx.PayProfits,
                     d => d.Id,
                     pp => pp.DemographicId,
                     (d, pp) => new { Demographic = d, PayProfit = pp })
                 .Where(joined => joined.PayProfit.ProfitYear == profitYear)
                 .FirstAsync(CancellationToken.None);
+        }, CancellationToken.None);
 
-            Assert.Equal(origExecutiveHoursExecutive, demographicsWithPayProfitsReloaded.PayProfit.HoursExecutive);
-            Assert.Equal(origIncomeExecutive, demographicsWithPayProfitsReloaded.PayProfit.IncomeExecutive);
-        });
+        Assert.Equal(initial.HoursExecutive, reloaded.PayProfit.HoursExecutive);
+        Assert.Equal(initial.IncomeExecutive, reloaded.PayProfit.IncomeExecutive);
     }
 }

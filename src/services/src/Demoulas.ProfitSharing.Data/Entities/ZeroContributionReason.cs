@@ -42,12 +42,12 @@ public sealed class ZeroContributionReason : ILookupTable<byte>
         public const byte Over64WithOver1000Hours3YearsVesting = 5;
 
         /// <summary>
-        /// >=65 AND 1st CONTRIBUTION >= 5 YEARS AGO GETS 100% VESTED
+        /// >=65 AND 1st CONTRIBUTION > 5 YEARS AGO (6+ YEARS) GETS 100% VESTED
         /// </summary>
         public const byte SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested = 6;
 
         /// <summary>
-        /// =64 AND 1ST CONTRIBUTION >=5 YEARS AGO GETS 100% VESTED ON THEIR BIRTHDAY
+        /// =64 AND 1ST CONTRIBUTION = 5 YEARS AGO GETS 100% VESTED ON THEIR BIRTHDAY
         /// </summary>
         public const byte SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay = 7;
 

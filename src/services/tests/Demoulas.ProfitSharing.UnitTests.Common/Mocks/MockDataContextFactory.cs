@@ -26,6 +26,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
     private readonly Mock<ProfitSharingDbContext> _profitSharingDbContext;
     private readonly Mock<ProfitSharingReadOnlyDbContext> _profitSharingReadOnlyDbContext;
     private readonly Mock<IDemoulasCommonWarehouseContext> _storeInfoDbContext;
+    private readonly SemaphoreSlim _contextLock = new(1, 1);
 
     // Lazy loading: Store references for on-demand Beneficiary expansion (never reassigned, content is mutated)
     private readonly List<Demographic>? _lazyDemographics;
@@ -663,9 +664,12 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
     /// </summary>
     public async Task UseWritableContext(Func<ProfitSharingDbContext, Task> func, CancellationToken cancellationToken = default)
     {
+        var lockTaken = false;
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
+            await _contextLock.WaitAsync(cancellationToken);
+            lockTaken = true;
             await func.Invoke(_profitSharingDbContext.Object);
         }
         catch (TargetInvocationException ex)
@@ -678,6 +682,13 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
                     throw ex.InnerException;
             }
         }
+        finally
+        {
+            if (lockTaken)
+            {
+                _contextLock.Release();
+            }
+        }
     }
 
     /// <summary>
@@ -685,9 +696,12 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
     /// </summary>
     public async Task<T> UseWritableContext<T>(Func<ProfitSharingDbContext, Task<T>> func, CancellationToken cancellationToken = default)
     {
+        var lockTaken = false;
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
+            await _contextLock.WaitAsync(cancellationToken);
+            lockTaken = true;
             return await func.Invoke(_profitSharingDbContext.Object);
         }
         catch (TargetInvocationException ex)
@@ -698,6 +712,13 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
                     throw;
                 default:
                     throw ex.InnerException;
+            }
+        }
+        finally
+        {
+            if (lockTaken)
+            {
+                _contextLock.Release();
             }
         }
     }
@@ -711,14 +732,24 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
             throw new ArgumentNullException(nameof(action));
         }
 
+        var lockTaken = false;
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
+            await _contextLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            lockTaken = true;
             return await action.Invoke(_profitSharingDbContext.Object, null!).ConfigureAwait(false);
         }
         catch (TargetInvocationException ex) when (ex.InnerException != null)
         {
             throw ex.InnerException;
+        }
+        finally
+        {
+            if (lockTaken)
+            {
+                _contextLock.Release();
+            }
         }
     }
 
@@ -772,6 +803,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
 
         try
         {
+            cancellationToken.ThrowIfCancellationRequested();
             return await func.Invoke(_profitSharingReadOnlyDbContext.Object);
         }
         catch (TargetInvocationException ex)

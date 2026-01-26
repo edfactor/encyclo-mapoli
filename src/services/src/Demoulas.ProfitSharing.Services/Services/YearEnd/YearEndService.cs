@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using Demoulas.ProfitSharing.Common;
-using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -49,7 +48,7 @@ public sealed class YearEndService : IYearEndService
     */
     public async Task RunFinalYearEndUpdatesAsync(short profitYear, bool rebuild, CancellationToken ct)
     {
-        using var activity = Activity.Current?.Source.StartActivity("RunFinalYearEndUpdates");
+        using var activity = Activity.Current?.Source.StartActivity();
         activity?.SetTag("profit_year", profitYear);
         activity?.SetTag("rebuild", rebuild);
 
@@ -79,7 +78,7 @@ public sealed class YearEndService : IYearEndService
                         profitYear, profitYear + 1);
 
                     // Copy the current ZeroContributionReason to the Now Year. This might seem odd, but the YE process looks at ZeroContribution for
-                    // last year, and handles someone differently if they had a ZercontributionReason=6 last year.
+                    // last year, and handles someone differently if they had a ZeroContributionReason=6 last year.
                     await using OracleCommand cmd = oracleConnection.CreateCommand();
                     cmd.CommandText = @"
                         MERGE INTO pay_profit pp
@@ -156,6 +155,10 @@ public sealed class YearEndService : IYearEndService
         const byte zcrTerminated = ZeroContributionReason.Constants.TerminatedEmployeeOver1000HoursWorkedGetsYearVested; // 2
         const byte zcr65Plus5Years = ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested; // 6
         const byte zcr64Near5Years = ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay; // 7
+
+        // PS-2524: >64 & >5 Rule requires DISTINCT thresholds:
+        // - PendingVestingYears (5): "Since 1st contribution = 5 years" → ZEROCONT 7 (pending, vests on birthday)
+        // - FullVestingYears (6): "Since 1st contribution > 5 years" → ZEROCONT 6 (fully vested)
 
         // Constants for EmployeeType
         const byte empTypeNotNew = EmployeeType.Constants.NotNewLastYear; // 0
@@ -281,85 +284,97 @@ USING (
                     -- Age 64+ terminated employees: check vesting like active 64+ employees
                     WHEN c.age >= :retirementAgeMinus1 THEN
                         CASE
-                            -- Age 65+ with 5+ years vesting -> ZCR=6 (takes priority)
-                            WHEN c.age >= :retirementAge AND (c.years_since_first_base + c.balance_year_adj) >= :vestingYears THEN :zcr65Plus5Years
-                            -- Preserve existing ZCR if = 6 (already fully vested)
+                            -- PS-2524: Age 65+ with >5 years (6+ years) vesting -> ZCR=6
+                            -- Per >64 & >5 Rule: Since 1st contribution > 5 years means 6+ years
+                            WHEN c.age >= :retirementAge AND(c.years_since_first_base +c.balance_year_adj) >= :fullVestingYears THEN :zcr65Plus5Years
+                            -- Preserve existing ZCR if = 6(once 6, always 6)
                             WHEN NVL(c.current_zcr, 0) = :zcr65Plus5Years THEN :zcr65Plus5Years
-                            -- Age 65+ with exactly 4 years vesting
-                            WHEN c.age >= :retirementAge AND (c.years_since_first_base + c.balance_year_adj) = :vestingYearsMinus1 THEN :zcr64Near5Years
-                            -- Age 64 with 4+ years vesting
-                            WHEN c.age = :retirementAgeMinus1 AND (c.years_since_first_base + c.balance_year_adj) >= :vestingYearsMinus1 THEN :zcr64Near5Years
+                            -- PS - 2524: Prior year ZEROCONT = 7, now age 65 + ->transition to ZEROCONT = 6
+                            WHEN NVL(c.current_zcr, 0) = :zcr64Near5Years AND c.age >= :retirementAge THEN :zcr65Plus5Years
+                            -- PS - 2524: Age 64 with exactly 5 years->ZEROCONT = 7(pending vesting on birthday)
+                            -- Per > 64 & > 5 Rule: Since 1st contribution = 5 years gets 100% vested on birthday
+                            WHEN c.age = :retirementAgeMinus1 AND(c.years_since_first_base +c.balance_year_adj) = :pendingVestingYears THEN :zcr64Near5Years
+                            -- PS - 2524: Age 65 + with exactly 5 years->ZEROCONT = 7(pending, will vest when reaches 6 years)
+                            WHEN c.age >= :retirementAge AND(c.years_since_first_base +c.balance_year_adj) = :pendingVestingYears THEN :zcr64Near5Years
                             -- Terminated with >= 1000 hours
                             WHEN c.has_min_hours = 1 THEN :zcrTerminated
                             ELSE :zcrNormal
                         END
-                    -- Terminated under 64: just check hours
+                    --Terminated under 64: just check hours
                     WHEN c.has_min_hours = 1 THEN :zcrTerminated
                     ELSE :zcrNormal
                 END
-            -- Age 64+ employees (active)
+            --Age 64 + employees(active)
             WHEN c.age >= :retirementAgeMinus1 THEN
                 CASE
-                    -- Age 65+ with 5+ years vesting -> ZCR=6 (takes priority over preserving existing)
-                    WHEN c.age >= :retirementAge AND (c.years_since_first_base + c.balance_year_adj) >= :vestingYears THEN :zcr65Plus5Years
-                    -- Preserve existing ZCR if = 6 (already fully vested with 65+/5+ years)
-                    -- Note: Only preserve ZCR=6 exactly, not ZCR=7, because ZCR=7 employees may now qualify for ZCR=6
+                    -- PS - 2524: Age 65 + with > 5 years(6 + years) vesting->ZCR = 6
+                    -- Per > 64 & > 5 Rule: Since 1st contribution > 5 years means 6 + years
+                    WHEN c.age >= :retirementAge AND(c.years_since_first_base +c.balance_year_adj) >= :fullVestingYears THEN :zcr65Plus5Years
+                    -- Preserve existing ZCR if = 6(once 6, always 6)
                     WHEN NVL(c.current_zcr, 0) = :zcr65Plus5Years THEN :zcr65Plus5Years
-                    -- Age 65+ with exactly 4 years vesting (will vest next year)
-                    WHEN c.age >= :retirementAge AND (c.years_since_first_base + c.balance_year_adj) = :vestingYearsMinus1 THEN :zcr64Near5Years
-                    -- Age 64 with 4+ years vesting
-                    WHEN c.age = :retirementAgeMinus1 AND (c.years_since_first_base + c.balance_year_adj) >= :vestingYearsMinus1 THEN :zcr64Near5Years
-                    -- Reset ZCR 3-5 to normal (invalid for age 64+) - COBOL PAY426.cbl lines 1199-1203
+                    -- PS - 2524: Prior year ZEROCONT = 7, now age 65 + ->transition to ZEROCONT = 6
+                    -- Per > 64 & > 5 Rule: 'ZEROCONT 7 on age > 64 from prior year, becomes to be 6'
+                    WHEN NVL(c.current_zcr, 0) = :zcr64Near5Years AND c.age >= :retirementAge THEN :zcr65Plus5Years
+                    -- PS - 2524: Age 64 with exactly 5 years->ZEROCONT = 7(pending vesting on birthday)
+                    -- Per > 64 & > 5 Rule: Since 1st contribution = 5 years gets 100% vested on birthday
+                    WHEN c.age = :retirementAgeMinus1 AND(c.years_since_first_base +c.balance_year_adj) = :pendingVestingYears THEN :zcr64Near5Years
+                    -- PS - 2524: Age 65 + with exactly 5 years->ZEROCONT = 7(pending, will vest when reaches 6 years)
+                    WHEN c.age >= :retirementAge AND(c.years_since_first_base +c.balance_year_adj) = :pendingVestingYears THEN :zcr64Near5Years
+                    -- Reset ZCR 3 - 5 to normal(invalid for age 64 +) -COBOL PAY426.cbl lines 1199 - 1203
                     WHEN NVL(c.current_zcr, 0) > :zcrTerminated AND NVL(c.current_zcr, 0) < :zcr65Plus5Years THEN :zcrNormal
                     ELSE :zcrNormal
                 END
-            -- Active employees under 64
+            --Active employees under 64
             ELSE :zcrNormal
         END AS new_zcr,
 
-        -- Calculate PointsEarned = ROUND(total_income / 100)
+        --Calculate PointsEarned = ROUND(total_income / 100)
         CASE
             -- Ineligible employees get 0 points
-            WHEN c.is_eligible = 0 OR (c.hire_date >= :fiscalEndDate AND :includeAllHireDates = 0) THEN 0
+            WHEN c.is_eligible = 0 OR(c.hire_date >= :fiscalEndDate AND :includeAllHireDates = 0) THEN 0
             -- Under 21 gets 0 points
             WHEN c.age < :minAgeForContribution THEN 0
             -- Terminated employees get 0 points
             WHEN c.is_terminated = 1 THEN 0
-            -- Age 64+ with < 1000 hours gets 0 points (COBOL PAY426.cbl lines 1219-1221)
+            -- Age 64 + with < 1000 hours gets 0 points(COBOL PAY426.cbl lines 1219 - 1221)
             WHEN c.age >= :retirementAgeMinus1 AND c.has_min_hours = 0 THEN 0
             -- Active employees: ROUND(income / 100, 0, ROUND_HALF_UP)
             ELSE ROUND(c.total_income / 100, 0)
         END AS new_points_earned,
 
-        -- Calculate PsCertificateIssuedDate (set to today if points > 0)
-        CASE
-            -- Ineligible employees get NULL certificate date
-            WHEN c.is_eligible = 0 OR (c.hire_date >= :fiscalEndDate AND :includeAllHireDates = 0) THEN NULL
-            -- Under 21 gets NULL
+        --Calculate PsCertificateIssuedDate(set to today if points > 0)
+            CASE
+                -- Ineligible employees get NULL certificate date
+            WHEN c.is_eligible = 0 OR(c.hire_date >= :fiscalEndDate AND :includeAllHireDates = 0) THEN NULL
+            --Under 21 gets NULL
             WHEN c.age < :minAgeForContribution THEN NULL
             -- Terminated employees get NULL
             WHEN c.is_terminated = 1 THEN NULL
-            -- Age 64+ with < 1000 hours gets NULL
+            --Age 64 + with < 1000 hours gets NULL
             WHEN c.age >= :retirementAgeMinus1 AND c.has_min_hours = 0 THEN NULL
-            -- Active employees: set date if points > 0
+            --Active employees: set date if points > 0
             WHEN ROUND(c.total_income / 100, 0) > 0 THEN TRUNC(SYSDATE)
             ELSE NULL
         END AS new_cert_date
     FROM calc c
 ) src
-ON (pp.demographic_id = src.demographic_id AND pp.profit_year = src.profit_year)
+ON(pp.demographic_id = src.demographic_id AND pp.profit_year = src.profit_year)
 WHEN MATCHED THEN UPDATE SET
     pp.employee_type_id = src.new_employee_type_id,
     pp.zero_contribution_reason_id = src.new_zcr,
     pp.points_earned = src.new_points_earned,
     pp.ps_certificate_issued_date = src.new_cert_date,
     pp.modified_at_utc = SYSTIMESTAMP AT TIME ZONE 'UTC'
--- Only update rows where at least one field changed (using sentinel values for NULL comparisons)
--- Sentinel values: -1 for nullable numbers, 1900-01-01 for nullable dates
-WHERE pp.employee_type_id != src.new_employee_type_id
-   OR NVL(pp.zero_contribution_reason_id, -1) != NVL(src.new_zcr, -1)
-   OR NVL(pp.points_earned, -1) != NVL(src.new_points_earned, -1)
-   OR NVL(pp.ps_certificate_issued_date, DATE '1900-01-01') != NVL(src.new_cert_date, DATE '1900-01-01')";
+-- Only update rows where at least one field changed(using sentinel values for NULL comparisons)
+            --Sentinel values: -1 for nullable numbers, 1900 - 01 - 01 for nullable dates
+            WHERE pp.employee_type_id != src.new_employee_type_id
+
+               OR NVL(pp.zero_contribution_reason_id, -1) != NVL(src.new_zcr, -1)
+
+               OR NVL(pp.points_earned, -1) != NVL(src.new_points_earned, -1)
+
+               OR NVL(pp.ps_certificate_issued_date, DATE '1900-01-01') != NVL(src.new_cert_date, DATE '1900-01-01')";
+
 
         _logger.LogDebug(
             "Executing year-end MERGE for profit year {ProfitYear} (fiscal end date: {FiscalEndDate}, rebuild: {Rebuild})",
@@ -396,8 +411,9 @@ WHERE pp.employee_type_id != src.new_employee_type_id
             cmd.Parameters.Add(":minAgeForContribution", OracleDbType.Int16).Value = ReferenceData.MinimumAgeForContribution;
             cmd.Parameters.Add(":retirementAge", OracleDbType.Int16).Value = ReferenceData.RetirementAge;
             cmd.Parameters.Add(":retirementAgeMinus1", OracleDbType.Int16).Value = ReferenceData.RetirementAge - 1;
-            cmd.Parameters.Add(":vestingYears", OracleDbType.Int16).Value = ReferenceData.VestingYears;
-            cmd.Parameters.Add(":vestingYearsMinus1", OracleDbType.Int16).Value = ReferenceData.VestingYears - 1;
+            // PS-2524: Use new distinct constants per >64 & >5 Rule documentation
+            cmd.Parameters.Add(":pendingVestingYears", OracleDbType.Int16).Value = ReferenceData.PendingVestingYears;
+            cmd.Parameters.Add(":fullVestingYears", OracleDbType.Int16).Value = ReferenceData.FullVestingYears;
 
             var sqlStopwatch = Stopwatch.StartNew();
             int rowsAffected = await cmd.ExecuteNonQueryAsync(ct);
@@ -445,7 +461,7 @@ WHERE pp.employee_type_id != src.new_employee_type_id
             {
                 var maxYear = await ctx.YearEndUpdateStatuses
                     .Where(st => st.IsYearEndCompleted)
-                    .Select(st => (short?)st.ProfitYear)  // Make it nullable
+                    .Select(st => (short?)st.ProfitYear) // Make it nullable
                     .MaxAsync(ct);
 
                 return maxYear ?? (short)(ReferenceData.SmartTransitionYear - 1);

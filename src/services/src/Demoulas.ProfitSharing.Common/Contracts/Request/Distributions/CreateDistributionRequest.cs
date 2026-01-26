@@ -1,4 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 
@@ -13,12 +13,12 @@ public record CreateDistributionRequest : IBadgeNumberRequest
     public string? ForTheBenefitOfAccountType { get; set; }
     public bool Tax1099ForEmployee { get; set; }
     public bool Tax1099ForBeneficiary { get; set; }
-    public required Decimal FederalTaxPercentage { get; set; }
-    public required Decimal StateTaxPercentage { get; set; }
-    public required Decimal GrossAmount { get; set; }
-    public required Decimal FederalTaxAmount { get; set; }
-    public required Decimal StateTaxAmount { get; set; }
-    public required Decimal CheckAmount { get; set; }
+    public required decimal FederalTaxPercentage { get; set; }
+    public required decimal StateTaxPercentage { get; set; }
+    public required decimal GrossAmount { get; set; }
+    public required decimal FederalTaxAmount { get; set; }
+    public required decimal StateTaxAmount { get; set; }
+    public required decimal CheckAmount { get; set; }
     public required char TaxCodeId { get; set; }
     public bool IsDeceased { get; set; }
     public char? GenderId { get; set; }
