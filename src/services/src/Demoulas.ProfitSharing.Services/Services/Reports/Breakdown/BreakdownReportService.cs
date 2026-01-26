@@ -67,7 +67,7 @@ public sealed class BreakdownReportService : IBreakdownService
         public DateOnly HireDate { get; init; }
         public DateOnly? TerminationDate { get; init; }
         public byte EnrollmentId { get; init; }
-        public Decimal ProfitShareHours { get; init; }
+        public decimal ProfitShareHours { get; init; }
         public byte? YearsInPlan { get; internal set; }
         public string Street1 { get; set; } = string.Empty;
         public string? City { get; set; } = string.Empty;

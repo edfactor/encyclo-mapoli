@@ -250,7 +250,9 @@ GROUP BY pd.SSN";
 
     public static string GetVestingRatioQuery(short profitYear, DateOnly asOfDate)
     {
-        var initialContributionFiveYearsAgo = asOfDate.AddYears(-5).Year;
+        // PS-2524: >64 & >5 Rule uses "first plan year FOLLOWING" the initial contribution year
+        // This means: initial_contr_year + 5 < current_year → 6+ years since first contribution
+        var initialContributionSixYearsAgo = asOfDate.AddYears(-ReferenceData.FullVestingYears).Year;
         var birthDate65 = asOfDate.AddYears(-65);
         var yearsOfCreditQuery = GetYearsOfServiceQuery(profitYear, asOfDate);
         var initialContributionYearQuery = GetInitialContributionYearQuery();
@@ -264,14 +266,18 @@ SELECT m.SSN,
        m.BENEFICIARY_CONTACT_ID,
   CASE WHEN m.IS_EMPLOYEE = 0 THEN 1 ELSE --Beneficiaries are always 100% vested
   CASE WHEN
-        -- If employee is active and age > 65, then 100%
-        (m.termination_date IS NULL OR m.termination_date > TO_DATE('{asOfDate.ToString("yyyy-MM-dd")}', 'YYYY-MM-DD') )
-        AND m.initial_contr_year <= {initialContributionFiveYearsAgo}
+        -- PS-2524: Age 65+ with >5 years (6+ years) since first contribution = 100% vested
+      m.IS_EMPLOYEE = 1
+      AND (m.termination_date IS NULL OR m.termination_date > TO_DATE('{asOfDate.ToString("yyyy-MM-dd")}', 'YYYY-MM-DD') )
+        AND m.initial_contr_year <= {initialContributionSixYearsAgo}
         AND m.date_of_birth <= TO_DATE('{birthDate65.ToString("yyyy-MM-dd")}', 'YYYY-MM-DD')
         THEN 1 ELSE
   CASE WHEN m.HAS_FORFEITED = 1 THEN 1 ELSE --Otherwise, If employee has forfeiture records, 100%
   CASE WHEN m.IS_EMPLOYEE = 1 AND m.TERMINATION_CODE_ID = 'Z' AND TERMINATION_DATE<  TO_DATE('{asOfDate.ToString("yyyy-MM-dd")}', 'YYYY-MM-DD')  THEN 1 ELSE --Otherwise, If deceased, mark for 100% vested
-  CASE WHEN m.ZERO_CONTRIBUTION_REASON_ID = 6 THEN 1 ELSE --Otherwise, If zero contribution reason is 65 or over, first contribution more than 5 years ago, 100% vested
+    CASE WHEN m.ZERO_CONTRIBUTION_REASON_ID IN (6, 7)
+                AND m.IS_EMPLOYEE = 1
+                AND (m.termination_date IS NULL OR m.termination_date > TO_DATE('{asOfDate.ToString("yyyy-MM-dd")}', 'YYYY-MM-DD') )
+             THEN 1 ELSE --Otherwise, If zero contribution reason is 65 or over, first contribution more than 5 years ago, 100% vested
   -- PS-2464: Database-driven vesting lookup replaces hardcoded CASE ladder
   NVL(m.VESTING_PERCENT, 0) / 100
   END END END END END AS RATIO
