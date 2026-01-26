@@ -1,9 +1,9 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import { createMockStoreAndWrapper } from "../../../../test";
 import MilitaryContributionSearchFilter from "../MilitaryContributionSearchFilter";
-import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 
 // Mock validators
 vi.mock("../../../../utils/FormValidators", async () => {
@@ -122,8 +122,8 @@ describe("MilitaryContributionSearchFilter", () => {
       const user = userEvent.setup();
       render(<MilitaryContributionSearchFilter />, { wrapper });
 
-      const ssnInput = screen.getByPlaceholderText("Enter SSN");
-      const badgeInput = screen.getByPlaceholderText("Enter Badge Number");
+      const ssnInput = screen.getByPlaceholderText("#########");
+      const badgeInput = screen.getByPlaceholderText("Badge or PSN");
 
       await user.type(ssnInput, "123456789");
 
@@ -136,8 +136,8 @@ describe("MilitaryContributionSearchFilter", () => {
       const user = userEvent.setup();
       render(<MilitaryContributionSearchFilter />, { wrapper });
 
-      const ssnInput = screen.getByPlaceholderText("Enter SSN");
-      const badgeInput = screen.getByPlaceholderText("Enter Badge Number");
+      const ssnInput = screen.getByPlaceholderText("#########");
+      const badgeInput = screen.getByPlaceholderText("Badge or PSN");
 
       await user.type(badgeInput, "12345");
 
@@ -150,8 +150,8 @@ describe("MilitaryContributionSearchFilter", () => {
       const user = userEvent.setup();
       render(<MilitaryContributionSearchFilter />, { wrapper });
 
-      const ssnInput = screen.getByPlaceholderText("Enter SSN");
-      const badgeInput = screen.getByPlaceholderText("Enter Badge Number");
+      const ssnInput = screen.getByPlaceholderText("#########");
+      const badgeInput = screen.getByPlaceholderText("Badge or PSN");
 
       // Type in SSN
       await user.type(ssnInput, "123456789");
@@ -212,7 +212,7 @@ describe("MilitaryContributionSearchFilter", () => {
       const user = userEvent.setup();
       render(<MilitaryContributionSearchFilter />, { wrapper });
 
-      const ssnInput = screen.getByPlaceholderText("Enter SSN");
+      const ssnInput = screen.getByPlaceholderText("#########");
 
       await user.type(ssnInput, "invalid");
 

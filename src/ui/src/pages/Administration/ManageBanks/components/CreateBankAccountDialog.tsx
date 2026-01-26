@@ -1,12 +1,15 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField } from "@mui/material";
 import { useState } from "react";
 import { CreateBankAccountRequest } from "../../../../types/administration/banks";
+import { VisuallyHidden } from "../../../../utils/accessibilityHelpers";
+import { generateFieldId, getAriaDescribedBy } from "../../../../utils/accessibilityUtils";
 import {
   handleAccountNumberInput,
   handleRoutingNumberInput,
   validateAccountNumber,
   validateRoutingNumber
 } from "../../../../utils/bankValidation";
+import { ARIA_DESCRIPTIONS, INPUT_PLACEHOLDERS } from "../../../../utils/inputFormatters";
 
 interface CreateBankAccountDialogProps {
   open: boolean;
@@ -90,13 +93,17 @@ const CreateBankAccountDialog = ({ open, onClose, onCreate, bankId }: CreateBank
           spacing={2}
           sx={{ mt: 1 }}>
           <TextField
+            id={generateFieldId("routingNumber")}
             label="Routing Number"
             value={routingNumber}
+            placeholder={INPUT_PLACEHOLDERS.ROUTING_NUMBER}
             onChange={handleRoutingNumberChange}
             onBlur={() => setTouched((prev) => ({ ...prev, routingNumber: true }))}
             fullWidth
             required
             error={touched.routingNumber && !!routingNumberError}
+            aria-invalid={touched.routingNumber && !!routingNumberError}
+            aria-describedby={getAriaDescribedBy("routingNumber", touched.routingNumber && !!routingNumberError, true)}
             helperText={
               touched.routingNumber && routingNumberError ? routingNumberError : "Enter 9-digit routing number"
             }
@@ -105,17 +112,28 @@ const CreateBankAccountDialog = ({ open, onClose, onCreate, bankId }: CreateBank
               inputMode: "numeric" as const
             }}
           />
+          <VisuallyHidden id={generateFieldId("routingNumber-hint")}>
+            {ARIA_DESCRIPTIONS.ROUTING_NUMBER || INPUT_PLACEHOLDERS.ROUTING_NUMBER_HINT}
+          </VisuallyHidden>
           <TextField
+            id={generateFieldId("accountNumber")}
             label="Account Number"
             value={accountNumber}
+            placeholder={INPUT_PLACEHOLDERS.ACCOUNT_NUMBER}
+            inputMode="numeric"
             onChange={handleAccountNumberChange}
             onBlur={() => setTouched((prev) => ({ ...prev, accountNumber: true }))}
             fullWidth
             required
             error={touched.accountNumber && !!accountNumberError}
+            aria-invalid={touched.accountNumber && !!accountNumberError}
+            aria-describedby={getAriaDescribedBy("accountNumber", touched.accountNumber && !!accountNumberError, true)}
             helperText={touched.accountNumber && accountNumberError ? accountNumberError : "Max 34 characters"}
             inputProps={{ maxLength: 34 }}
           />
+          <VisuallyHidden id={generateFieldId("accountNumber-hint")}>
+            {ARIA_DESCRIPTIONS.ACCOUNT_NUMBER || INPUT_PLACEHOLDERS.ACCOUNT_NUMBER_HINT}
+          </VisuallyHidden>
         </Stack>
       </DialogContent>
       <DialogActions>

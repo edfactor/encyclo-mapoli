@@ -10,12 +10,20 @@ import {
   TextField
 } from "@mui/material";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
+import { Controller, ControllerRenderProps, Resolver, useForm, useWatch } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { MAX_EMPLOYEE_BADGE_LENGTH } from "../../constants";
 import { BeneficiarySearchAPIRequest, BeneficiarySearchForm } from "../../types";
+import { VisuallyHidden } from "../../utils/accessibilityHelpers";
+import { generateFieldId, getAriaDescribedBy } from "../../utils/accessibilityUtils";
 import { badgeNumberOrPSNValidator, ssnValidator } from "../../utils/FormValidators";
+import {
+  ARIA_DESCRIPTIONS,
+  formatSSNInput,
+  getBadgeOrPSNPlaceholder,
+  INPUT_PLACEHOLDERS
+} from "../../utils/inputFormatters";
 import { parseBadgeAndPSN } from "./utils/badgeUtils";
 
 const schema = yup.object().shape({
@@ -60,6 +68,9 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
   const badgeNumberValue = useWatch({ control, name: "badgeNumber" });
   const memberTypeValue = useWatch({ control, name: "memberType" });
 
+  // Dynamic placeholder state for badge/PSN field
+  const [badgePlaceholder, setBadgePlaceholder] = useState(INPUT_PLACEHOLDERS.BADGE_OR_PSN);
+
   // Auto-detect member type based on badge number length
   const handleBadgeNumberChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -67,11 +78,29 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
 
       if (badgeStr.length === 0) {
         setValue("memberType", 0);
+        setBadgePlaceholder(INPUT_PLACEHOLDERS.BADGE_OR_PSN as "Badge or PSN");
       } else if (badgeStr.length > MAX_EMPLOYEE_BADGE_LENGTH) {
         setValue("memberType", 2);
+        setBadgePlaceholder(getBadgeOrPSNPlaceholder(badgeStr.length) as "Badge or PSN");
+      } else {
+        setBadgePlaceholder(getBadgeOrPSNPlaceholder(badgeStr.length) as "Badge or PSN");
       }
     },
     [setValue]
+  );
+
+  // Live SSN formatting handler
+  const handleSSNChange = useCallback(
+    (
+      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+      field: ControllerRenderProps<BeneficiarySearchForm, "ssn">
+    ) => {
+      const { display, raw } = formatSSNInput(e.target.value);
+      e.target.value = display;
+      // Store as string to match schema
+      field.onChange(raw === "" ? null : raw);
+    },
+    []
   );
 
   // Member type options
@@ -182,49 +211,53 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
           spacing={2}
           width="100%">
           <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <FormLabel>Social Security Number</FormLabel>
+            <FormLabel htmlFor={generateFieldId("ssn")}>Social Security Number</FormLabel>
             <Controller
               name="ssn"
               control={control}
               render={({ field }) => (
-                <TextField
-                  name={field.name}
-                  ref={field.ref}
-                  onBlur={field.onBlur}
-                  fullWidth
-                  type="text"
-                  size="small"
-                  variant="outlined"
-                  value={field.value ?? ""}
-                  error={!!errors.ssn}
-                  disabled={isSSNDisabled}
-                  inputProps={{ inputMode: "numeric" }}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Only allow numeric input
-                    if (value !== "" && !/^\d*$/.test(value)) {
-                      return;
-                    }
-                    // Prevent input beyond 9 characters
-                    if (value.length > 9) {
-                      return;
-                    }
-                    const parsedValue = value === "" ? null : value;
-                    field.onChange(parsedValue);
-                  }}
-                  sx={
-                    isSSNDisabled
-                      ? {
-                          "& .MuiOutlinedInput-root": {
-                            backgroundColor: "#f5f5f5"
+                <>
+                  <TextField
+                    id={generateFieldId("ssn")}
+                    name={field.name}
+                    ref={field.ref}
+                    onBlur={field.onBlur}
+                    fullWidth
+                    type="text"
+                    size="small"
+                    variant="outlined"
+                    value={field.value ?? ""}
+                    error={!!errors.ssn}
+                    disabled={isSSNDisabled}
+                    placeholder={INPUT_PLACEHOLDERS.SSN}
+                    inputProps={{ inputMode: "numeric" }}
+                    aria-invalid={!!errors.ssn || undefined}
+                    aria-describedby={getAriaDescribedBy("ssn", !!errors.ssn, true)}
+                    onChange={(e) => {
+                      handleSSNChange(e, field as ControllerRenderProps<BeneficiarySearchForm, "ssn">);
+                    }}
+                    sx={
+                      isSSNDisabled
+                        ? {
+                            "& .MuiOutlinedInput-root": {
+                              backgroundColor: "#f5f5f5"
+                            }
                           }
-                        }
-                      : undefined
-                  }
-                />
+                        : undefined
+                    }
+                  />
+                  <VisuallyHidden id="ssn-hint">{ARIA_DESCRIPTIONS.SSN_FORMAT}</VisuallyHidden>
+                </>
               )}
             />
-            {errors?.ssn && <FormHelperText error>{errors.ssn.message}</FormHelperText>}
+            {errors?.ssn && (
+              <div
+                id="ssn-error"
+                aria-live="polite"
+                aria-atomic="true">
+                <FormHelperText error>{errors.ssn.message}</FormHelperText>
+              </div>
+            )}
             {!errors.ssn && getExclusionHelperText("ssn", isSSNDisabled) && (
               <FormHelperText sx={{ color: "info.main", fontSize: "0.75rem", marginTop: "4px" }}>
                 {getExclusionHelperText("ssn", isSSNDisabled)}
@@ -233,38 +266,51 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <FormLabel>Name</FormLabel>
+            <FormLabel htmlFor={generateFieldId("name")}>Name</FormLabel>
             <Controller
               name="name"
               control={control}
               render={({ field }) => (
-                <TextField
-                  name={field.name}
-                  ref={field.ref}
-                  onBlur={field.onBlur}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  value={field.value ?? ""}
-                  error={!!errors.name}
-                  disabled={isNameDisabled}
-                  onChange={(e) => {
-                    const value = e.target.value === "" ? null : e.target.value;
-                    field.onChange(value);
-                  }}
-                  sx={
-                    isNameDisabled
-                      ? {
-                          "& .MuiOutlinedInput-root": {
-                            backgroundColor: "#f5f5f5"
+                <>
+                  <TextField
+                    id={generateFieldId("name")}
+                    name={field.name}
+                    ref={field.ref}
+                    onBlur={field.onBlur}
+                    fullWidth
+                    size="small"
+                    variant="outlined"
+                    value={field.value ?? ""}
+                    error={!!errors.name}
+                    disabled={isNameDisabled}
+                    placeholder={INPUT_PLACEHOLDERS.NAME}
+                    aria-invalid={!!errors.name || undefined}
+                    aria-describedby={getAriaDescribedBy("name", !!errors.name, false)}
+                    onChange={(e) => {
+                      const value = e.target.value === "" ? null : e.target.value;
+                      field.onChange(value);
+                    }}
+                    sx={
+                      isNameDisabled
+                        ? {
+                            "& .MuiOutlinedInput-root": {
+                              backgroundColor: "#f5f5f5"
+                            }
                           }
-                        }
-                      : undefined
-                  }
-                />
+                        : undefined
+                    }
+                  />
+                  {errors?.name && (
+                    <div
+                      id="name-error"
+                      aria-live="polite"
+                      aria-atomic="true">
+                      <FormHelperText error>{errors.name.message}</FormHelperText>
+                    </div>
+                  )}
+                </>
               )}
             />
-            {errors?.name && <FormHelperText error>{errors.name.message}</FormHelperText>}
             {!errors.name && getExclusionHelperText("name", isNameDisabled) && (
               <FormHelperText sx={{ color: "info.main", fontSize: "0.75rem", marginTop: "4px" }}>
                 {getExclusionHelperText("name", isNameDisabled)}
@@ -273,51 +319,65 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <FormLabel>Badge/PSN Number</FormLabel>
+            <FormLabel htmlFor={generateFieldId("badgeNumber")}>Badge/PSN Number</FormLabel>
             <Controller
               name="badgeNumber"
               control={control}
               render={({ field }) => (
-                <TextField
-                  name={field.name}
-                  ref={field.ref}
-                  onBlur={field.onBlur}
-                  fullWidth
-                  type="text"
-                  size="small"
-                  variant="outlined"
-                  value={field.value ?? ""}
-                  error={!!errors.badgeNumber}
-                  disabled={isBadgeNumberDisabled}
-                  inputProps={{ inputMode: "numeric" }}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Only allow numeric input
-                    if (value !== "" && !/^\d*$/.test(value)) {
-                      return;
-                    }
-                    // Prevent input beyond 11 characters
-                    if (value.length > 11) {
-                      return;
-                    }
-                    const parsedValue = value === "" ? null : Number(value);
-                    field.onChange(parsedValue);
-                    // Auto-update memberType when badgeNumber changes
-                    handleBadgeNumberChange(e);
-                  }}
-                  sx={
-                    isBadgeNumberDisabled
-                      ? {
-                          "& .MuiOutlinedInput-root": {
-                            backgroundColor: "#f5f5f5"
+                <>
+                  <TextField
+                    id={generateFieldId("badgeNumber")}
+                    name={field.name}
+                    ref={field.ref}
+                    onBlur={field.onBlur}
+                    fullWidth
+                    type="text"
+                    size="small"
+                    variant="outlined"
+                    value={field.value ?? ""}
+                    error={!!errors.badgeNumber}
+                    disabled={isBadgeNumberDisabled}
+                    placeholder={badgePlaceholder}
+                    inputProps={{ inputMode: "numeric" }}
+                    aria-invalid={!!errors.badgeNumber || undefined}
+                    aria-describedby={getAriaDescribedBy("badgeNumber", !!errors.badgeNumber, true)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Only allow numeric input
+                      if (value !== "" && !/^\d*$/.test(value)) {
+                        return;
+                      }
+                      // Prevent input beyond 11 characters
+                      if (value.length > 11) {
+                        return;
+                      }
+                      const parsedValue = value === "" ? null : Number(value);
+                      field.onChange(parsedValue);
+                      // Auto-update memberType when badgeNumber changes
+                      handleBadgeNumberChange(e);
+                    }}
+                    sx={
+                      isBadgeNumberDisabled
+                        ? {
+                            "& .MuiOutlinedInput-root": {
+                              backgroundColor: "#f5f5f5"
+                            }
                           }
-                        }
-                      : undefined
-                  }
-                />
+                        : undefined
+                    }
+                  />
+                  <VisuallyHidden id="badgeNumber-hint">{ARIA_DESCRIPTIONS.BADGE_FORMAT}</VisuallyHidden>
+                </>
               )}
             />
-            {errors?.badgeNumber && <FormHelperText error>{errors.badgeNumber.message}</FormHelperText>}
+            {errors?.badgeNumber && (
+              <div
+                id="badgeNumber-error"
+                aria-live="polite"
+                aria-atomic="true">
+                <FormHelperText error>{errors.badgeNumber.message}</FormHelperText>
+              </div>
+            )}
             {!errors.badgeNumber && getExclusionHelperText("badgeNumber", isBadgeNumberDisabled) && (
               <FormHelperText sx={{ color: "info.main", fontSize: "0.75rem", marginTop: "4px" }}>
                 {getExclusionHelperText("badgeNumber", isBadgeNumberDisabled)}

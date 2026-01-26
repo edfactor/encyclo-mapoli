@@ -3,6 +3,9 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextF
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { CreateBankRequest } from "../../../../types/administration/banks";
+import { VisuallyHidden } from "../../../../utils/accessibilityHelpers";
+import { generateFieldId, getAriaDescribedBy } from "../../../../utils/accessibilityUtils";
+import { ARIA_DESCRIPTIONS, formatPhoneInput, INPUT_PLACEHOLDERS } from "../../../../utils/inputFormatters";
 
 interface CreateBankDialogProps {
   open: boolean;
@@ -146,14 +149,26 @@ const CreateBankDialog = ({ open, onClose, onCreate }: CreateBankDialogProps) =>
               name="phone"
               control={control}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Phone"
-                  fullWidth
-                  error={!!errors.phone}
-                  helperText={errors.phone?.message}
-                  inputProps={{ maxLength: 20 }}
-                />
+                <>
+                  <TextField
+                    {...field}
+                    id={generateFieldId("phone")}
+                    label="Phone"
+                    fullWidth
+                    placeholder={INPUT_PLACEHOLDERS.PHONE}
+                    inputMode="tel"
+                    error={!!errors.phone}
+                    aria-invalid={!!errors.phone}
+                    aria-describedby={getAriaDescribedBy("phone", !!errors.phone, true)}
+                    helperText={errors.phone?.message}
+                    onChange={(e) => {
+                      const formatted = formatPhoneInput(e.target.value);
+                      field.onChange(formatted.display);
+                    }}
+                    inputProps={{ maxLength: 20 }}
+                  />
+                  <VisuallyHidden id={generateFieldId("phone-hint")}>{ARIA_DESCRIPTIONS.PHONE_FORMAT}</VisuallyHidden>
+                </>
               )}
             />
             <Controller

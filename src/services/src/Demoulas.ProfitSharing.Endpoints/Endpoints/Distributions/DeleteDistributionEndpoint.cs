@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Microsoft.Extensions.Logging;
@@ -38,8 +39,43 @@ public sealed class DeleteDistributionEndpoint : ProfitSharingEndpoint<IdRequest
         IdRequest req,
         CancellationToken ct)
     {
-        var result = await _distributionService.DeleteDistributionAsync(req.Id, ct);
-        _logger.LogInformation("Distribution delete requested for id {DistributionId}", req.Id);
-        return result.ToHttpResultWithValidation(Error.DistributionNotFound);
+        using var activity = this.StartEndpointActivity(HttpContext);
+
+        try
+        {
+            this.RecordRequestMetrics(HttpContext, _logger, req);
+
+            var result = await _distributionService.DeleteDistributionAsync(req.Id, ct);
+
+            // Business metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "distribution-delete"),
+                new("endpoint", "DeleteDistributionEndpoint"));
+
+            if (result.IsSuccess)
+            {
+                EndpointTelemetry.RecordCountsProcessed.Record(1,
+                    new("record_type", "distribution-deleted"),
+                    new("endpoint", "DeleteDistributionEndpoint"));
+
+                _logger.LogInformation("Distribution deleted for ID: {Id} (correlation: {CorrelationId})",
+                    req.Id, HttpContext.TraceIdentifier);
+            }
+            else
+            {
+                _logger.LogWarning("Distribution deletion failed for ID: {Id} - {Error} (correlation: {CorrelationId})",
+                    req.Id, result.Error, HttpContext.TraceIdentifier);
+            }
+
+            var httpResult = result.ToHttpResultWithValidation(Error.DistributionNotFound);
+            this.RecordResponseMetrics(HttpContext, _logger, httpResult);
+
+            return httpResult;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 }

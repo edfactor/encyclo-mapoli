@@ -11,7 +11,7 @@ import {
   TextField
 } from "@mui/material";
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { Controller, ControllerRenderProps, useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -26,12 +26,20 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { MAX_EMPLOYEE_BADGE_LENGTH, ROUTES } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { VisuallyHidden } from "../../../utils/accessibilityHelpers";
+import { generateFieldId, getAriaDescribedBy } from "../../../utils/accessibilityUtils";
 import {
   badgeNumberOrPSNValidator,
   monthValidator,
   profitYearNullableValidator,
   ssnValidator
 } from "../../../utils/FormValidators";
+import {
+  ARIA_DESCRIPTIONS,
+  formatSSNInput,
+  getBadgeOrPSNPlaceholder,
+  INPUT_PLACEHOLDERS
+} from "../../../utils/inputFormatters";
 import { transformSearchParams } from "./utils/transformSearchParams";
 
 const schema: yup.ObjectSchema<MasterInquirySearch> = yup.object().shape({
@@ -94,6 +102,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
 
     // Ref to track if URL search has been processed
     const urlSearchProcessedRef = useRef(false);
+
+    // Dynamic placeholder state for badge/PSN field
+    const [badgePlaceholder, setBadgePlaceholder] = useState(INPUT_PLACEHOLDERS.BADGE_OR_PSN);
 
     // profitYear should always start with this year
     const profitYear = useDecemberFlowProfitYear();
@@ -306,13 +317,31 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
         if (badgeStr.length === 0) {
           // Reset to all when cleared
           setValue("memberType", "all");
+          setBadgePlaceholder(INPUT_PLACEHOLDERS.BADGE_OR_PSN as "Badge or PSN");
         } else if (badgeStr.length > MAX_EMPLOYEE_BADGE_LENGTH) {
           // Only auto-switch to beneficiaries when badge is long enough
           setValue("memberType", "beneficiaries");
+          setBadgePlaceholder(getBadgeOrPSNPlaceholder(badgeStr.length) as "Badge or PSN");
+        } else {
+          // Update placeholder for shorter badge numbers
+          setBadgePlaceholder(getBadgeOrPSNPlaceholder(badgeStr.length) as "Badge or PSN");
         }
         // Don't change memberType for shorter badge numbers - let user choose
       },
       [setValue]
+    );
+
+    // Live SSN formatting handler
+    const handleSSNChange = useCallback(
+      (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+        field: ControllerRenderProps<MasterInquirySearch, "socialSecurity">
+      ) => {
+        const { display, raw } = formatSSNInput(e.target.value);
+        e.target.value = display; // Update visual display
+        field.onChange(raw === "" ? null : raw); // Store raw value
+      },
+      []
     );
 
     const TextInputField = useCallback(
@@ -328,118 +357,174 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
         type?: string;
         disabled?: boolean;
         helperText?: string;
-      }) => (
-        <Grid
-          size={{
-            xs: 12,
-            sm: 6,
-            md:
-              type === "number" ||
-              name === "contribution" ||
-              name === "earnings" ||
-              name === "forfeiture" ||
-              name === "payment"
-                ? 2
-                : 4
-          }}>
-          <FormLabel>{label}</FormLabel>
-          <Controller
-            name={name}
-            control={control}
-            render={({ field }) => (
-              <TextField
-                name={field.name}
-                ref={field.ref}
-                onBlur={field.onBlur}
-                fullWidth
-                type={type}
-                size="small"
-                variant="outlined"
-                value={field.value ?? ""}
-                error={!!errors[name]}
-                disabled={disabled}
-                onChange={(e) => {
-                  const value = e.target.value;
+      }) => {
+        const fieldId = generateFieldId(name);
+        const hasError = !!errors[name];
+        const hasHint =
+          name === "socialSecurity" ||
+          name === "badgeNumber" ||
+          name === "contribution" ||
+          name === "earnings" ||
+          name === "forfeiture" ||
+          name === "payment";
+        const ariaDescribedBy = getAriaDescribedBy(name, hasError, hasHint);
 
-                  // For SSN and badge fields, only allow numeric input
-                  if (name === "socialSecurity" || name === "badgeNumber") {
-                    if (value !== "" && !/^\d*$/.test(value)) {
-                      return;
-                    }
-                  }
+        // Determine placeholder based on field type
+        let placeholder: string | undefined;
+        if (name === "socialSecurity") {
+          placeholder = INPUT_PLACEHOLDERS.SSN;
+        } else if (name === "badgeNumber") {
+          placeholder = badgePlaceholder;
+        } else if (name === "contribution" || name === "earnings" || name === "forfeiture" || name === "payment") {
+          placeholder = INPUT_PLACEHOLDERS.CURRENCY;
+        }
 
-                  // For dollar amount fields, only allow 0-9, ., and - characters (max 2 decimal places)
-                  if (name === "contribution" || name === "earnings" || name === "forfeiture" || name === "payment") {
-                    // Allow negative numbers for all dollar amount fields, limit to 2 decimal places
-                    if (value !== "" && !/^-?\d*\.?\d{0,2}$/.test(value)) {
-                      return;
-                    }
-                  }
+        return (
+          <Grid
+            size={{
+              xs: 12,
+              sm: 6,
+              md:
+                type === "number" ||
+                name === "contribution" ||
+                name === "earnings" ||
+                name === "forfeiture" ||
+                name === "payment"
+                  ? 2
+                  : 4
+            }}>
+            <FormLabel htmlFor={fieldId}>{label}</FormLabel>
+            <Controller
+              name={name}
+              control={control}
+              render={({ field }) => (
+                <>
+                  <TextField
+                    id={fieldId}
+                    name={field.name}
+                    ref={field.ref}
+                    onBlur={field.onBlur}
+                    fullWidth
+                    type={type}
+                    size="small"
+                    variant="outlined"
+                    value={field.value ?? ""}
+                    error={hasError}
+                    disabled={disabled}
+                    placeholder={placeholder}
+                    inputProps={{
+                      inputMode: name === "socialSecurity" || name === "badgeNumber" ? "numeric" : undefined
+                    }}
+                    aria-invalid={hasError || undefined}
+                    aria-describedby={ariaDescribedBy}
+                    onChange={(e) => {
+                      const value = e.target.value;
 
-                  // Prevent input beyond 11 characters for badgeNumber
-                  if (name === "badgeNumber" && value.length > 11) {
-                    return;
-                  }
-                  // Prevent input beyond 9 characters for socialSecurity
-                  if (name === "socialSecurity" && value.length > 9) {
-                    return;
-                  }
+                      // For SSN field, use live formatting
+                      if (name === "socialSecurity") {
+                        handleSSNChange(e, field as ControllerRenderProps<MasterInquirySearch, "socialSecurity">);
+                        return;
+                      }
 
-                  // Parse value for number fields and dollar amount fields
-                  let parsedValue;
-
-                  if (value === "") {
-                    parsedValue = null;
-                  } else if (
-                    name === "contribution" ||
-                    name === "earnings" ||
-                    name === "forfeiture" ||
-                    name === "payment"
-                  ) {
-                    // For dollar fields that allow negative, keep as string while typing (intermediate states)
-                    // Only convert to number when it's a complete valid number AND the string representation matches
-                    const endsWithPeriod = value.endsWith(".");
-                    // Check for trailing zeros after decimal (e.g., "234.0", "234.00", "1.10")
-                    // These should be kept as strings since Number("234.0").toString() === "234" loses precision
-                    const hasTrailingDecimalZero = /\.\d*0$/.test(value);
-                    const isIntermediateState =
-                      value === "-" || value === "." || value === "-." || endsWithPeriod || hasTrailingDecimalZero;
-                    const isValidNumber = !isIntermediateState && !isNaN(Number(value));
-                    parsedValue = isValidNumber ? Number(value) : value;
-                  } else if (type === "number") {
-                    parsedValue = Number(value);
-                  } else {
-                    parsedValue = value;
-                  }
-
-                  field.onChange(parsedValue);
-
-                  // Auto-update memberType when badgeNumber changes
-                  if (name === "badgeNumber") {
-                    handleBadgeNumberChange(e);
-                  }
-                }}
-                sx={
-                  disabled
-                    ? {
-                        "& .MuiOutlinedInput-root": {
-                          backgroundColor: "#f5f5f5"
+                      // For badge fields, only allow numeric input
+                      if (name === "badgeNumber") {
+                        if (value !== "" && !/^\d*$/.test(value)) {
+                          return;
                         }
                       }
-                    : undefined
-                }
-              />
+
+                      // For dollar amount fields, only allow 0-9, ., and - characters (max 2 decimal places)
+                      if (
+                        name === "contribution" ||
+                        name === "earnings" ||
+                        name === "forfeiture" ||
+                        name === "payment"
+                      ) {
+                        // Allow negative numbers for all dollar amount fields, limit to 2 decimal places
+                        if (value !== "" && !/^-?\d*\.?\d{0,2}$/.test(value)) {
+                          return;
+                        }
+                      }
+
+                      // Prevent input beyond 11 characters for badgeNumber
+                      if (name === "badgeNumber" && value.length > 11) {
+                        return;
+                      }
+
+                      // Parse value for number fields and dollar amount fields
+                      let parsedValue;
+
+                      if (value === "") {
+                        parsedValue = null;
+                      } else if (
+                        name === "contribution" ||
+                        name === "earnings" ||
+                        name === "forfeiture" ||
+                        name === "payment"
+                      ) {
+                        // For dollar fields that allow negative, keep as string while typing (intermediate states)
+                        // Only convert to number when it's a complete valid number AND the string representation matches
+                        const endsWithPeriod = value.endsWith(".");
+                        // Check for trailing zeros after decimal (e.g., "234.0", "234.00", "1.10")
+                        // These should be kept as strings since Number("234.0").toString() === "234" loses precision
+                        const hasTrailingDecimalZero = /\.\d*0$/.test(value);
+                        const isIntermediateState =
+                          value === "-" || value === "." || value === "-." || endsWithPeriod || hasTrailingDecimalZero;
+                        const isValidNumber = !isIntermediateState && !isNaN(Number(value));
+                        parsedValue = isValidNumber ? Number(value) : value;
+                      } else if (type === "number") {
+                        parsedValue = Number(value);
+                      } else {
+                        parsedValue = value;
+                      }
+
+                      field.onChange(parsedValue);
+
+                      // Auto-update memberType when badgeNumber changes
+                      if (name === "badgeNumber") {
+                        handleBadgeNumberChange(e);
+                      }
+                    }}
+                    sx={
+                      disabled
+                        ? {
+                            "& .MuiOutlinedInput-root": {
+                              backgroundColor: "#f5f5f5"
+                            }
+                          }
+                        : undefined
+                    }
+                  />
+                  {/* Screen reader hint for field format */}
+                  {name === "socialSecurity" && (
+                    <VisuallyHidden id={`${name}-hint`}>{ARIA_DESCRIPTIONS.SSN_FORMAT}</VisuallyHidden>
+                  )}
+                  {name === "badgeNumber" && (
+                    <VisuallyHidden id={`${name}-hint`}>{ARIA_DESCRIPTIONS.BADGE_FORMAT}</VisuallyHidden>
+                  )}
+                  {(name === "contribution" || name === "earnings" || name === "forfeiture" || name === "payment") && (
+                    <VisuallyHidden id={`${name}-hint`}>{ARIA_DESCRIPTIONS.CURRENCY_FORMAT}</VisuallyHidden>
+                  )}
+                </>
+              )}
+            />
+            {errors[name] && (
+              <div
+                id={`${name}-error`}
+                aria-live="polite"
+                aria-atomic="true">
+                <FormHelperText error>{errors[name]?.message}</FormHelperText>
+              </div>
             )}
-          />
-          {errors[name] && <FormHelperText error>{errors[name]?.message}</FormHelperText>}
-          {!errors[name] && helperText && (
-            <FormHelperText sx={{ color: "info.main", fontSize: "0.75rem", marginTop: "4px" }}>
-              {helperText}
-            </FormHelperText>
-          )}
-        </Grid>
-      ),
-      [control, errors, handleBadgeNumberChange]
+            {!errors[name] && helperText && (
+              <FormHelperText sx={{ color: "info.main", fontSize: "0.75rem", marginTop: "4px" }}>
+                {helperText}
+              </FormHelperText>
+            )}
+          </Grid>
+        );
+      },
+      [control, errors, handleBadgeNumberChange, handleSSNChange, badgePlaceholder]
     );
 
     const RadioGroupField = memo(

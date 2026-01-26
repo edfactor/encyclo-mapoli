@@ -1,16 +1,19 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, Grid, TextField, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
-import { Controller, Resolver, useForm } from "react-hook-form";
+import { useCallback, useEffect, useState } from "react";
+import { Controller, ControllerRenderProps, Resolver, useForm } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { useFakeTimeAwareYear } from "../../../hooks/useFakeTimeAwareDate";
+import { VisuallyHidden } from "../../../utils/accessibilityHelpers";
+import { generateFieldId, getAriaDescribedBy } from "../../../utils/accessibilityUtils";
+import { badgeNumberStringValidator, handleBadgeNumberStringInput, ssnValidator } from "../../../utils/FormValidators";
 import {
-  badgeNumberStringValidator,
-  handleBadgeNumberStringInput,
-  handleSsnInput,
-  ssnValidator
-} from "../../../utils/FormValidators";
+  ARIA_DESCRIPTIONS,
+  formatSSNInput,
+  getBadgeOrPSNPlaceholder,
+  INPUT_PLACEHOLDERS
+} from "../../../utils/inputFormatters";
 
 // Define the search parameters interface
 interface ForfeituresAdjustmentSearchParams {
@@ -48,7 +51,39 @@ const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFil
   isSearching
 }) => {
   const [activeField, setActiveField] = useState<"ssn" | "badge" | null>(null);
+  const [badgePlaceholder, setBadgePlaceholder] = useState(INPUT_PLACEHOLDERS.BADGE_OR_PSN);
   const currentYear = useFakeTimeAwareYear();
+
+  // Live SSN formatting handler
+  const handleSSNChange = useCallback(
+    (
+      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+      field: ControllerRenderProps<ForfeituresAdjustmentSearchParams, "ssn">
+    ) => {
+      const { display, raw } = formatSSNInput(e.target.value);
+      e.target.value = display;
+      field.onChange(raw === "" ? "" : raw);
+      if (raw) setActiveField("ssn");
+    },
+    []
+  );
+
+  // Badge change handler with dynamic placeholder
+  const handleBadgeChange = useCallback(
+    (value: string, field: ControllerRenderProps<ForfeituresAdjustmentSearchParams, "badge">) => {
+      const validatedValue = handleBadgeNumberStringInput(value);
+      if (validatedValue !== null) {
+        field.onChange(validatedValue);
+        if (value) {
+          setActiveField("badge");
+          setBadgePlaceholder(getBadgeOrPSNPlaceholder(value.length) as "Badge or PSN");
+        } else {
+          setBadgePlaceholder(INPUT_PLACEHOLDERS.BADGE_OR_PSN as "Badge or PSN");
+        }
+      }
+    },
+    []
+  );
 
   const {
     control,
@@ -135,56 +170,77 @@ const ForfeituresAdjustmentSearchFilter: React.FC<ForfeituresAdjustmentSearchFil
           spacing={3}
           width="100%">
           <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <FormLabel>SSN {requiredLabel}</FormLabel>
+            <FormLabel htmlFor={generateFieldId("ssn")}>SSN {requiredLabel}</FormLabel>
             <Controller
               name="ssn"
               control={control}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  variant="outlined"
-                  disabled={activeField === "badge"}
-                  error={!!errors.ssn || !!errors.root?.message}
-                  placeholder="SSN"
-                  onChange={(e) => {
-                    const validatedValue = handleSsnInput(e.target.value);
-                    if (validatedValue !== null) {
-                      field.onChange(validatedValue);
-                      if (validatedValue) setActiveField("ssn");
-                    }
-                  }}
-                />
+                <>
+                  <TextField
+                    {...field}
+                    id={generateFieldId("ssn")}
+                    fullWidth
+                    variant="outlined"
+                    disabled={activeField === "badge"}
+                    placeholder={INPUT_PLACEHOLDERS.SSN}
+                    inputProps={{ inputMode: "numeric" }}
+                    aria-invalid={!!errors.ssn || !!errors.root?.message || undefined}
+                    aria-describedby={getAriaDescribedBy("ssn", !!errors.ssn || !!errors.root?.message, true)}
+                    onChange={(e) => {
+                      handleSSNChange(e, field as ControllerRenderProps<ForfeituresAdjustmentSearchParams, "ssn">);
+                    }}
+                  />
+                  <VisuallyHidden id="ssn-hint">{ARIA_DESCRIPTIONS.SSN_FORMAT}</VisuallyHidden>
+                  {(errors.ssn || errors.root) && (
+                    <div
+                      id="ssn-error"
+                      aria-live="polite"
+                      aria-atomic="true">
+                      {errors.ssn && <FormHelperText error>{errors.ssn.message}</FormHelperText>}
+                      {errors.root && <FormHelperText error>{errors.root.message}</FormHelperText>}
+                    </div>
+                  )}
+                </>
               )}
             />
-            {errors.ssn && <FormHelperText error>{errors.ssn.message}</FormHelperText>}
-            {errors.root && <FormHelperText error>{errors.root.message}</FormHelperText>}
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <FormLabel>Badge {requiredLabel}</FormLabel>
+            <FormLabel htmlFor={generateFieldId("badge")}>Badge {requiredLabel}</FormLabel>
             <Controller
               name="badge"
               control={control}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  variant="outlined"
-                  error={!!errors.badge || !!errors.root?.message}
-                  placeholder="Badge"
-                  disabled={activeField === "ssn"}
-                  onChange={(e) => {
-                    const validatedValue = handleBadgeNumberStringInput(e.target.value);
-                    if (validatedValue !== null) {
-                      field.onChange(validatedValue);
-                      if (e.target.value) setActiveField("badge");
-                    }
-                  }}
-                />
+                <>
+                  <TextField
+                    {...field}
+                    id={generateFieldId("badge")}
+                    fullWidth
+                    variant="outlined"
+                    placeholder={badgePlaceholder}
+                    disabled={activeField === "ssn"}
+                    inputProps={{ inputMode: "numeric" }}
+                    aria-invalid={!!errors.badge || !!errors.root?.message || undefined}
+                    aria-describedby={getAriaDescribedBy("badge", !!errors.badge || !!errors.root?.message, true)}
+                    onChange={(e) => {
+                      handleBadgeChange(
+                        e.target.value,
+                        field as ControllerRenderProps<ForfeituresAdjustmentSearchParams, "badge">
+                      );
+                    }}
+                  />
+                  <VisuallyHidden id="badge-hint">{ARIA_DESCRIPTIONS.BADGE_FORMAT}</VisuallyHidden>
+                  {errors.badge && (
+                    <div
+                      id="badge-error"
+                      aria-live="polite"
+                      aria-atomic="true">
+                      <FormHelperText error>{errors.badge.message}</FormHelperText>
+                    </div>
+                  )}
+                </>
               )}
             />
-            {errors.badge && <FormHelperText error>{errors.badge.message}</FormHelperText>}
           </Grid>
         </Grid>
       </Grid>
