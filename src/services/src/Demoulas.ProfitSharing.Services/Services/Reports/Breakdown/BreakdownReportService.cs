@@ -236,11 +236,8 @@ public sealed class BreakdownReportService : IBreakdownService
 
             ThrowIfInvalidSsns(employees.Select(e => e.Ssn).ToHashSet());
 
-            // Now get vesting ratios - we still need these as they're computed separately
-            var employeeSsns = employees.Select(e => e.Ssn).ToHashSet();
-
             // Degenerate guard: prevent full table scan
-            if (employeeSsns.Count == 0)
+            if (employees.Count == 0)
             {
                 return new BreakdownByStoreTotals
                 {
@@ -253,28 +250,6 @@ public sealed class BreakdownReportService : IBreakdownService
                     TotalEndBalances = 0,
                     TotalVestedBalance = 0
                 };
-            }
-
-            // Batch SSNs if > 5000 to avoid Oracle IN clause limit (10K is max, use 5K for safety)
-            var vestingByKey = new Dictionary<(int Ssn, int BadgeNumber), decimal>();
-            const int batchSize = 5000;
-            var ssnList = employeeSsns.ToList();
-
-            for (int i = 0; i < ssnList.Count; i += batchSize)
-            {
-                var batch = ssnList.Skip(i).Take(batchSize).ToList();
-                var batchVesting = await _totalService.GetVestingRatio(ctx, request.ProfitYear, calInfo.FiscalEndDate)
-                    .TagWith($"GetTotalsByStore-Vesting-Batch{i / batchSize}-{request.ProfitYear}")
-                    .Where(vr => batch.Contains(vr.Ssn))
-                    .ToListAsync(cancellationToken);
-
-                var vestingBySsn = batchVesting.ToLookup(vr => vr.Ssn);
-
-                foreach (var employee in employees.Where(e => batch.Contains(e.Ssn)))
-                {
-                    var ratio = vestingBySsn[employee.Ssn].FirstOrDefault()?.Ratio ?? 0m;
-                    vestingByKey[(employee.Ssn, employee.BadgeNumber)] = ratio;
-                }
             }
 
             // ── Aggregate from already-loaded data ────────────────────────────────────
@@ -295,18 +270,13 @@ public sealed class BreakdownReportService : IBreakdownService
                                      + totals.TotalDisbursements
                                      + employees.Sum(e => e.BeneficiaryAllocation ?? 0);
 
-            // Calculate vested balance using the vesting ratios we fetched
-            totals.TotalVestedBalance = employees.Sum(e =>
-            {
-                var endBal = (e.BeginningBalance ?? 0)
-                           + e.Contributions
-                           + e.Earnings
-                           + e.Forfeitures
-                           + e.Distributions
-                           + (e.BeneficiaryAllocation ?? 0);
-                var vestingRatio = vestingByKey.GetValueOrDefault((e.Ssn, e.BadgeNumber), 0);
-                return endBal * vestingRatio;
-            });
+            // Use the pre-calculated VestedBalance from TotalVestingBalanceAlt query
+            // which uses the correct profit code logic:
+            // Contributions (PC 0) + Earnings (PC 0) + EtvaForfeitures (PC 0) +
+            // Distributions (PC 1,3,5 * -1) + Forfeitures (PC 2 * -1) +
+            // VestedEarnings (PC 6 contrib + PC 8 earnings + PC 9 forfeit * -1)
+            // Then applies vesting ratio and ETVA adjustments
+            totals.TotalVestedBalance = employees.Sum(e => e.VestedBalance ?? 0);
 
             totals.CrossReferenceValidation = await _crossReferenceValidationService.ValidateBreakoutReportGrandTotalAsync(
                 request.ProfitYear,
