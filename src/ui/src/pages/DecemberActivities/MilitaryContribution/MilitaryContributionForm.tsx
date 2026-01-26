@@ -5,6 +5,9 @@ import { useCreateMilitaryContributionMutation } from "reduxstore/api/MilitaryAp
 import { CreateMilitaryContributionRequest, MilitaryContribution } from "reduxstore/types";
 import { DSMDatePicker } from "smart-ui-library";
 import { ServiceErrorResponse } from "../../../types/errors/errors";
+import { VisuallyHidden } from "../../../utils/accessibilityHelpers";
+import { generateFieldId, getAriaDescribedBy } from "../../../utils/accessibilityUtils";
+import { ARIA_DESCRIPTIONS, INPUT_PLACEHOLDERS } from "../../../utils/inputFormatters";
 
 interface FormData {
   contributionDate: Date | null;
@@ -150,22 +153,31 @@ const MilitaryContributionForm = ({
         </Grid>
 
         <Grid size={{ xs: 6 }}>
-          <FormLabel>Contribution Amount</FormLabel>
+          <FormLabel htmlFor={generateFieldId("contributionAmount")}>Contribution Amount</FormLabel>
           <Controller
             name="contributionAmount"
             control={control}
             rules={{ required: "Amount is required" }}
             render={({ field, fieldState: { error } }) => (
-              <TextField
-                {...field}
-                value={field.value ?? ""}
-                id="contributionAmount"
-                type="number"
-                error={!!error}
-                helperText={error?.message}
-                required
-                fullWidth
-              />
+              <>
+                <TextField
+                  {...field}
+                  value={field.value ?? ""}
+                  id={generateFieldId("contributionAmount")}
+                  type="number"
+                  placeholder={INPUT_PLACEHOLDERS.CURRENCY_WITH_SYMBOL}
+                  inputMode="decimal"
+                  error={!!error}
+                  aria-invalid={!!error}
+                  aria-describedby={getAriaDescribedBy("contributionAmount", !!error, true)}
+                  helperText={error?.message}
+                  required
+                  fullWidth
+                />
+                <VisuallyHidden id={generateFieldId("contributionAmount-hint")}>
+                  {ARIA_DESCRIPTIONS.CURRENCY_FORMAT}
+                </VisuallyHidden>
+              </>
             )}
           />
         </Grid>

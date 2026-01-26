@@ -6,7 +6,10 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import DuplicateSsnGuard from "../../../components/DuplicateSsnGuard";
 import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
+import { VisuallyHidden } from "../../../utils/accessibilityHelpers";
+import { generateFieldId, getAriaDescribedBy } from "../../../utils/accessibilityUtils";
 import { profitYearValidator } from "../../../utils/FormValidators";
+import { ARIA_DESCRIPTIONS, INPUT_PLACEHOLDERS } from "../../../utils/inputFormatters";
 import { ForfeitSearchParams } from "./hooks/useForfeit";
 
 interface ForfeitSearchParametersProps {
@@ -66,25 +69,40 @@ const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({ onSea
           spacing={3}
           width="100%">
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <FormLabel>Profit Year</FormLabel>
+            <FormLabel htmlFor={generateFieldId("profitYear")}>Profit Year</FormLabel>
             <Controller
               name="profitYear"
               control={control}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  type="number"
-                  variant="outlined"
-                  error={!!errors.profitYear}
-                  onChange={(e) => {
-                    field.onChange(e);
-                  }}
-                  disabled={true}
-                />
+                <>
+                  <TextField
+                    {...field}
+                    id={generateFieldId("profitYear")}
+                    fullWidth
+                    type="number"
+                    variant="outlined"
+                    placeholder={INPUT_PLACEHOLDERS.PROFIT_YEAR}
+                    inputMode="numeric"
+                    error={!!errors.profitYear}
+                    aria-invalid={!!errors.profitYear}
+                    aria-describedby={getAriaDescribedBy("profitYear", !!errors.profitYear, true)}
+                    onChange={(e) => {
+                      field.onChange(e);
+                    }}
+                    disabled={true}
+                  />
+                  <VisuallyHidden id={generateFieldId("profitYear-hint")}>
+                    {ARIA_DESCRIPTIONS.PROFIT_YEAR}
+                  </VisuallyHidden>
+                </>
               )}
             />
-            {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
+            <div
+              id={generateFieldId("profitYear-error")}
+              aria-live="polite"
+              aria-atomic="true">
+              {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
+            </div>
           </Grid>
         </Grid>
       </Grid>

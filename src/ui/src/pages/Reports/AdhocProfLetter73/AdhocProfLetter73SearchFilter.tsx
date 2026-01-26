@@ -1,10 +1,13 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormHelperText, Grid } from "@mui/material";
+import { FormHelperText, FormLabel, Grid, TextField } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { Controller, Resolver, useForm, useWatch } from "react-hook-form";
 import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { useFakeTimeAwareDate } from "../../../hooks/useFakeTimeAwareDate";
+import { VisuallyHidden } from "../../../utils/accessibilityHelpers";
+import { generateFieldId, getAriaDescribedBy } from "../../../utils/accessibilityUtils";
+import { ARIA_DESCRIPTIONS, INPUT_PLACEHOLDERS } from "../../../utils/inputFormatters";
 
 export interface AdhocProfLetter73FilterParams {
   profitYear?: Date | null;
@@ -114,31 +117,39 @@ const AdhocProfLetter73FilterSection: React.FC<AdhocProfLetter73FilterSectionPro
               control={control}
               render={({ field }) => (
                 <>
-                  <label
-                    htmlFor="DeMinimusValue"
-                    style={{ display: "block", marginBottom: "8px", fontSize: "14px" }}>
-                    De Minimus Value
-                  </label>
-                  <input
-                    id="DeMinimusValue"
+                  <FormLabel htmlFor={generateFieldId("DeMinimusValue")}>De Minimus Value</FormLabel>
+                  <TextField
+                    {...field}
+                    id={generateFieldId("DeMinimusValue")}
+                    fullWidth
                     type="number"
-                    step="0.01"
-                    min="0"
+                    variant="outlined"
+                    size="small"
+                    placeholder={INPUT_PLACEHOLDERS.CURRENCY_WITH_SYMBOL}
+                    inputMode="decimal"
                     value={field.value ?? ""}
+                    error={!!errors.DeMinimusValue}
+                    aria-invalid={!!errors.DeMinimusValue}
+                    aria-describedby={getAriaDescribedBy("DeMinimusValue", !!errors.DeMinimusValue, true)}
                     onChange={(e) => {
                       const value = e.target.value === "" ? null : parseFloat(e.target.value);
                       field.onChange(value);
                       trigger("DeMinimusValue");
                     }}
-                    style={{
-                      width: "100%",
-                      padding: "8px",
-                      fontSize: "14px",
-                      border: errors.DeMinimusValue ? "1px solid #d32f2f" : "1px solid #ccc",
-                      borderRadius: "4px"
+                    inputProps={{
+                      step: 0.01,
+                      min: 0
                     }}
                   />
-                  {errors.DeMinimusValue && <FormHelperText error>{errors.DeMinimusValue.message}</FormHelperText>}
+                  <VisuallyHidden id={generateFieldId("DeMinimusValue-hint")}>
+                    {ARIA_DESCRIPTIONS.CURRENCY_FORMAT}
+                  </VisuallyHidden>
+                  <div
+                    id={generateFieldId("DeMinimusValue-error")}
+                    aria-live="polite"
+                    aria-atomic="true">
+                    {errors.DeMinimusValue && <FormHelperText error>{errors.DeMinimusValue.message}</FormHelperText>}
+                  </div>
                 </>
               )}
             />

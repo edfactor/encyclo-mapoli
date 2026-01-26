@@ -3,6 +3,9 @@ import { CellValueChangedEvent, ColDef } from "ag-grid-community";
 import { DSMGrid } from "smart-ui-library";
 import { GRID_KEYS } from "../../../constants";
 import { AnnuityRateInputRequest } from "../../../reduxstore/types";
+import { VisuallyHidden } from "../../../utils/accessibilityHelpers";
+import { generateFieldId, getAriaDescribedBy } from "../../../utils/accessibilityUtils";
+import { ARIA_DESCRIPTIONS, INPUT_PLACEHOLDERS } from "../../../utils/inputFormatters";
 
 interface ManageAnnuityRatesCopyModalProps {
   isOpen: boolean;
@@ -43,11 +46,18 @@ const ManageAnnuityRatesCopyModal = ({
         <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 2 }}>
           <TextField
             label="New Year"
+            id={generateFieldId("copyYear")}
+            placeholder={INPUT_PLACEHOLDERS.PROFIT_YEAR}
             value={copyYear}
             onChange={(event) => onYearChange(event.target.value)}
-            inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+            inputProps={{
+              inputMode: "numeric",
+              pattern: "[0-9]*",
+              "aria-describedby": getAriaDescribedBy(generateFieldId("copyYear"), false, true)
+            }}
             size="small"
           />
+          <VisuallyHidden id="copyYear-hint">{ARIA_DESCRIPTIONS.PROFIT_YEAR}</VisuallyHidden>
         </Box>
         <DSMGrid
           preferenceKey={`${GRID_KEYS.MANAGE_ANNUITY_RATES}-copy`}

@@ -1,15 +1,13 @@
 import AddIcon from "@mui/icons-material/Add";
-import DownloadIcon from "@mui/icons-material/Download";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import { Button, Divider, Grid, Tooltip } from "@mui/material";
+import { Box, Button, Divider, Grid, Tooltip } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { DSMAccordion, Page, formatNumberWithComma } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
-import PageErrorBoundary from "../../../components/PageErrorBoundary/PageErrorBoundary";
 import MissiveAlerts from "../../../components/MissiveAlerts/MissiveAlerts";
 import { DISTRIBUTION_INQUIRY_MESSAGES } from "../../../components/MissiveAlerts/MissiveMessages";
+import PageErrorBoundary from "../../../components/PageErrorBoundary/PageErrorBoundary";
 import StatusDropdownActionNode from "../../../components/StatusDropdownActionNode";
 import { CAPTIONS, ROUTES } from "../../../constants";
 import { SortParams } from "../../../hooks/useGridPagination";
@@ -28,10 +26,10 @@ import {
 } from "../../../reduxstore/slices/distributionSlice";
 import { DistributionSearchFormData, DistributionSearchRequest, DistributionSearchResponse } from "../../../types";
 import { ServiceErrorResponse } from "../../../types/errors/errors";
+import { encodePathParameter, isSafePath } from "../../../utils/pathValidation";
 import DeleteDistributionModal from "./DeleteDistributionModal";
 import DistributionInquiryGrid from "./DistributionInquiryGrid";
 import DistributionInquirySearchFilter from "./DistributionInquirySearchFilter";
-import NewEntryDialog from "./NewEntryDialog";
 
 interface LocationState {
   showSuccessMessage?: boolean;
@@ -46,7 +44,6 @@ const DistributionInquiryContent = () => {
   const navigate = useNavigate();
   const [searchData, setSearchData] = useState<DistributionSearchRequest | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
-  const [isNewEntryDialogOpen, setIsNewEntryDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [distributionToDelete, setDistributionToDelete] = useState<DistributionSearchResponse | null>(null);
   const [triggerSearch, { data, isFetching }] = useLazySearchDistributionsQuery();
@@ -216,11 +213,24 @@ const DistributionInquiryContent = () => {
   };
 
   const handleNewEntry = () => {
-    setIsNewEntryDialogOpen(true);
-  };
+    if (!searchData) return;
 
-  const handleCloseNewEntryDialog = () => {
-    setIsNewEntryDialogOpen(false);
+    // Extract badge number or SSN from search data
+    const identifier = searchData.badgeNumber?.toString() || searchData.ssn || "";
+    if (!identifier) return;
+
+    // Determine member type from search data
+    // searchData.memberType: 1 = Employee, 2 = Beneficiary
+    const memberType = searchData.memberType || 1;
+
+    // Encode parameters and validate path
+    const encodedIdentifier = encodePathParameter(identifier);
+    const encodedMemberType = encodePathParameter(memberType.toString());
+    const path = `/${ROUTES.ADD_DISTRIBUTION}/${encodedIdentifier}/${encodedMemberType}`;
+
+    if (isSafePath(path)) {
+      navigate(path);
+    }
   };
 
   const handleCloseDeleteDialog = () => {
@@ -257,14 +267,6 @@ const DistributionInquiryContent = () => {
     }
   };
 
-  const handleExport = () => {
-    console.log("Export clicked");
-  };
-
-  const handleReport = () => {
-    console.log("Report clicked");
-  };
-
   return (
     <Grid
       container
@@ -274,36 +276,6 @@ const DistributionInquiryContent = () => {
       </Grid>
 
       <MissiveAlerts />
-
-      <Grid
-        width="100%"
-        sx={{ display: "flex", justifyContent: "flex-end", paddingX: "24px", gap: "12px" }}>
-        <Tooltip title={isReadOnly ? "You are in read-only mode" : ""}>
-          <span>
-            <Button
-              variant="outlined"
-              onClick={handleNewEntry}
-              disabled={isReadOnly}
-              startIcon={<AddIcon />}>
-              NEW ENTRY
-            </Button>
-          </span>
-        </Tooltip>
-        <Button
-          variant="outlined"
-          disabled={true}
-          onClick={handleExport}
-          startIcon={<DownloadIcon />}>
-          EXPORT
-        </Button>
-        <Button
-          variant="outlined"
-          disabled={true}
-          onClick={handleReport}
-          startIcon={<PictureAsPdfIcon />}>
-          REPORT
-        </Button>
-      </Grid>
 
       <Grid width="100%">
         <DSMAccordion title="Filter">
@@ -322,15 +294,26 @@ const DistributionInquiryContent = () => {
             totalRecords={data?.total ?? 0}
             isLoading={isFetching}
             onPaginationChange={handlePaginationChange}
+            renderHeaderActions={() => (
+              <Box sx={{ paddingRight: "24px" }}>
+                <Tooltip
+                  title={isReadOnly ? "You are in read-only mode" : !searchData ? "Please perform a search first" : ""}>
+                  <span>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      onClick={handleNewEntry}
+                      disabled={isReadOnly || !searchData}
+                      startIcon={<AddIcon />}>
+                      NEW ENTRY
+                    </Button>
+                  </span>
+                </Tooltip>
+              </Box>
+            )}
           />
         </Grid>
       )}
-
-      {/* New Entry Dialog */}
-      <NewEntryDialog
-        open={isNewEntryDialogOpen}
-        onClose={handleCloseNewEntryDialog}
-      />
 
       {/* Delete Distribution Modal */}
       <DeleteDistributionModal

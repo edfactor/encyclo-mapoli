@@ -1,5 +1,8 @@
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from "@mui/material";
 import React, { memo } from "react";
+import { VisuallyHidden } from "../../../utils/accessibilityHelpers";
+import { generateFieldId, getAriaDescribedBy } from "../../../utils/accessibilityUtils";
+import { ARIA_DESCRIPTIONS, INPUT_PLACEHOLDERS } from "../../../utils/inputFormatters";
 import { AdjustmentDraft } from "./hooks/useProfitSharingAdjustments";
 
 interface ProfitSharingAdjustmentModalProps {
@@ -37,41 +40,59 @@ const ProfitSharingAdjustmentModal: React.FC<ProfitSharingAdjustmentModalProps> 
               label="Contribution"
               size="small"
               type="text"
+              id={generateFieldId("contribution")}
+              placeholder={INPUT_PLACEHOLDERS.CURRENCY_WITH_SYMBOL}
               value={draft.contribution}
               onChange={(e) =>
                 onUpdateDraft({
                   contribution: e.target.value
                 })
               }
-              inputProps={{ inputMode: "decimal" }}
+              inputProps={{
+                inputMode: "decimal",
+                "aria-describedby": getAriaDescribedBy(generateFieldId("contribution"), false, true)
+              }}
               sx={{ width: 180 }}
             />
+            <VisuallyHidden id="contribution-hint">{ARIA_DESCRIPTIONS.CURRENCY_FORMAT}</VisuallyHidden>
             <TextField
               label="Earnings"
               size="small"
               type="text"
+              id={generateFieldId("earnings")}
+              placeholder={INPUT_PLACEHOLDERS.CURRENCY_WITH_SYMBOL}
               value={draft.earnings}
               onChange={(e) =>
                 onUpdateDraft({
                   earnings: e.target.value
                 })
               }
-              inputProps={{ inputMode: "decimal" }}
+              inputProps={{
+                inputMode: "decimal",
+                "aria-describedby": getAriaDescribedBy(generateFieldId("earnings"), false, true)
+              }}
               sx={{ width: 180 }}
             />
+            <VisuallyHidden id="earnings-hint">{ARIA_DESCRIPTIONS.CURRENCY_FORMAT}</VisuallyHidden>
             <TextField
               label="Forfeiture"
               size="small"
               type="text"
+              id={generateFieldId("forfeiture")}
+              placeholder={INPUT_PLACEHOLDERS.CURRENCY_WITH_SYMBOL}
               value={draft.forfeiture}
               onChange={(e) =>
                 onUpdateDraft({
                   forfeiture: e.target.value
                 })
               }
-              inputProps={{ inputMode: "decimal" }}
+              inputProps={{
+                inputMode: "decimal",
+                "aria-describedby": getAriaDescribedBy(generateFieldId("forfeiture"), false, true)
+              }}
               sx={{ width: 180 }}
             />
+            <VisuallyHidden id="forfeiture-hint">{ARIA_DESCRIPTIONS.CURRENCY_FORMAT}</VisuallyHidden>
           </Box>
         </DialogContent>
         <DialogActions>

@@ -1,13 +1,16 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
+﻿using Demoulas.ProfitSharing.Common.Contracts;
+using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Distributions;
 
-public sealed class CreateDistributionEndpoint : ProfitSharingEndpoint<CreateDistributionRequest, CreateOrUpdateDistributionResponse>
+public sealed class CreateDistributionEndpoint : ProfitSharingEndpoint<CreateDistributionRequest, Results<Ok<CreateOrUpdateDistributionResponse>, NotFound, BadRequest, ProblemHttpResult>>
 {
     private readonly IDistributionService _distributionService;
     private readonly ILogger<CreateDistributionEndpoint> _logger;
@@ -56,10 +59,45 @@ public sealed class CreateDistributionEndpoint : ProfitSharingEndpoint<CreateDis
         });
     }
 
-    protected override async Task<CreateOrUpdateDistributionResponse> HandleRequestAsync(CreateDistributionRequest req, CancellationToken ct)
+    protected override async Task<Results<Ok<CreateOrUpdateDistributionResponse>, NotFound, BadRequest, ProblemHttpResult>> HandleRequestAsync(CreateDistributionRequest req, CancellationToken ct)
     {
-        var result = await _distributionService.CreateDistributionAsync(req, ct);
-        _logger.LogInformation("Distribution created with id {DistributionId}", result?.Id ?? 0);
-        return result!;
+        using var activity = this.StartEndpointActivity(HttpContext);
+
+        try
+        {
+            this.RecordRequestMetrics(HttpContext, _logger, req);
+
+            var result = await _distributionService.CreateDistributionAsync(req, ct);
+
+            // Business metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "distribution-create"),
+                new("endpoint", "CreateDistributionEndpoint"));
+
+            if (result.IsSuccess)
+            {
+                EndpointTelemetry.RecordCountsProcessed.Record(1,
+                    new("record_type", "distribution-created"),
+                    new("endpoint", "CreateDistributionEndpoint"));
+
+                _logger.LogInformation("Distribution created with ID: {Id}, Badge: {BadgeNumber}, Gross Amount: {GrossAmount} (correlation: {CorrelationId})",
+                    result.Value?.Id, result.Value?.BadgeNumber, result.Value?.GrossAmount, HttpContext.TraceIdentifier);
+            }
+            else
+            {
+                _logger.LogWarning("Distribution creation failed - {Error} (correlation: {CorrelationId})",
+                    result.Error, HttpContext.TraceIdentifier);
+            }
+
+            var httpResult = result.ToHttpResultWithValidation(Error.BadgeNumberNotFound);
+            this.RecordResponseMetrics(HttpContext, _logger, httpResult);
+
+            return httpResult;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 }

@@ -110,9 +110,7 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
                 earningPointsGroup
             };
 
-            int totalValidations, passedValidations, failedValidations;
-            List<string> criticalIssues, warnings;
-            SummarizeValidations(validationGroups, out totalValidations, out passedValidations, out failedValidations, out criticalIssues, out warnings);
+            SummarizeValidations(validationGroups, out int totalValidations, out int passedValidations, out int failedValidations, out List<string> criticalIssues, out List<string> warnings);
             bool blockMasterUpdate = criticalIssues.Any();
 
             _logger.LogInformation(
@@ -187,9 +185,7 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
             wagesValidation
         };
 
-        int totalValidations, passedValidations, failedValidations;
-        List<string> criticalIssues, warnings;
-        SummarizeValidations(validationGroups, out totalValidations, out passedValidations, out failedValidations, out criticalIssues, out warnings);
+        SummarizeValidations(validationGroups, out int totalValidations, out int passedValidations, out int failedValidations, out List<string> criticalIssues, out List<string> warnings);
 
         var rslt = new ValidationResponse()
         {
@@ -250,9 +246,7 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
         };
 
         var validationGroups = new List<CrossReferenceValidationGroup> { validationGroup };
-        int totalValidations, passedValidations, failedValidations;
-        List<string> criticalIssues, warnings;
-        SummarizeValidations(validationGroups, out totalValidations, out passedValidations, out failedValidations, out criticalIssues, out warnings);
+        SummarizeValidations(validationGroups, out int totalValidations, out int passedValidations, out int failedValidations, out List<string> criticalIssues, out List<string> warnings);
         var rslt = new ValidationResponse()
         {
             ProfitYear = profitYear,
@@ -357,9 +351,7 @@ public class CrossReferenceValidationService : ICrossReferenceValidationService
         };
 
         var validationGroups = new List<CrossReferenceValidationGroup>() { beginningBalanceValidationGroup, earningsTotalValidationGroup, contributionsTotalValidationGroup };
-        int totalValidations, passedValidations, failedValidations;
-        List<string> criticalIssues, warnings;
-        SummarizeValidations(validationGroups, out totalValidations, out passedValidations, out failedValidations, out criticalIssues, out warnings);
+        SummarizeValidations(validationGroups, out int totalValidations, out int passedValidations, out int failedValidations, out List<string> criticalIssues, out List<string> warnings);
 
         var rslt = new ValidationResponse()
         {

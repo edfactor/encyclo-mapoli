@@ -11,6 +11,8 @@ import {
 import { useState } from "react";
 import { useCreateTaxCodeMutation } from "../../../reduxstore/api/administrationApi";
 import { CreateTaxCodeRequest } from "../../../types";
+import { VisuallyHidden } from "../../../utils/accessibilityHelpers";
+import { generateFieldId, getAriaDescribedBy } from "../../../utils/accessibilityUtils";
 
 interface AddTaxCodeDialogProps {
   open: boolean;
@@ -106,6 +108,8 @@ export const AddTaxCodeDialog = ({ open, onClose, onSuccess }: AddTaxCodeDialogP
           margin="dense"
           label="Id"
           fullWidth
+          id={generateFieldId("taxCodeId")}
+          placeholder="A-Z or 0-9"
           value={id}
           onChange={(e) => {
             setId(e.target.value.toUpperCase());
@@ -115,12 +119,19 @@ export const AddTaxCodeDialog = ({ open, onClose, onSuccess }: AddTaxCodeDialogP
           error={!!error}
           helperText={error}
           required
-          inputProps={{ maxLength: 1 }}
+          inputProps={{
+            maxLength: 1,
+            "aria-invalid": !!error,
+            "aria-describedby": getAriaDescribedBy(generateFieldId("taxCodeId"), !!error, true)
+          }}
         />
+        <VisuallyHidden id="taxCodeId-hint">Enter a single letter or number for the tax code ID</VisuallyHidden>
         <TextField
           margin="dense"
           label="Name"
           fullWidth
+          id={generateFieldId("taxCodeName")}
+          placeholder="Enter descriptive name (max 128 characters)"
           value={name}
           onChange={(e) => {
             setName(e.target.value);
@@ -130,8 +141,15 @@ export const AddTaxCodeDialog = ({ open, onClose, onSuccess }: AddTaxCodeDialogP
           error={!!error}
           helperText={error}
           required
-          inputProps={{ maxLength: 128 }}
+          inputProps={{
+            maxLength: 128,
+            "aria-invalid": !!error,
+            "aria-describedby": getAriaDescribedBy(generateFieldId("taxCodeName"), !!error, true)
+          }}
         />
+        <VisuallyHidden id="taxCodeName-hint">
+          Enter a descriptive name for the tax code, up to 128 characters
+        </VisuallyHidden>
         <FormControlLabel
           control={
             <Checkbox

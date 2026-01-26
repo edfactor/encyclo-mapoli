@@ -12,13 +12,15 @@ interface DistributionInquiryGridProps {
   totalRecords: number;
   isLoading: boolean;
   onPaginationChange: (pageNumber: number, pageSize: number, sortParams: SortParams) => void;
+  renderHeaderActions?: () => React.ReactNode;
 }
 
 const DistributionInquiryGrid: React.FC<DistributionInquiryGridProps> = ({
   postReturnData,
   totalRecords,
   isLoading,
-  onPaginationChange
+  onPaginationChange,
+  renderHeaderActions
 }) => {
   const pagination = useGridPagination({
     initialPageSize: 25,
@@ -81,6 +83,7 @@ const DistributionInquiryGrid: React.FC<DistributionInquiryGridProps> = ({
           {`Distribution Records (${totalRecords} ${totalRecords === 1 ? "Record" : "Records"})`}
         </Typography>
       }
+      headerActions={renderHeaderActions?.()}
       afterGrid={
         postReturnData && postReturnData.length > 0 ? (
           <div
