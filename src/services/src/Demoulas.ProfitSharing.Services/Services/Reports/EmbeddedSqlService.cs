@@ -274,7 +274,7 @@ SELECT m.SSN,
         THEN 1 ELSE
   CASE WHEN m.HAS_FORFEITED = 1 THEN 1 ELSE --Otherwise, If employee has forfeiture records, 100%
   CASE WHEN m.IS_EMPLOYEE = 1 AND m.TERMINATION_CODE_ID = 'Z' AND TERMINATION_DATE<  TO_DATE('{asOfDate.ToString("yyyy-MM-dd")}', 'YYYY-MM-DD')  THEN 1 ELSE --Otherwise, If deceased, mark for 100% vested
-    CASE WHEN m.ZERO_CONTRIBUTION_REASON_ID IN (6, 7)
+    CASE WHEN m.ZERO_CONTRIBUTION_REASON_ID = 6
                 AND m.IS_EMPLOYEE = 1
                 AND (m.termination_date IS NULL OR m.termination_date > TO_DATE('{asOfDate.ToString("yyyy-MM-dd")}', 'YYYY-MM-DD') )
              THEN 1 ELSE --Otherwise, If zero contribution reason is 65 or over, first contribution more than 5 years ago, 100% vested
