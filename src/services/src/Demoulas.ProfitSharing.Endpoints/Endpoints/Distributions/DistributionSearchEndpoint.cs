@@ -1,20 +1,26 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Distributions;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Distributions;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Telemetry;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Distributions;
 
-public sealed class DistributionSearchEndpoint : ProfitSharingEndpoint<DistributionSearchRequest, PaginatedResponseDto<DistributionSearchResponse>>
+public sealed class DistributionSearchEndpoint : ProfitSharingEndpoint<DistributionSearchRequest, Results<Ok<PaginatedResponseDto<DistributionSearchResponse>>, NotFound, BadRequest, ProblemHttpResult>>
 {
     private readonly IDistributionService _distributionService;
+    private readonly ILogger<DistributionSearchEndpoint> _logger;
 
-    public DistributionSearchEndpoint(IDistributionService distributionService) : base(Navigation.Constants.Distributions)
+    public DistributionSearchEndpoint(IDistributionService distributionService, ILogger<DistributionSearchEndpoint> logger) : base(Navigation.Constants.Distributions)
     {
         _distributionService = distributionService;
+        _logger = logger;
     }
     public override void Configure()
     {
@@ -46,11 +52,48 @@ public sealed class DistributionSearchEndpoint : ProfitSharingEndpoint<Distribut
         });
     }
 
-    protected override async Task<PaginatedResponseDto<DistributionSearchResponse>> HandleRequestAsync(
+    protected override async Task<Results<Ok<PaginatedResponseDto<DistributionSearchResponse>>, NotFound, BadRequest, ProblemHttpResult>> HandleRequestAsync(
         DistributionSearchRequest req,
         CancellationToken ct)
     {
-        var result = await _distributionService.SearchAsync(req, ct);
-        return result ?? new PaginatedResponseDto<DistributionSearchResponse>();
+        using var activity = this.StartEndpointActivity(HttpContext);
+
+        try
+        {
+            this.RecordRequestMetrics(HttpContext, _logger, req, "Ssn");
+
+            var result = await _distributionService.SearchAsync(req, ct);
+
+            // Business metrics
+            EndpointTelemetry.BusinessOperationsTotal.Add(1,
+                new("operation", "distribution-search"),
+                new("endpoint", "DistributionSearchEndpoint"));
+
+            if (result.IsSuccess)
+            {
+                var recordCount = result.Value?.Total ?? 0;
+                EndpointTelemetry.RecordCountsProcessed.Record(recordCount,
+                    new("record_type", "distributions"),
+                    new("endpoint", "DistributionSearchEndpoint"));
+
+                _logger.LogInformation("Distribution search completed, returned {Count} results (correlation: {CorrelationId})",
+                    recordCount, HttpContext.TraceIdentifier);
+            }
+            else
+            {
+                _logger.LogWarning("Distribution search failed - {Error} (correlation: {CorrelationId})",
+                    result.Error, HttpContext.TraceIdentifier);
+            }
+
+            var httpResult = result.ToHttpResultWithValidation(Error.SsnNotFound, Error.BadgeNumberNotFound);
+            this.RecordResponseMetrics(HttpContext, _logger, httpResult);
+
+            return httpResult;
+        }
+        catch (Exception ex)
+        {
+            this.RecordException(HttpContext, _logger, ex, activity);
+            throw;
+        }
     }
 }

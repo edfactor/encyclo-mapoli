@@ -3,6 +3,8 @@ import { Box, Button, Grid, TextField } from "@mui/material";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { DSMDatePicker } from "smart-ui-library";
 import * as yup from "yup";
+import { VisuallyHidden } from "../../../utils/accessibilityHelpers";
+import { generateFieldId, getAriaDescribedBy } from "../../../utils/accessibilityUtils";
 
 interface AuditSearchFilters {
   tableName: string;
@@ -97,13 +99,22 @@ const AuditSearchManager: React.FC<AuditSearchManagerProps> = ({ onSearch, onRes
               name="tableName"
               control={control}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Table Name"
-                  fullWidth
-                  error={!!errors.tableName}
-                  helperText={errors.tableName?.message}
-                />
+                <>
+                  <TextField
+                    {...field}
+                    label="Table Name"
+                    fullWidth
+                    id={generateFieldId("tableName")}
+                    placeholder="e.g. Demographics, Member"
+                    error={!!errors.tableName}
+                    helperText={errors.tableName?.message}
+                    inputProps={{
+                      "aria-invalid": !!errors.tableName,
+                      "aria-describedby": getAriaDescribedBy(generateFieldId("tableName"), !!errors.tableName, true)
+                    }}
+                  />
+                  <VisuallyHidden id="tableName-hint">Enter database table name to filter audit records</VisuallyHidden>
+                </>
               )}
             />
           </Grid>
@@ -113,13 +124,24 @@ const AuditSearchManager: React.FC<AuditSearchManagerProps> = ({ onSearch, onRes
               name="operation"
               control={control}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Operation"
-                  fullWidth
-                  error={!!errors.operation}
-                  helperText={errors.operation?.message}
-                />
+                <>
+                  <TextField
+                    {...field}
+                    label="Operation"
+                    fullWidth
+                    id={generateFieldId("operation")}
+                    placeholder="e.g. INSERT, UPDATE, DELETE"
+                    error={!!errors.operation}
+                    helperText={errors.operation?.message}
+                    inputProps={{
+                      "aria-invalid": !!errors.operation,
+                      "aria-describedby": getAriaDescribedBy(generateFieldId("operation"), !!errors.operation, true)
+                    }}
+                  />
+                  <VisuallyHidden id="operation-hint">
+                    Enter database operation type such as INSERT, UPDATE, or DELETE
+                  </VisuallyHidden>
+                </>
               )}
             />
           </Grid>
@@ -129,13 +151,24 @@ const AuditSearchManager: React.FC<AuditSearchManagerProps> = ({ onSearch, onRes
               name="userName"
               control={control}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="User Name"
-                  fullWidth
-                  error={!!errors.userName}
-                  helperText={errors.userName?.message}
-                />
+                <>
+                  <TextField
+                    {...field}
+                    label="User Name"
+                    fullWidth
+                    id={generateFieldId("userName")}
+                    placeholder="Enter username"
+                    error={!!errors.userName}
+                    helperText={errors.userName?.message}
+                    inputProps={{
+                      "aria-invalid": !!errors.userName,
+                      "aria-describedby": getAriaDescribedBy(generateFieldId("userName"), !!errors.userName, true)
+                    }}
+                  />
+                  <VisuallyHidden id="userName-hint">
+                    Enter username to filter audit records by user who performed the operation
+                  </VisuallyHidden>
+                </>
               )}
             />
           </Grid>

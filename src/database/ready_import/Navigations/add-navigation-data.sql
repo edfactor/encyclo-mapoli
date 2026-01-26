@@ -320,7 +320,7 @@ BEGIN
     insert_navigation_item(PAY_BENEFICIARY_REPORT, BENEFICIARIES_MENU, 'Pay Beneficiary Report', '', 'payben-report', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, IS_NAVIGABLE);
 
 --distribution items
-    insert_navigation_item(DISTRIBUTION_INQUIRY_PAGE, DISTRIBUTIONS_MENU, 'Distribution Inquiry (008-14L)', '', 'distributions-inquiry', STATUS_NORMAL, ORDER_FIRST, '', DISABLED, IS_NAVIGABLE);
+    insert_navigation_item(DISTRIBUTION_INQUIRY_PAGE, DISTRIBUTIONS_MENU, 'Distribution Inquiry (008-14I)', '', 'distributions-inquiry', STATUS_NORMAL, ORDER_FIRST, '', DISABLED, IS_NAVIGABLE);
     insert_navigation_item(VIEW_DISTRIBUTION_PAGE, DISTRIBUTIONS_MENU, 'View Distribution (008-14V)', '', 'view-distribution', STATUS_NORMAL, ORDER_SECOND, '', ENABLED, NOT_NAVIGABLE);
     insert_navigation_item(ADD_DISTRIBUTION_PAGE, DISTRIBUTIONS_MENU, 'Add Distribution (008-14A)', '', 'add-distribution', STATUS_NORMAL, ORDER_THIRD, '', ENABLED, NOT_NAVIGABLE);
     insert_navigation_item(EDIT_DISTRIBUTION_PAGE, DISTRIBUTIONS_MENU, 'Edit Distribution (008-14E)', '', 'edit-distribution', STATUS_NORMAL, ORDER_FOURTH, '', ENABLED, NOT_NAVIGABLE);

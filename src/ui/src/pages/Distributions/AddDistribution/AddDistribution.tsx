@@ -7,9 +7,9 @@ import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { Page } from "smart-ui-library";
 import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
-import PageErrorBoundary from "../../../components/PageErrorBoundary/PageErrorBoundary";
 import MissiveAlerts from "../../../components/MissiveAlerts/MissiveAlerts";
 import { DISTRIBUTION_INQUIRY_MESSAGES } from "../../../components/MissiveAlerts/MissiveMessages";
+import PageErrorBoundary from "../../../components/PageErrorBoundary/PageErrorBoundary";
 import { CAPTIONS, ROUTES } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
@@ -77,19 +77,28 @@ const AddDistributionContent = () => {
   // Handle successful submission
   useEffect(() => {
     if (submissionSuccess && memberData) {
-      // Get member name
-      const memberName = memberData.fullName;
-
-      // Navigate to distributions inquiry page with success message
-      navigate(`/${ROUTES.DISTRIBUTIONS_INQUIRY}`, {
-        state: {
-          showSuccessMessage: true,
-          memberName: memberName,
-          amount: submittedAmount
-        }
+      // Show success message
+      addAlert({
+        id: Date.now(),
+        severity: "success",
+        message: "Distribution Saved Successfully",
+        description: `Distribution for ${memberData.fullName} in the amount of ${submittedAmount?.toLocaleString("en-US", { style: "currency", currency: "USD" })} has been saved.`
       });
+
+      // Reload member data to get updated balances
+      if (memberId && memberType && profitYear != null) {
+        const memberTypeNum = parseInt(memberType, 10);
+        if (!isNaN(memberTypeNum)) {
+          fetchMemberData(memberId, memberTypeNum, profitYear);
+        }
+      }
+
+      // Reset form for next distribution
+      if (formRef.current) {
+        formRef.current.reset();
+      }
     }
-  }, [submissionSuccess, memberData, submittedAmount, navigate]);
+  }, [submissionSuccess, memberData, submittedAmount, addAlert, memberId, memberType, profitYear, fetchMemberData]);
 
   // Handle form submission
   const handleFormSubmit = async (data: CreateDistributionRequest) => {

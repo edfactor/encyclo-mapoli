@@ -11,7 +11,10 @@ import {
 import { FilterParams } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import { VisuallyHidden } from "../../../utils/accessibilityHelpers";
+import { generateFieldId, getAriaDescribedBy } from "../../../utils/accessibilityUtils";
 import { psnValidator } from "../../../utils/FormValidators";
+import { ARIA_DESCRIPTIONS, INPUT_PLACEHOLDERS } from "../../../utils/inputFormatters";
 import presets from "../../FiscalClose/PAY426Reports/PAY426N/presets";
 
 interface ProfitShareReportSearch {
@@ -123,19 +126,37 @@ const ProfitShareReportSearchFilter: React.FC<ProfitShareReportSearchFilterProps
         container
         paddingX="24px">
         <Grid size={{ xs: 12, sm: 3, md: 3 }}>
-          <FormLabel>Profit Sharing Number</FormLabel>
+          <FormLabel htmlFor={generateFieldId("badgeNumber")}>Profit Sharing Number</FormLabel>
           <Controller
             name="badgeNumber"
             control={control}
             render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                value={field.value || ""}
-                onChange={(e) => field.onChange(e.target.value === "" ? null : Number(e.target.value))}
-                error={!!errors.badgeNumber}
-                helperText={errors.badgeNumber?.message}
-              />
+              <>
+                <TextField
+                  {...field}
+                  id={generateFieldId("badgeNumber")}
+                  fullWidth
+                  value={field.value || ""}
+                  placeholder={INPUT_PLACEHOLDERS.BADGE_OR_PSN}
+                  inputProps={{ inputMode: "numeric" }}
+                  aria-invalid={!!errors.badgeNumber || undefined}
+                  aria-describedby={getAriaDescribedBy("badgeNumber", !!errors.badgeNumber, true)}
+                  onChange={(e) => field.onChange(e.target.value === "" ? null : Number(e.target.value))}
+                />
+                <VisuallyHidden id="badgeNumber-hint">{ARIA_DESCRIPTIONS.BADGE_FORMAT}</VisuallyHidden>
+                {errors.badgeNumber && (
+                  <div
+                    id="badgeNumber-error"
+                    aria-live="polite"
+                    aria-atomic="true">
+                    <Typography
+                      variant="caption"
+                      color="error">
+                      {errors.badgeNumber.message}
+                    </Typography>
+                  </div>
+                )}
+              </>
             )}
           />
         </Grid>

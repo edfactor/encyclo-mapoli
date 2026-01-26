@@ -16,7 +16,8 @@ interface LabelValueItem {
     | "text.primary"
     | "text.secondary"
     | "text.disabled"
-    | "inherit";
+    | "inherit"
+    | string;
   labelVariant?:
     | "body1"
     | "body2"
@@ -47,20 +48,29 @@ const LabelValueSection: React.FC<LabelValueSectionProps> = ({ title, data }) =>
         container
         key={index}
         paddingY="4px"
-        spacing={1}>
+        spacing={0}>
         {!!label && label != "" && (
-          <Grid>
+          <Grid size={{ xs: 12, sm: 5, md: 4 }}>
             <Typography
               variant={labelVariant || "body2"}
               align="left"
               fontWeight={labelWeight || "bold"}
-              color={labelColor}>
+              color={labelColor || "text.primary"}>
               {label}
             </Typography>
           </Grid>
         )}
-        <Grid size={{ xs: !!label && label != "" ? 6 : 12 }}>
-          <Typography variant="body2">{value}</Typography>
+        <Grid
+          size={{
+            xs: !!label && label != "" ? 12 : 12,
+            sm: !!label && label != "" ? 7 : 12,
+            md: !!label && label != "" ? 8 : 12
+          }}>
+          <Typography
+            variant="body2"
+            color="text.primary">
+            {value}
+          </Typography>
         </Grid>
       </Grid>
     ))}

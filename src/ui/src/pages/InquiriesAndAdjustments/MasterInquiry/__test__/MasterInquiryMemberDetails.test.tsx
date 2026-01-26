@@ -150,8 +150,8 @@ describe("MasterInquiryMemberDetails", { timeout: 18000 }, () => {
 
     // Summary Section
     expect(screen.getByText("Doe, John")).toBeInTheDocument();
-    expect(screen.getByText("123 Main St")).toBeInTheDocument();
-    expect(screen.getByText("Lowell, MA 01850")).toBeInTheDocument();
+    expect(screen.getByText(/123 Main St/)).toBeInTheDocument();
+    expect(screen.getByText(/Lowell, MA 01850/)).toBeInTheDocument();
     expect(screen.getByText("(978) 555-1234")).toBeInTheDocument(); // Formatted phone
     expect(screen.getByText("Store 4 (4)")).toBeInTheDocument();
 
@@ -188,8 +188,8 @@ describe("MasterInquiryMemberDetails", { timeout: 18000 }, () => {
 
     // Summary Section
     expect(screen.getByText("Smith, Jane")).toBeInTheDocument();
-    expect(screen.getByText("456 Oak Ave")).toBeInTheDocument();
-    expect(screen.getByText("Boston, MA 02101")).toBeInTheDocument();
+    expect(screen.getByText(/456 Oak Ave/)).toBeInTheDocument();
+    expect(screen.getByText(/Boston, MA 02101/)).toBeInTheDocument();
     expect(screen.getByText("(617) 555-9876")).toBeInTheDocument(); // Formatted phone
 
     // Personal Section - should NOT show employee-specific fields
@@ -239,7 +239,7 @@ describe("MasterInquiryMemberDetails", { timeout: 18000 }, () => {
       />
     );
 
-    expect(screen.getByText("Lowell, MA 01850")).toBeInTheDocument();
+    expect(screen.getByText(/Lowell, MA 01850/)).toBeInTheDocument();
   });
 
   it("should display duplicate SSN badges correctly", () => {

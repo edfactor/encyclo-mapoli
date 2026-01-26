@@ -5,6 +5,9 @@ import { Controller, useForm } from "react-hook-form";
 import { useLazyGetCertificatesReportQuery } from "reduxstore/api/YearsEndApi";
 import { CertificatePrintRequest } from "reduxstore/types";
 import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
+import { VisuallyHidden } from "../../../utils/accessibilityHelpers";
+import { generateFieldId, getAriaDescribedBy } from "../../../utils/accessibilityUtils";
+import { ARIA_DESCRIPTIONS, INPUT_PLACEHOLDERS } from "../../../utils/inputFormatters";
 
 export interface ReprintCertificatesFilterParams {
   profitYear: number;
@@ -119,38 +122,58 @@ const ReprintCertificatesFilterSection: React.FC<ReprintCertificatesFilterSectio
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <FormLabel>Badge Number</FormLabel>
+            <FormLabel htmlFor={generateFieldId("badgeNumber")}>Badge Number</FormLabel>
             <FormControl fullWidth>
               <Controller
                 name="badgeNumber"
                 control={control}
                 render={({ field }) => (
-                  <TextField
-                    {...field}
-                    size="small"
-                    fullWidth
-                    placeholder="e.g. 12345 or 12345,23456"
-                    helperText="Comma-separated for multiple"
-                  />
+                  <>
+                    <TextField
+                      {...field}
+                      size="small"
+                      fullWidth
+                      id={generateFieldId("badgeNumber")}
+                      placeholder="e.g. 12345 or 12345,23456"
+                      inputMode="numeric"
+                      helperText="Comma-separated for multiple"
+                      inputProps={{
+                        "aria-describedby": getAriaDescribedBy(generateFieldId("badgeNumber"), false, true)
+                      }}
+                    />
+                    <VisuallyHidden id="badgeNumber-hint">
+                      {ARIA_DESCRIPTIONS.BADGE_DYNAMIC}. You can enter multiple badge numbers separated by commas.
+                    </VisuallyHidden>
+                  </>
                 )}
               />
             </FormControl>
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <FormLabel>Social Security Number</FormLabel>
+            <FormLabel htmlFor={generateFieldId("socialSecurityNumber")}>Social Security Number</FormLabel>
             <FormControl fullWidth>
               <Controller
                 name="socialSecurityNumber"
                 control={control}
                 render={({ field }) => (
-                  <TextField
-                    {...field}
-                    size="small"
-                    fullWidth
-                    placeholder="e.g. 123456789 or 123456789,987654321"
-                    helperText="Comma-separated for multiple"
-                  />
+                  <>
+                    <TextField
+                      {...field}
+                      size="small"
+                      fullWidth
+                      id={generateFieldId("socialSecurityNumber")}
+                      placeholder={INPUT_PLACEHOLDERS.SSN}
+                      inputMode="numeric"
+                      helperText="Comma-separated for multiple"
+                      inputProps={{
+                        "aria-describedby": getAriaDescribedBy(generateFieldId("socialSecurityNumber"), false, true)
+                      }}
+                    />
+                    <VisuallyHidden id="socialSecurityNumber-hint">
+                      {ARIA_DESCRIPTIONS.SSN_FORMAT}. You can enter multiple SSNs separated by commas.
+                    </VisuallyHidden>
+                  </>
                 )}
               />
             </FormControl>

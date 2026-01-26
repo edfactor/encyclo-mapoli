@@ -181,6 +181,72 @@ public interface IAuditService
 
 ## Configuration
 
+### DemoulasConfiguration<TDownstream>
+
+**Namespace:** `Demoulas.Common.Contracts.Configuration`
+
+Root configuration model that aggregates common settings with a downstream configuration root. Use `BindDemoulasConfiguration<TDownstream>()` to bind common options and the downstream section in one call. `TDownstream` must declare a public const string `SectionName`.
+
+```csharp
+public sealed class DemoulasConfiguration<TDownstream>
+    where TDownstream : class
+{
+	public CacheProviderOptions CacheProviderOptions { get; set; } = new();
+	public PaginationOptions PaginationOptions { get; set; } = new();
+	public EndpointInstrumentationOptions EndpointInstrumentationOptions { get; set; } = new();
+	public LoggingConfig LoggingConfig { get; set; } = new();
+	public FileSystemLogConfig FileSystemLogConfig { get; set; } = new();
+	public SumoLogicConfig SumoLogicConfig { get; set; } = new();
+	public DynatraceConfig DynatraceConfig { get; set; } = new();
+	public DsmMessagingConfiguration DsmMessagingConfiguration { get; set; } = new();
+	public OktaSwaggerConfiguration OktaSwaggerConfiguration { get; set; } = OktaSwaggerConfiguration.Empty();
+	public CultureConfiguration CultureConfiguration { get; set; } = new();
+	public TDownstream Downstream { get; set; } = default!;
+}
+```
+
+**Binding (recommended):**
+
+```csharp
+using Demoulas.Common.Contracts.Extensions;
+
+builder.Services.BindDemoulasConfiguration<AppSettings>(builder.Configuration);
+```
+
+**Configuration shape:**
+
+Downstream configuration is bound from `DemoulasConfiguration:{TDownstream.SectionName}` (not a top-level section).
+
+```json
+{
+	"DemoulasConfiguration": {
+		"AppSettings": {
+			"SomeAppSetting": "value"
+		},
+		"CultureConfiguration": {
+			"TimeZone": "UTC",
+			"DateFormat": "MM/dd/yyyy",
+			"DateTimeFormat": "O",
+			"TimeFormat": "T"
+		}
+	}
+}
+```
+
+**Accessing:**
+
+```csharp
+using Microsoft.Extensions.Options;
+
+public sealed class MyService
+{
+	private readonly DemoulasConfiguration<AppSettings> _config;
+
+	public MyService(IOptions<DemoulasConfiguration<AppSettings>> config)
+		=> _config = config.Value;
+}
+```
+
 ### LoggingConfig
 
 **Namespace:** `Demoulas.Common.Contracts.Configuration`

@@ -5,6 +5,9 @@ import { Controller, Resolver, useForm } from "react-hook-form";
 import { useGetTaxCodesQuery } from "reduxstore/api/LookupsApi";
 import * as yup from "yup";
 import { DistributionSearchResponse, EditDistributionRequest } from "../../../types";
+import { VisuallyHidden } from "../../../utils/accessibilityHelpers";
+import { generateFieldId, getAriaDescribedBy } from "../../../utils/accessibilityUtils";
+import { ARIA_DESCRIPTIONS, formatSSNInput, INPUT_PLACEHOLDERS } from "../../../utils/inputFormatters";
 
 export interface EditDistributionFormRef {
   submit: () => void;
@@ -79,7 +82,8 @@ const schema = yup.object().shape({
     .string()
     .test("valid-ssn", "SSN must be 9 digits", (value) => {
       if (!value || value === "") return true;
-      return /^\d{9}$/.test(value);
+      const cleaned = value.replace(/-/g, "");
+      return /^\d{9}$/.test(cleaned);
     })
     .optional()
 });
@@ -880,30 +884,33 @@ const EditDistributionForm = forwardRef<EditDistributionFormRef, EditDistributio
 
               {/* SSN */}
               <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <FormLabel>SSN</FormLabel>
+                <FormLabel htmlFor={generateFieldId("thirdPartySsn")}>SSN</FormLabel>
                 <Controller
                   name="thirdPartySsn"
                   control={control}
                   render={({ field }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      size="small"
-                      variant="outlined"
-                      placeholder="9 digits"
-                      error={!!errors.thirdPartySsn}
-                      helperText={errors.thirdPartySsn?.message}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        // Only allow digits
-                        if (value === "" || /^\d*$/.test(value)) {
-                          // Limit to 9 digits
-                          if (value.length <= 9) {
-                            field.onChange(value);
-                          }
-                        }
-                      }}
-                    />
+                    <>
+                      <TextField
+                        {...field}
+                        id={generateFieldId("thirdPartySsn")}
+                        fullWidth
+                        size="small"
+                        variant="outlined"
+                        placeholder={INPUT_PLACEHOLDERS.SSN}
+                        inputMode="numeric"
+                        error={!!errors.thirdPartySsn}
+                        aria-invalid={!!errors.thirdPartySsn}
+                        aria-describedby={getAriaDescribedBy("thirdPartySsn", !!errors.thirdPartySsn, true)}
+                        helperText={errors.thirdPartySsn?.message}
+                        onChange={(e) => {
+                          const formatted = formatSSNInput(e.target.value);
+                          field.onChange(formatted.display);
+                        }}
+                      />
+                      <VisuallyHidden id={generateFieldId("thirdPartySsn-hint")}>
+                        {ARIA_DESCRIPTIONS.SSN_FORMAT}
+                      </VisuallyHidden>
+                    </>
                   )}
                 />
               </Grid>

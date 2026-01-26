@@ -4,8 +4,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import Checkbox from "@mui/material/Checkbox";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { useEffect, useState } from "react";
-import { Controller, Resolver, useForm } from "react-hook-form";
+import { useCallback, useEffect, useState } from "react";
+import { Controller, ControllerRenderProps, Resolver, useForm } from "react-hook-form";
 import {
   useCreateBeneficiariesMutation,
   useCreateBeneficiaryContactMutation,
@@ -21,8 +21,11 @@ import {
   UpdateBeneficiaryResponse
 } from "reduxstore/types";
 import { DSMDatePicker, SearchAndReset } from "smart-ui-library";
+import { VisuallyHidden } from "utils/accessibilityHelpers";
+import { generateFieldId, getAriaDescribedBy } from "utils/accessibilityUtils";
 import { tryddmmyyyyToDate } from "utils/dateUtils";
 import { ssnValidator } from "utils/FormValidators";
+import { ARIA_DESCRIPTIONS, formatSSNInput, formatZipCode, INPUT_PLACEHOLDERS } from "utils/inputFormatters";
 import * as yup from "yup";
 import { decomposePSNSuffix } from "./utils/badgeUtils";
 
@@ -139,6 +142,32 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
     reset();
   };
 
+  // Live SSN formatting handler
+  const handleSSNChange = useCallback(
+    (
+      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+      field: ControllerRenderProps<CreateBeneficiaryForm, "beneficiarySsn">
+    ) => {
+      const { display, raw } = formatSSNInput(e.target.value);
+      e.target.value = display; // Update visual display
+      field.onChange(raw === "" ? null : raw); // Store raw value
+    },
+    []
+  );
+
+  // Live zip code formatting handler
+  const handleZipChange = useCallback(
+    (
+      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+      field: ControllerRenderProps<CreateBeneficiaryForm, "postalCode">
+    ) => {
+      const formatted = formatZipCode(e.target.value);
+      e.target.value = formatted.display;
+      field.onChange(formatted.display);
+    },
+    []
+  );
+
   const createBeneficiary = (data: CreateBeneficiaryForm) => {
     const request: CreateBeneficiaryContactRequest = {
       contactSsn: Number(data.beneficiarySsn),
@@ -239,7 +268,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
           size={12}
           rowSpacing={3}>
           <Grid size={{ md: 5, xs: 12 }}>
-            <FormLabel>
+            <FormLabel htmlFor={generateFieldId("firstName")}>
               First Name{" "}
               <Typography
                 component="span"
@@ -251,25 +280,43 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
               name="firstName"
               control={control}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  value={field.value ?? ""}
-                  error={!!errors.firstName}
-                  autoComplete="off"
-                  onChange={(e) => {
-                    field.onChange(e.target.value);
-                  }}
-                />
+                <>
+                  <TextField
+                    {...field}
+                    id={generateFieldId("firstName")}
+                    fullWidth
+                    size="small"
+                    variant="outlined"
+                    value={field.value ?? ""}
+                    error={!!errors.firstName}
+                    autoComplete="off"
+                    placeholder={INPUT_PLACEHOLDERS.NAME}
+                    aria-invalid={!!errors.firstName || undefined}
+                    aria-describedby={getAriaDescribedBy("firstName", !!errors.firstName, false)}
+                    onChange={(e) => {
+                      field.onChange(e.target.value);
+                    }}
+                  />
+                  {errors.firstName && (
+                    <div
+                      id="firstName-error"
+                      aria-live="polite"
+                      aria-atomic="true">
+                      <Typography
+                        variant="caption"
+                        color="error">
+                        {errors.firstName.message}
+                      </Typography>
+                    </div>
+                  )}
+                </>
               )}
             />
           </Grid>
           <Grid
             offset={1}
             size={{ md: 5, xs: 12 }}>
-            <FormLabel>
+            <FormLabel htmlFor={generateFieldId("lastName")}>
               Last Name{" "}
               <Typography
                 component="span"
@@ -281,23 +328,41 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
               name="lastName"
               control={control}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  value={field.value ?? ""}
-                  error={!!errors.lastName}
-                  autoComplete="off"
-                  onChange={(e) => {
-                    field.onChange(e.target.value);
-                  }}
-                />
+                <>
+                  <TextField
+                    {...field}
+                    id={generateFieldId("lastName")}
+                    fullWidth
+                    size="small"
+                    variant="outlined"
+                    value={field.value ?? ""}
+                    error={!!errors.lastName}
+                    autoComplete="off"
+                    placeholder={INPUT_PLACEHOLDERS.NAME}
+                    aria-invalid={!!errors.lastName || undefined}
+                    aria-describedby={getAriaDescribedBy("lastName", !!errors.lastName, false)}
+                    onChange={(e) => {
+                      field.onChange(e.target.value);
+                    }}
+                  />
+                  {errors.lastName && (
+                    <div
+                      id="lastName-error"
+                      aria-live="polite"
+                      aria-atomic="true">
+                      <Typography
+                        variant="caption"
+                        color="error">
+                        {errors.lastName.message}
+                      </Typography>
+                    </div>
+                  )}
+                </>
               )}
             />
           </Grid>
           <Grid size={{ md: 5, xs: 12 }}>
-            <FormLabel>
+            <FormLabel htmlFor={generateFieldId("beneficiarySsn")}>
               SSN{" "}
               <Typography
                 component="span"
@@ -309,30 +374,39 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
               name="beneficiarySsn"
               control={control}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  type="text"
-                  size="small"
-                  variant="outlined"
-                  value={field.value ?? ""}
-                  error={!!errors.beneficiarySsn}
-                  helperText={errors.beneficiarySsn?.message}
-                  autoComplete="off"
-                  inputProps={{ inputMode: "numeric" }}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Only allow numeric input
-                    if (value !== "" && !/^\d*$/.test(value)) {
-                      return;
-                    }
-                    // Prevent input beyond 9 characters
-                    if (value.length > 9) {
-                      return;
-                    }
-                    field.onChange(value === "" ? null : value);
-                  }}
-                />
+                <>
+                  <TextField
+                    {...field}
+                    id={generateFieldId("beneficiarySsn")}
+                    fullWidth
+                    type="text"
+                    size="small"
+                    variant="outlined"
+                    value={field.value ?? ""}
+                    error={!!errors.beneficiarySsn}
+                    autoComplete="off"
+                    placeholder={INPUT_PLACEHOLDERS.SSN}
+                    inputProps={{ inputMode: "numeric" }}
+                    aria-invalid={!!errors.beneficiarySsn || undefined}
+                    aria-describedby={getAriaDescribedBy("beneficiarySsn", !!errors.beneficiarySsn, true)}
+                    onChange={(e) => {
+                      handleSSNChange(e, field as ControllerRenderProps<CreateBeneficiaryForm, "beneficiarySsn">);
+                    }}
+                  />
+                  <VisuallyHidden id="beneficiarySsn-hint">{ARIA_DESCRIPTIONS.SSN_FORMAT}</VisuallyHidden>
+                  {errors.beneficiarySsn && (
+                    <div
+                      id="beneficiarySsn-error"
+                      aria-live="polite"
+                      aria-atomic="true">
+                      <Typography
+                        variant="caption"
+                        color="error">
+                        {errors.beneficiarySsn.message}
+                      </Typography>
+                    </div>
+                  )}
+                </>
               )}
             />
           </Grid>
@@ -387,7 +461,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
             />
           </Grid>
           <Grid size={{ md: 5, xs: 12 }}>
-            <FormLabel>
+            <FormLabel htmlFor={generateFieldId("street")}>
               Address{" "}
               {!addressSameAsBeneficiary && (
                 <Typography
@@ -401,18 +475,36 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
               name="street"
               control={control}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  value={field.value ?? ""}
-                  error={!!errors.street}
-                  autoComplete="off"
-                  onChange={(e) => {
-                    field.onChange(e.target.value);
-                  }}
-                />
+                <>
+                  <TextField
+                    {...field}
+                    id={generateFieldId("street")}
+                    fullWidth
+                    size="small"
+                    variant="outlined"
+                    value={field.value ?? ""}
+                    error={!!errors.street}
+                    autoComplete="off"
+                    placeholder={INPUT_PLACEHOLDERS.STREET_ADDRESS}
+                    aria-invalid={!!errors.street || undefined}
+                    aria-describedby={getAriaDescribedBy("street", !!errors.street, false)}
+                    onChange={(e) => {
+                      field.onChange(e.target.value);
+                    }}
+                  />
+                  {errors.street && (
+                    <div
+                      id="street-error"
+                      aria-live="polite"
+                      aria-atomic="true">
+                      <Typography
+                        variant="caption"
+                        color="error">
+                        {errors.street.message}
+                      </Typography>
+                    </div>
+                  )}
+                </>
               )}
             />
           </Grid>
@@ -421,7 +513,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
             columnSpacing={4}
             size={{ xs: 12, md: 12 }}>
             <Grid size={{ md: 5, xs: 12 }}>
-              <FormLabel>
+              <FormLabel htmlFor={generateFieldId("city")}>
                 City{" "}
                 {!addressSameAsBeneficiary && (
                   <Typography
@@ -435,23 +527,41 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
                 name="city"
                 control={control}
                 render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    size="small"
-                    variant="outlined"
-                    value={field.value ?? ""}
-                    error={!!errors.city}
-                    autoComplete="off"
-                    onChange={(e) => {
-                      field.onChange(e.target.value);
-                    }}
-                  />
+                  <>
+                    <TextField
+                      {...field}
+                      id={generateFieldId("city")}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      value={field.value ?? ""}
+                      error={!!errors.city}
+                      autoComplete="off"
+                      placeholder={INPUT_PLACEHOLDERS.CITY}
+                      aria-invalid={!!errors.city || undefined}
+                      aria-describedby={getAriaDescribedBy("city", !!errors.city, false)}
+                      onChange={(e) => {
+                        field.onChange(e.target.value);
+                      }}
+                    />
+                    {errors.city && (
+                      <div
+                        id="city-error"
+                        aria-live="polite"
+                        aria-atomic="true">
+                        <Typography
+                          variant="caption"
+                          color="error">
+                          {errors.city.message}
+                        </Typography>
+                      </div>
+                    )}
+                  </>
                 )}
               />
             </Grid>
             <Grid size={{ md: 2, xs: 12 }}>
-              <FormLabel>
+              <FormLabel htmlFor={generateFieldId("state")}>
                 State{" "}
                 {!addressSameAsBeneficiary && (
                   <Typography
@@ -465,23 +575,41 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
                 name="state"
                 control={control}
                 render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    size="small"
-                    variant="outlined"
-                    value={field.value ?? ""}
-                    error={!!errors.state}
-                    autoComplete="off"
-                    onChange={(e) => {
-                      field.onChange(e.target.value);
-                    }}
-                  />
+                  <>
+                    <TextField
+                      {...field}
+                      id={generateFieldId("state")}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      value={field.value ?? ""}
+                      error={!!errors.state}
+                      autoComplete="off"
+                      placeholder={INPUT_PLACEHOLDERS.STATE}
+                      aria-invalid={!!errors.state || undefined}
+                      aria-describedby={getAriaDescribedBy("state", !!errors.state, false)}
+                      onChange={(e) => {
+                        field.onChange(e.target.value);
+                      }}
+                    />
+                    {errors.state && (
+                      <div
+                        id="state-error"
+                        aria-live="polite"
+                        aria-atomic="true">
+                        <Typography
+                          variant="caption"
+                          color="error">
+                          {errors.state.message}
+                        </Typography>
+                      </div>
+                    )}
+                  </>
                 )}
               />
             </Grid>
             <Grid size={{ md: 3, xs: 12 }}>
-              <FormLabel>
+              <FormLabel htmlFor={generateFieldId("postalCode")}>
                 Zipcode{" "}
                 {!addressSameAsBeneficiary && (
                   <Typography
@@ -495,18 +623,38 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
                 name="postalCode"
                 control={control}
                 render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    size="small"
-                    variant="outlined"
-                    value={field.value ?? ""}
-                    error={!!errors.postalCode}
-                    autoComplete="off"
-                    onChange={(e) => {
-                      field.onChange(e.target.value);
-                    }}
-                  />
+                  <>
+                    <TextField
+                      {...field}
+                      id={generateFieldId("postalCode")}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      value={field.value ?? ""}
+                      error={!!errors.postalCode}
+                      autoComplete="off"
+                      placeholder={INPUT_PLACEHOLDERS.ZIP_CODE}
+                      inputProps={{ inputMode: "numeric" }}
+                      aria-invalid={!!errors.postalCode || undefined}
+                      aria-describedby={getAriaDescribedBy("postalCode", !!errors.postalCode, true)}
+                      onChange={(e) => {
+                        handleZipChange(e, field as ControllerRenderProps<CreateBeneficiaryForm, "postalCode">);
+                      }}
+                    />
+                    <VisuallyHidden id="postalCode-hint">{ARIA_DESCRIPTIONS.ZIP_FORMAT}</VisuallyHidden>
+                    {errors.postalCode && (
+                      <div
+                        id="postalCode-error"
+                        aria-live="polite"
+                        aria-atomic="true">
+                        <Typography
+                          variant="caption"
+                          color="error">
+                          {errors.postalCode.message}
+                        </Typography>
+                      </div>
+                    )}
+                  </>
                 )}
               />
             </Grid>
@@ -517,7 +665,7 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
             columnSpacing={4}
             size={{ xs: 12, md: 12 }}>
             <Grid size={{ md: 5, xs: 12 }}>
-              <FormLabel>
+              <FormLabel htmlFor={generateFieldId("relationship")}>
                 Relationship{" "}
                 <Typography
                   component="span"
@@ -529,18 +677,35 @@ const CreateBeneficiary: React.FC<CreateBeneficiaryProps> = ({
                 name="relationship"
                 control={control}
                 render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    size="small"
-                    variant="outlined"
-                    value={field.value ?? ""}
-                    error={!!errors.relationship}
-                    autoComplete="off"
-                    onChange={(e) => {
-                      field.onChange(e.target.value);
-                    }}
-                  />
+                  <>
+                    <TextField
+                      {...field}
+                      id={generateFieldId("relationship")}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      value={field.value ?? ""}
+                      error={!!errors.relationship}
+                      autoComplete="off"
+                      aria-invalid={!!errors.relationship || undefined}
+                      aria-describedby={getAriaDescribedBy("relationship", !!errors.relationship, false)}
+                      onChange={(e) => {
+                        field.onChange(e.target.value);
+                      }}
+                    />
+                    {errors.relationship && (
+                      <div
+                        id="relationship-error"
+                        aria-live="polite"
+                        aria-atomic="true">
+                        <Typography
+                          variant="caption"
+                          color="error">
+                          {errors.relationship.message}
+                        </Typography>
+                      </div>
+                    )}
+                  </>
                 )}
               />
             </Grid>

@@ -10,10 +10,18 @@ import {
   TextField
 } from "@mui/material";
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { Controller, ControllerRenderProps, useForm, useWatch } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { MAX_EMPLOYEE_BADGE_LENGTH } from "../../../constants";
+import { VisuallyHidden } from "../../../utils/accessibilityHelpers";
+import { generateFieldId, getAriaDescribedBy } from "../../../utils/accessibilityUtils";
+import {
+  ARIA_DESCRIPTIONS,
+  formatSSNInput,
+  getBadgeOrPSNPlaceholder,
+  INPUT_PLACEHOLDERS
+} from "../../../utils/inputFormatters";
 
 export interface ReversalsSearchParams {
   socialSecurity?: string | null;
@@ -46,6 +54,7 @@ interface ReversalsSearchFilterProps {
 const ReversalsSearchFilter: React.FC<ReversalsSearchFilterProps> = memo(
   ({ onSearch, onReset, isSearching = false }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [badgePlaceholder, setBadgePlaceholder] = useState(INPUT_PLACEHOLDERS.BADGE_OR_PSN);
 
     const {
       control,
@@ -102,11 +111,29 @@ const ReversalsSearchFilter: React.FC<ReversalsSearchFilterProps> = memo(
 
         if (badgeStr.length === 0) {
           setValue("memberType", "all");
+          setBadgePlaceholder(INPUT_PLACEHOLDERS.BADGE_OR_PSN as "Badge or PSN");
         } else if (badgeStr.length > MAX_EMPLOYEE_BADGE_LENGTH) {
           setValue("memberType", "beneficiaries");
+          setBadgePlaceholder(getBadgeOrPSNPlaceholder(badgeStr.length) as "Badge or PSN");
+        } else {
+          setBadgePlaceholder(getBadgeOrPSNPlaceholder(badgeStr.length) as "Badge or PSN");
         }
       },
       [setValue]
+    );
+
+    // Live SSN formatting handler
+    const handleSSNChange = useCallback(
+      (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+        field: ControllerRenderProps<ReversalsSearchFormData, "socialSecurity">
+      ) => {
+        const { display, raw } = formatSSNInput(e.target.value);
+        e.target.value = display;
+        // Store as string to match schema
+        field.onChange(raw === "" ? null : raw);
+      },
+      []
     );
 
     // Watch the two mutually exclusive fields
@@ -172,46 +199,52 @@ const ReversalsSearchFilter: React.FC<ReversalsSearchFilterProps> = memo(
             width="100%">
             {/* Social Security Number */}
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-              <FormLabel>Social Security Number</FormLabel>
+              <FormLabel htmlFor={generateFieldId("socialSecurity")}>Social Security Number</FormLabel>
               <Controller
                 name="socialSecurity"
                 control={control}
                 render={({ field }) => (
-                  <TextField
-                    name={field.name}
-                    ref={field.ref}
-                    onBlur={field.onBlur}
-                    fullWidth
-                    size="small"
-                    variant="outlined"
-                    value={field.value ?? ""}
-                    error={!!errors.socialSecurity}
-                    disabled={isSocialSecurityDisabled}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      // Only allow numeric input
-                      if (value !== "" && !/^\d*$/.test(value)) {
-                        return;
-                      }
-                      // Prevent input beyond 9 characters
-                      if (value.length > 9) {
-                        return;
-                      }
-                      field.onChange(value === "" ? null : Number(value));
-                    }}
-                    sx={
-                      isSocialSecurityDisabled
-                        ? {
-                            "& .MuiOutlinedInput-root": {
-                              backgroundColor: "#f5f5f5"
+                  <>
+                    <TextField
+                      id={generateFieldId("socialSecurity")}
+                      name={field.name}
+                      ref={field.ref}
+                      onBlur={field.onBlur}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      value={field.value ?? ""}
+                      error={!!errors.socialSecurity}
+                      disabled={isSocialSecurityDisabled}
+                      placeholder={INPUT_PLACEHOLDERS.SSN}
+                      inputProps={{ inputMode: "numeric" }}
+                      aria-invalid={!!errors.socialSecurity || undefined}
+                      aria-describedby={getAriaDescribedBy("socialSecurity", !!errors.socialSecurity, true)}
+                      onChange={(e) => {
+                        handleSSNChange(e, field as ControllerRenderProps<ReversalsSearchFormData, "socialSecurity">);
+                      }}
+                      sx={
+                        isSocialSecurityDisabled
+                          ? {
+                              "& .MuiOutlinedInput-root": {
+                                backgroundColor: "#f5f5f5"
+                              }
                             }
-                          }
-                        : undefined
-                    }
-                  />
+                          : undefined
+                      }
+                    />
+                    <VisuallyHidden id="socialSecurity-hint">{ARIA_DESCRIPTIONS.SSN_FORMAT}</VisuallyHidden>
+                  </>
                 )}
               />
-              {errors.socialSecurity && <FormHelperText error>{errors.socialSecurity.message}</FormHelperText>}
+              {errors.socialSecurity && (
+                <div
+                  id="socialSecurity-error"
+                  aria-live="polite"
+                  aria-atomic="true">
+                  <FormHelperText error>{errors.socialSecurity.message}</FormHelperText>
+                </div>
+              )}
               {!errors.socialSecurity && getExclusionHelperText("socialSecurity", isSocialSecurityDisabled) && (
                 <FormHelperText sx={{ color: "info.main", fontSize: "0.75rem", marginTop: "4px" }}>
                   {getExclusionHelperText("socialSecurity", isSocialSecurityDisabled)}
@@ -221,47 +254,62 @@ const ReversalsSearchFilter: React.FC<ReversalsSearchFilterProps> = memo(
 
             {/* Badge/PSN Number */}
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-              <FormLabel>Badge/PSN Number</FormLabel>
+              <FormLabel htmlFor={generateFieldId("badgeNumber")}>Badge/PSN Number</FormLabel>
               <Controller
                 name="badgeNumber"
                 control={control}
                 render={({ field }) => (
-                  <TextField
-                    name={field.name}
-                    ref={field.ref}
-                    onBlur={field.onBlur}
-                    fullWidth
-                    size="small"
-                    variant="outlined"
-                    value={field.value ?? ""}
-                    error={!!errors.badgeNumber}
-                    disabled={isBadgeNumberDisabled}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      // Only allow numeric input
-                      if (value !== "" && !/^\d*$/.test(value)) {
-                        return;
-                      }
-                      // Prevent input beyond 11 characters
-                      if (value.length > 11) {
-                        return;
-                      }
-                      field.onChange(value === "" ? null : Number(value));
-                      handleBadgeNumberChange(e);
-                    }}
-                    sx={
-                      isBadgeNumberDisabled
-                        ? {
-                            "& .MuiOutlinedInput-root": {
-                              backgroundColor: "#f5f5f5"
+                  <>
+                    <TextField
+                      id={generateFieldId("badgeNumber")}
+                      name={field.name}
+                      ref={field.ref}
+                      onBlur={field.onBlur}
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      value={field.value ?? ""}
+                      error={!!errors.badgeNumber}
+                      disabled={isBadgeNumberDisabled}
+                      placeholder={badgePlaceholder}
+                      inputProps={{ inputMode: "numeric" }}
+                      aria-invalid={!!errors.badgeNumber || undefined}
+                      aria-describedby={getAriaDescribedBy("badgeNumber", !!errors.badgeNumber, true)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        // Only allow numeric input
+                        if (value !== "" && !/^\d*$/.test(value)) {
+                          return;
+                        }
+                        // Prevent input beyond 11 characters
+                        if (value.length > 11) {
+                          return;
+                        }
+                        field.onChange(value === "" ? null : Number(value));
+                        handleBadgeNumberChange(e);
+                      }}
+                      sx={
+                        isBadgeNumberDisabled
+                          ? {
+                              "& .MuiOutlinedInput-root": {
+                                backgroundColor: "#f5f5f5"
+                              }
                             }
-                          }
-                        : undefined
-                    }
-                  />
+                          : undefined
+                      }
+                    />
+                    <VisuallyHidden id="badgeNumber-hint">{ARIA_DESCRIPTIONS.BADGE_FORMAT}</VisuallyHidden>
+                  </>
                 )}
               />
-              {errors.badgeNumber && <FormHelperText error>{errors.badgeNumber.message}</FormHelperText>}
+              {errors.badgeNumber && (
+                <div
+                  id="badgeNumber-error"
+                  aria-live="polite"
+                  aria-atomic="true">
+                  <FormHelperText error>{errors.badgeNumber.message}</FormHelperText>
+                </div>
+              )}
               {!errors.badgeNumber && getExclusionHelperText("badgeNumber", isBadgeNumberDisabled) && (
                 <FormHelperText sx={{ color: "info.main", fontSize: "0.75rem", marginTop: "4px" }}>
                   {getExclusionHelperText("badgeNumber", isBadgeNumberDisabled)}
